@@ -1,0 +1,67 @@
+import React from 'react';
+import { FaRegStar, FaStar } from 'react-icons/fa';
+import { FaRegStarHalfStroke } from 'react-icons/fa6';
+
+// Các import kiểu (ProductDetail, Promotion) đã được loại bỏ vì chúng không tồn tại trong JavaScript.
+
+/**
+ * Định dạng một số theo chuẩn của Đức (dấu chấm ngăn cách hàng nghìn).
+ * @param {number | string} number - Số cần định dạng.
+ * @returns {string | number} Trả về số đã định dạng hoặc 0.
+ */
+const formatNumber = (number) => {
+    const numberParse = Number(number);
+    if (!numberParse || numberParse === 0) {
+        return 0;
+    }
+    return numberParse.toLocaleString('de-DE');
+};
+
+
+
+/**
+ * Chuyển đổi một số (ví dụ: 4.5) thành một mảng các component ngôi sao (Star).
+ * @param {number} number - Số điểm rating.
+ * @returns {React.ReactElement[]} Mảng các component sao.
+ */
+const convertNumberToStar = (number) => {
+    if (!number) {
+        // Trả về 5 ngôi sao rỗng nếu không có số điểm
+        return new Array(5).fill(React.createElement(FaRegStar));
+    }
+    number = Number(number);
+    const stars = [];
+
+    // Thêm các ngôi sao đầy
+    for (let i = 1; i <= number; i++) {
+        stars.push(React.createElement(FaStar));
+    }
+
+    // Thêm ngôi sao nửa nếu là số lẻ
+    if (number !== 0 && number % Math.floor(number) !== 0) {
+        stars.push(React.createElement(FaRegStarHalfStroke));
+        number++;
+    }
+
+    // Thêm các ngôi sao rỗng cho phần còn lại
+    for (let i = 5; i > number; i--) {
+        stars.push(React.createElement(FaRegStar));
+    }
+    return stars;
+};
+
+/**
+ * Tính toán phần trăm giảm giá.
+ * @param {number | undefined} price - Giá gốc.
+ * @param {number | undefined} priceDiscount - Giá sau khi giảm.
+ * @returns {number} Phần trăm giảm giá.
+ */
+const calculatePercent = (price, priceDiscount) => {
+    if (price === 0 || !price || priceDiscount === 0 || !priceDiscount) {
+        return 0;
+    }
+    // toFixed trả về string, nên cần Number() để chuyển lại thành số
+    return Number((((price - priceDiscount) / price) * 100).toFixed(2));
+};
+
+export { formatNumber, convertNumberToStar, calculatePercent };
