@@ -4,6 +4,8 @@ import PublicLayout from "./pages/public/PublicLayout";
 import Home from "./pages/public/home/Home";
 import Login from "./pages/public/auth/Login";
 import Register from "./pages/public/auth/Register";
+import ResetPassword from "./pages/public/auth/ResetPassword";
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
           <Route element={<Home />} />
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
+          <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
         </Route>
       </Routes>
     </div>
