@@ -2,6 +2,7 @@ const publicPaths = {
     HOME: '/',
     LOGIN: '/login',
     REGISTER: '/register',
+    RESET_PASSWORD: '/reset-password',
     PRODUCT_DETAIL: '/product/:id',
     CART: '/cart',
     CHECKOUT: '/checkout',
