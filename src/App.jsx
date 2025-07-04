@@ -5,15 +5,23 @@ import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
 import Register from "./pages/public/auth/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
-
-import DashBoard from "./pages/admin/DashBoard";
+import {
+  DashBoard,
+  Users,
+  Brand,
+  Series,
+  Products,
+  Orders,
+  Vouchers,
+  AdminLayout,
+} from "./pages/admin";
 
 function App() {
   return (
     <div className="relative h-full w-full overflow-auto">
       <Routes>
         <Route path="/" element={<PublicLayout />}>
-          <Route element={<Home />} />
+          <Route index element={<Home />} />
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
           <Route
@@ -21,8 +29,15 @@ function App() {
             element={<ResetPassword />}
           />
         </Route>
-        <Route path="/admin" element={<PublicLayout />}>
-          <Route element={<DashBoard />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<DashBoard />} />
+          <Route path="" element={<DashBoard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="brand" element={<Brand />} />
+          <Route path="series" element={<Series />} />
+          <Route path="products" element={<Products />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="vouchers" element={<Vouchers />} />
         </Route>
       </Routes>
     </div>

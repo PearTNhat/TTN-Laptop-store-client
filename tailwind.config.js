@@ -1,12 +1,58 @@
 import daisyui from "daisyui";
 /** @type {import('tailwindcss').Config} */
+const COLORS = {
+  primary: 'var(--primary)',
+  baseBackground: 'var(--baseBackground)',
+  baseText: 'var(--baseText)',
+  baseBorder: 'var(--baseBorder)',
+  btnPrimary: 'var(--btnPrimary)',
+  btnTextColor: 'var(--btnTextColor)',
+}
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        ...COLORS,
+        brand: {
+          500: '#465fff',
+          50: '#ecf3ff'
+        }
+      },
+      flex: {
+        '2': '2 2 0%',
+        '3': '3 3 0%',
+        '4': '4 4 0%',
+        '5': '5 5 0%',
+        '6': '6 6 0%',
+        '7': '7 7 0%',
+        '8': '8 8 0%',
+        '9': '9 9 0%',
+        '10': '10 10 0%'
+      },
+      animation: {
+        'modal-enter': 'modalEnter 300ms ease-out forwards',
+      },
+      maxWidth: {
+        'main': '1200px',
+      },
+      keyframes: {
+        modalEnter: {
+          '0%': {
+            opacity: '0',
+            transform: 'scale(0.95)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'scale(1)',
+          },
+        },
+      },
+
+    },
   },
   daisyui: {
     themes: ['light'], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
