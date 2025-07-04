@@ -1,59 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  ShoppingCart,
-  Menu,
-  X,
-  Camera,
-  User,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { ShoppingCart, Menu, X, Camera } from "lucide-react";
 import {
   useNavigate,
   NavLink,
   Link,
   createSearchParams,
 } from "react-router-dom";
-
-// --- DỮ LIỆU VÀ HÀM GIẢ ---
-
-// 1. Đường dẫn công khai (Giả lập từ file constance)
-const publicPaths = {
-  PUBLIC: "/",
-  ABOUT: "/about",
-  PRODUCT: "/products",
-  SERVICE: "/services",
-  CONTACT: "/contact",
-  PROFILE: "/profile",
-  ADMIN: "/admin",
-};
-
-// 2. Dữ liệu dropdown cho profile (Giả lập)
-const dropDownProfile = [
-  {
-    id: 1,
-    name: "Profile",
-    icon: <User size={16} className="mr-2" />,
-    to: publicPaths.PROFILE,
-  },
-  {
-    id: 2,
-    name: "Admin",
-    icon: <Settings size={16} className="mr-2" />,
-    to: publicPaths.ADMIN,
-  },
-  {
-    id: 3,
-    name: "Logout",
-    icon: <LogOut size={16} className="mr-2" />,
-    style: "text-red-500 hover:bg-red-50",
-    styleParent: "border-t mt-1 pt-1",
-    onClick: true, // Dùng để xác định hàm cần gọi
-  },
-];
-
-// 3. Hàm hiển thị thông báo giả
-const showToastSuccess = (message) => alert(`SUCCESS: ${message}`);
+import { dropDownProfile } from "~/constances/dropdown";
+import { showToastSuccess } from "~/utils/alert";
+import { publicPaths } from "~/constances/paths";
 
 // 4. Component Search giả
 const SearchWithSuggestions = () => {
@@ -111,7 +66,7 @@ function Header() {
   const navigate = useNavigate();
 
   // --- Thay thế Redux bằng useState ---
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Đặt là `true` để thấy profile, `false` để thấy nút Login/Register
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Đặt là `true` để thấy profile, `false` để thấy nút Login/Register
   const [userData, setUserData] = useState({
     userId: "user123",
     lastName: "P",
@@ -281,7 +236,7 @@ function Header() {
           <div className="d-dropdown d-dropdown-hover d-dropdown-end">
             <div
               tabIndex={0}
-              className="w-10 h-10 rounded-full overflow-hidden cursor-pointer"
+              className="w-10 h-10 rounded-full overflow-hidden"
             >
               <img
                 src={userData?.avatar}
@@ -294,15 +249,22 @@ function Header() {
               className="d-dropdown-content d-menu bg-base-100 rounded-md z-10 w-52 p-2 shadow-md"
             >
               {filteredDropDownProfile.map((item) => {
-                const Comp = item.to ? Link : "button";
+                let Comp = "button";
+                if (item.to) {
+                  Comp = Link;
+                }
                 return (
-                  <li key={item.id} className={item.styleParent || ""}>
+                  <li
+                    key={item.id}
+                    className={`${item.styleParent ? item.styleParent : ""}`}
+                  >
                     <Comp
                       {...(item.to ? { to: item.to } : {})}
-                      onClick={item.onClick ? handleLogout : undefined}
+                      onClick={item?.onClick ? handleLogout : undefined}
                       className={`flex items-center w-full px-4 py-2 ${
-                        item.style ||
-                        "text-gray-700 hover:bg-gray-100 transition"
+                        item.style
+                          ? item.style
+                          : "text-gray-700 hover:bg-gray-100 transition  "
                       }`}
                     >
                       {item.icon}
