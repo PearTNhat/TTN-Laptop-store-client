@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { publicPaths } from "./constances/paths";
+import { adminPaths, publicPaths } from "./constances/paths";
 import PublicLayout from "./pages/public/PublicLayout";
 import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
@@ -15,10 +15,14 @@ import {
   Vouchers,
   AdminLayout,
 } from "./pages/admin";
+import { useSelector } from "react-redux";
+import Modal from "./components/modal/Modal";
 
 function App() {
+  const { childrenModal, isOpenModal } = useSelector((state) => state.modal);
   return (
     <div className="relative h-full w-full overflow-auto">
+      <Modal isOpen={isOpenModal}>{childrenModal}</Modal>
       <Routes>
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
@@ -31,13 +35,12 @@ function App() {
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />
-          <Route path="" element={<DashBoard />} />
-          <Route path="users" element={<Users />} />
-          <Route path="brand" element={<Brand />} />
-          <Route path="series" element={<Series />} />
-          <Route path="products" element={<Products />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="vouchers" element={<Vouchers />} />
+          <Route path={adminPaths.USERS} element={<Users />} />
+          <Route path={adminPaths.BRAND} element={<Brand />} />
+          <Route path={adminPaths.SERIES} element={<Series />} />
+          <Route path={adminPaths.PRODUCTS} element={<Products />} />
+          <Route path={adminPaths.ORDERS} element={<Orders />} />
+          <Route path={adminPaths.VOUCHERS} element={<Vouchers />} />
         </Route>
       </Routes>
     </div>

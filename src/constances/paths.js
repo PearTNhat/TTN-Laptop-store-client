@@ -11,4 +11,14 @@ const publicPaths = {
     CONTACT: '/contact',
     ABOUT: '/about',
 }
-export { publicPaths };
+
+const adminPaths = {
+    DASHBOARD: '',
+    USERS: 'users',
+    BRAND: 'brand',
+    SERIES: 'series',
+    PRODUCTS: 'products',
+    ORDERS: 'orders',
+    VOUCHERS: 'vouchers',
+}
+export { publicPaths, adminPaths };
