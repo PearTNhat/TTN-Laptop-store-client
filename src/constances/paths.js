@@ -19,4 +19,14 @@ const publicPaths = {
     USER_ORDER: '/user/order',
     USER_VOURCHER: '/user/voucher',
 }
-export { publicPaths };
+
+const adminPaths = {
+    DASHBOARD: '',
+    USERS: 'users',
+    BRAND: 'brand',
+    SERIES: 'series',
+    PRODUCTS: 'products',
+    ORDERS: 'orders',
+    VOUCHERS: 'vouchers',
+}
+export { publicPaths, adminPaths };
