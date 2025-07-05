@@ -10,5 +10,13 @@ const publicPaths = {
     ORDER_HISTORY: '/order-history',
     CONTACT: '/contact',
     ABOUT: '/about',
+    PROFILE: '/profile',
+    TEST: '/test',
+    //
+    USER_HOME: '/user',
+    USER_PROFILE: '/user/profile',
+    USER_CHANGEPASSWORD: '/user/change_password',
+    USER_ORDER: '/user/order',
+    USER_VOURCHER: '/user/voucher',
 }
 export { publicPaths };

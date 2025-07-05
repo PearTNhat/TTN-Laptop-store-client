@@ -26,6 +26,7 @@ const publicPaths = {
   CONTACT: "/contact",
   PROFILE: "/profile",
   ADMIN: "/admin",
+  TEST: "/test",
 };
 
 // 2. Dữ liệu dropdown cho profile (Giả lập)
@@ -190,7 +191,7 @@ function Header() {
     <nav className="fixed top-0 left-0 right-0 z-50 shadow-md bg-white px-6 py-3 flex items-center justify-between md:px-10">
       <Link to="/">
         <div className="text-2xl font-bold text-blue-600 cursor-pointer">
-          Stationery's P
+          LAPTOP SHOP 
         </div>
       </Link>
 
@@ -245,6 +246,23 @@ function Header() {
         >
           Contact
         </NavLink>
+
+
+
+        {/* test các giao diện */}
+
+        <NavLink
+          to={publicPaths.TEST}
+          className={({ isActive }) =>
+            isActive
+              ? "text-blue-600 font-bold"
+              : "text-gray-700 hover:text-blue-500 transition"
+          }
+        >
+          Test giao diện
+        </NavLink>
+
+        
       </div>
 
       <div className="hidden md:flex items-center space-x-2">

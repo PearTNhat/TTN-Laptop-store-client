@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 
-const ResetPassword = () => {
+const Test = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -34,7 +34,7 @@ const ResetPassword = () => {
           }
         }, 1000);
       });
-      // setSuccess(`Đã gửi mã xác minh đến ${email}`);
+      setSuccess(`Đã gửi mã xác minh đến ${email}`);
       setStep(2);
     } catch (err) {
       setError(err.message || 'Gửi mã thất bại, thử lại nhé!');
@@ -51,10 +51,11 @@ const ResetPassword = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
+    // Tự động focus ô tiếp theo
     if (value && index < 5) {
       otpRefs.current[index + 1].focus();
     }
-
+    // Focus ô trước nếu xóa
     if (!value && index > 0 && e.key === 'Backspace') {
       otpRefs.current[index - 1].focus();
     }
@@ -73,19 +74,19 @@ const ResetPassword = () => {
           if (code.length !== 6) {
             reject(new Error('Vui lòng nhập đủ 6 số!'));
           } else if (code !== '123456') {
-            reject(new Error('Mã xác thực không đúng!'));
+            reject(new Error('Mã xác minh không đúng!'));
           } else {
             resolve();
           }
         }, 1000);
       });
-      // setSuccess('Xác thực thành công!');
-      setOtp(['', '', '', '', '', '']); 
+      setSuccess('Xác thực thành công!');
+      setOtp(['', '', '', '', '', '']); // Xóa OTP sau khi thành công
       setStep(3);
     } catch (err) {
       setError(err.message || 'Xác thực thất bại, thử lại nhé!');
-      setOtp(['', '', '', '', '', '']); 
-      if (otpRefs.current[0]) otpRefs.current[0].focus(); 
+      setOtp(['', '', '', '', '', '']); // Xóa OTP khi sai
+      if (otpRefs.current[0]) otpRefs.current[0].focus(); // Focus ô đầu tiên
     } finally {
       setIsSubmitting(false);
     }
@@ -134,7 +135,7 @@ const ResetPassword = () => {
             {step === 1
               ? 'Nhập email của bạn để nhận mã xác minh.'
               : step === 2
-              ? 'Nhập mã xác minh đã được gửi tới email của bạn.'
+              ? 'Nhập 6 số mã xác minh đã được gửi.'
               : 'Nhập mật khẩu mới để hoàn tất.'}
           </p>
           {error && (
@@ -294,4 +295,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default Test;
