@@ -18,12 +18,6 @@ const formatNumber = (number) => {
 };
 
 
-
-/**
- * Chuyển đổi một số (ví dụ: 4.5) thành một mảng các component ngôi sao (Star).
- * @param {number} number - Số điểm rating.
- * @returns {React.ReactElement[]} Mảng các component sao.
- */
 const convertNumberToStar = (number) => {
     if (!number) {
         // Trả về 5 ngôi sao rỗng nếu không có số điểm
@@ -50,12 +44,6 @@ const convertNumberToStar = (number) => {
     return stars;
 };
 
-/**
- * Tính toán phần trăm giảm giá.
- * @param {number | undefined} price - Giá gốc.
- * @param {number | undefined} priceDiscount - Giá sau khi giảm.
- * @returns {number} Phần trăm giảm giá.
- */
 const calculatePercent = (price, priceDiscount) => {
     if (price === 0 || !price || priceDiscount === 0 || !priceDiscount) {
         return 0;
@@ -63,5 +51,10 @@ const calculatePercent = (price, priceDiscount) => {
     // toFixed trả về string, nên cần Number() để chuyển lại thành số
     return Number((((price - priceDiscount) / price) * 100).toFixed(2));
 };
-
-export { formatNumber, convertNumberToStar, calculatePercent };
+const formatPrice = (price) => {
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    }).format(price);
+};
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice };

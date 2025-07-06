@@ -19,6 +19,8 @@ const adminPaths = {
     SERIES: 'series',
     PRODUCTS: 'products',
     ORDERS: 'orders',
+    ORDER_CONFIRMS: 'orders/confirms',
+    ORDER_MANAGEMENT: 'orders/management',
     VOUCHERS: 'vouchers',
 }
 export { publicPaths, adminPaths };

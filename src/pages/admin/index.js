@@ -9,8 +9,6 @@ export { default as Brand } from './brand';
 export { default as Series } from './series';
 export { default as Products } from './products';
 
-// Order Management
-export { default as Orders } from './orders';
 
 // Promotion Management
 export { default as Vouchers } from './vouchers';

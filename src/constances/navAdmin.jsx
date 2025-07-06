@@ -5,6 +5,7 @@ import { RiProductHuntLine } from "react-icons/ri";
 import { IoHome } from "react-icons/io5";
 import { IoMdColorFill } from "react-icons/io";
 import { BiFontSize } from "react-icons/bi";
+import { adminPaths } from "./paths";
 
 const navItems = [
   {
@@ -35,7 +36,14 @@ const navItems = [
   {
     icon: <FaShoppingCart />,
     name: "Đơn hàng",
-    path: "/admin/orders",
+    subItems: [
+      {
+        name: "Quản lý đơn hàng",
+        path: adminPaths.ORDER_MANAGEMENT,
+        pro: true,
+      },
+      { name: "Chờ xác nhận", path: adminPaths.ORDER_CONFIRMS, pro: false },
+    ],
   },
   {
     icon: <BsTicketPerforatedFill />,
