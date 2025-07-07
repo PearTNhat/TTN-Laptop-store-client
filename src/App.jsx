@@ -20,6 +20,7 @@ import OrderConfirms from "./pages/admin/orders/confirmOrder";
 import OrderManagement from "./pages/admin/orders/manageOrder/OrderManagement";
 import NotFound from "./components/NotFound";
 import DetailProduct from "./pages/public/detailProduct/DetailProduct";
+import FilterProductPage from "./pages/public/filterProduct/FilterProductPage";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -40,6 +41,7 @@ function App() {
             path={productPaths.PRODUCT_DETAIL}
             element={<DetailProduct />}
           />
+          <Route path={productPaths.PRODUCTS} element={<FilterProductPage />} />
         </Route>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />

@@ -3,7 +3,7 @@ import clsx from "clsx"; // Thư viện tiện ích để nối các class name 
 import { DOTS, usePagination } from "~/hooks/usePagination";
 
 function Pagination({
-  siblingCount,
+  siblingCount = 1,
   currentPage,
   totalPageCount,
   onPageChange,
@@ -31,7 +31,7 @@ function Pagination({
 
   return (
     <nav aria-label="Page navigation">
-      <ul className="flex items-center justify-center -space-x-px">
+      <ul className="flex items-center justify-center gap-1 md:gap-2 py-4">
         {/* Nút Previous */}
         <li>
           <button
@@ -39,60 +39,58 @@ function Pagination({
             disabled={currentPage === 1}
             onClick={onPrevious}
             className={clsx(
-              "w-10 h-10 flex justify-center items-center text-gray-500 bg-white border border-gray-300 rounded-l-lg transition-colors",
-              "hover:bg-blue-50 hover:text-blue-600",
-              // "focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "w-9 h-9 md:w-10 md:h-10 flex justify-center items-center text-gray-500 bg-white border border-gray-300 rounded-full shadow-sm transition-all duration-150",
+              "hover:bg-blue-100 hover:text-blue-600",
               {
-                "cursor-not-allowed text-gray-400 bg-gray-50":
+                "cursor-not-allowed text-gray-400 bg-gray-100 border-gray-200":
                   currentPage === 1,
               }
             )}
+            aria-label="Trang trước"
           >
-            <span className="sr-only">Previous</span>
             <svg
               className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fillRule="evenodd"
-                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              ></path>
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
         </li>
 
         {/* Các nút số trang */}
         {paginationRange.map((pageNumber, index) => {
-          // Hiển thị dấu chấm '...'
           if (pageNumber === DOTS) {
             return (
               <li key={`dots-${index}`}>
-                <span className="w-10 h-10 flex justify-center items-center text-gray-500 bg-white border border-gray-300">
-                  {DOTS}
+                <span className="w-9 h-9 md:w-10 md:h-10 flex justify-center items-center text-gray-400 bg-white border border-gray-200 rounded-full select-none">
+                  ...
                 </span>
               </li>
             );
           }
-
-          // Hiển thị nút số trang
           return (
             <li key={pageNumber}>
               <button
                 type="button"
                 onClick={() => onPageChange(pageNumber)}
                 className={clsx(
-                  "w-10 h-10 flex justify-center items-center font-medium border border-gray-300 transition-colors",
-                  // "focus:outline-none focus:ring-2 focus:ring-blue-300",
+                  "w-9 h-9 md:w-10 md:h-10 flex justify-center items-center font-semibold border border-gray-200 rounded-full transition-all duration-150",
                   {
-                    "bg-blue-500 text-white border-blue-500 z-10":
+                    "bg-blue-600 text-white border-blue-600 shadow-md scale-110 z-10":
                       currentPage === pageNumber,
-                    "bg-white text-gray-500 hover:bg-blue-50 hover:text-blue-600":
+                    "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600":
                       currentPage !== pageNumber,
                   }
                 )}
+                aria-current={currentPage === pageNumber ? "page" : undefined}
               >
                 {pageNumber}
               </button>
@@ -107,27 +105,28 @@ function Pagination({
             disabled={currentPage === lastPage}
             onClick={onNext}
             className={clsx(
-              "w-10 h-10 flex justify-center items-center text-gray-500 bg-white border border-gray-300 rounded-r-lg transition-colors",
-              "hover:bg-blue-50 hover:text-blue-600",
-              // "focus:outline-none focus:ring-2 focus:ring-blue-300",
+              "w-9 h-9 md:w-10 md:h-10 flex justify-center items-center text-gray-500 bg-white border border-gray-300 rounded-full shadow-sm transition-all duration-150",
+              "hover:bg-blue-100 hover:text-blue-600",
               {
-                "cursor-not-allowed text-gray-400 bg-gray-50":
+                "cursor-not-allowed text-gray-400 bg-gray-100 border-gray-200":
                   currentPage === lastPage,
               }
             )}
+            aria-label="Trang sau"
           >
-            <span className="sr-only">Next</span>
             <svg
               className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              ></path>
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </li>

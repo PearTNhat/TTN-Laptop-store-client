@@ -37,7 +37,7 @@ function CustomSliceProducts({ customSetting, products, loading }) {
             </div>
           ))
         : products.map((item) => (
-            <div key={item._id} className="mt-4">
+            <div key={item.id || item._id || item.productId} className="mt-4">
               <div className="p-3 mb-3">
                 <ProductCard product={item} onClickLink={handleClick} />
               </div>

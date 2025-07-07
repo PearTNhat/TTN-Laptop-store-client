@@ -3,82 +3,42 @@ import Slider from "react-slick";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import NextArrow from "~/components/customeSlice/NextArrow";
 import PrevArrow from "~/components/customeSlice/PreviousArrow";
+import { fakeBrands } from "~/data/fakeData";
 
-// Dữ liệu thương hiệu nổi bật
-const brandData = [
-  {
-    id: 1,
-    name: "Apple",
-    logo: "https://logo.clearbit.com/apple.com",
-    description: "MacBook, iMac chính hãng",
-    productCount: 45,
-    badge: "Premium",
-    color: "from-gray-100 to-gray-200",
-  },
-  {
-    id: 2,
-    name: "Dell",
-    logo: "https://logo.clearbit.com/dell.com",
-    description: "XPS, Inspiron, Gaming",
-    productCount: 128,
-    badge: "Bestseller",
-    color: "from-blue-100 to-blue-200",
-  },
-  {
-    id: 3,
-    name: "HP",
-    logo: "https://logo.clearbit.com/hp.com",
-    description: "Pavilion, Envy, Omen",
-    productCount: 156,
-    badge: "Popular",
-    color: "from-cyan-100 to-cyan-200",
-  },
-  {
-    id: 4,
-    name: "ASUS",
-    logo: "https://logo.clearbit.com/asus.com",
-    description: "ROG, ZenBook, VivoBook",
-    productCount: 189,
-    badge: "Gaming",
-    color: "from-orange-100 to-orange-200",
-  },
-  {
-    id: 5,
-    name: "Lenovo",
-    logo: "https://logo.clearbit.com/lenovo.com",
-    description: "ThinkPad, IdeaPad, Legion",
-    productCount: 143,
-    badge: "Business",
-    color: "from-red-100 to-red-200",
-  },
-  {
-    id: 6,
-    name: "Acer",
-    logo: "https://logo.clearbit.com/acer.com",
-    description: "Aspire, Swift, Predator",
-    productCount: 97,
-    badge: "Value",
-    color: "from-green-100 to-green-200",
-  },
-  {
-    id: 7,
-    name: "MSI",
-    logo: "https://logo.clearbit.com/msi.com",
-    description: "Gaming, Creator, Business",
-    productCount: 76,
-    badge: "Gaming",
-    color: "from-purple-100 to-purple-200",
-  },
-  {
-    id: 8,
-    name: "Samsung",
-    logo: "https://logo.clearbit.com/samsung.com",
-    description: "Galaxy Book, Notebook",
-    productCount: 42,
-    badge: "Innovation",
-    color: "from-indigo-100 to-indigo-200",
-  },
-];
+// Thêm thông tin bổ sung cho brands
+const enrichedBrands = fakeBrands.map((brand, index) => ({
+  ...brand,
+  description:
+    {
+      1: "MacBook, iMac chính hãng",
+      2: "XPS, Inspiron, Gaming",
+      3: "Pavilion, Envy, Omen",
+      4: "ROG, ZenBook, VivoBook",
+      5: "ThinkPad, IdeaPad, Legion",
+      6: "Nitro, Swift, Aspire",
+      7: "Gaming, Creator, Business",
+      8: "Galaxy Book, Ultra-thin",
+    }[brand.id] || "Laptop chất lượng cao",
+  productCount: Math.floor(Math.random() * 100) + 50,
+  badge: [
+    "Premium",
+    "Bestseller",
+    "Popular",
+    "Gaming",
+    "Professional",
+    "Value",
+  ][index % 6],
+  color: [
+    "from-gray-100 to-gray-200",
+    "from-blue-100 to-blue-200",
+    "from-cyan-100 to-cyan-200",
+    "from-orange-100 to-orange-200",
+    "from-purple-100 to-purple-200",
+    "from-green-100 to-green-200",
+    "from-red-100 to-red-200",
+    "from-indigo-100 to-indigo-200",
+  ][index % 8],
+}));
 
 const BrandCard = ({ brand }) => {
   const getBadgeColor = (badge) => {
@@ -120,13 +80,20 @@ const BrandCard = ({ brand }) => {
         <div className="relative mb-6">
           <div className="w-20 h-20 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
             <img
-              src={brand.logo}
+              src={
+                brand.logo ||
+                `https://logo.clearbit.com/${brand.name.toLowerCase()}.com`
+              }
               alt={brand.name}
               className="w-12 h-12 object-contain"
               onError={(e) => {
-                e.target.src = `https://via.placeholder.com/48x48/666/fff?text=${brand.name.charAt(
-                  0
-                )}`;
+                // Fallback 1: Try logo.clearbit.com
+                if (!e.target.src.includes("logo.clearbit.com")) {
+                  e.target.src = `https://logo.clearbit.com/${brand.name.toLowerCase()}.com`;
+                } else {
+                  // Fallback 2: Use a placeholder with brand initial
+                  e.target.src = `https://ui-avatars.com/api/?name=${brand.name}&background=4F46E5&color=fff&size=48&format=png&font-size=0.33`;
+                }
               }}
             />
           </div>
@@ -189,10 +156,10 @@ const BrandCarousel = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">
             🏆 Thương hiệu nổi bật
           </h2>
@@ -201,8 +168,9 @@ const BrandCarousel = () => {
 
         {/* Brands Carousel */}
         <div className="relative">
+          {" "}
           <Slider {...settings}>
-            {brandData.map((brand) => (
+            {enrichedBrands.map((brand) => (
               <BrandCard key={brand.id} brand={brand} />
             ))}
           </Slider>
