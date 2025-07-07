@@ -4,20 +4,18 @@ import { FaRegStarHalfStroke } from 'react-icons/fa6';
 
 // Các import kiểu (ProductDetail, Promotion) đã được loại bỏ vì chúng không tồn tại trong JavaScript.
 
-/**
- * Định dạng một số theo chuẩn của Đức (dấu chấm ngăn cách hàng nghìn).
- * @param {number | string} number - Số cần định dạng.
- * @returns {string | number} Trả về số đã định dạng hoặc 0.
- */
 const formatNumber = (number) => {
-    const numberParse = Number(number);
+    let numberParse = Number(number);
     if (!numberParse || numberParse === 0) {
         return 0;
     }
-    return numberParse.toLocaleString('de-DE');
+    return numberParse.toLocaleString("de-DE");
 };
-
-
+const covertMoneyToNumber = (money) => {
+    if (!money) return 0;
+    const cleanedStr = money.replace(/\./g, ""); // Loại bỏ dấu chấm
+    return Number(cleanedStr);
+}
 const convertNumberToStar = (number) => {
     if (!number) {
         // Trả về 5 ngôi sao rỗng nếu không có số điểm
@@ -57,4 +55,8 @@ const formatPrice = (price) => {
         currency: "VND",
     }).format(price);
 };
-export { formatNumber, convertNumberToStar, calculatePercent, formatPrice };
+function capitalizeFirstCharacter(str) {
+    if (!str) return str; // Handle empty or null strings
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter };

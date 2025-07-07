@@ -9,7 +9,7 @@ import ModalWrapper from "./modal/ModallWrapper";
 import ViewUserModal from "./modal/ViewUserModal";
 import UserFormModal from "./modal/UserFormModal";
 import ConfirmationModal from "./modal/ConfirmationModal";
-import { initialUsers } from "~/constances/mockUsers";
+import { initialUsers } from "~/constants/mockUsers";
 import Pagination from "~/components/pagination/Pagination";
 
 function UserManagement() {

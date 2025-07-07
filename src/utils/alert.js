@@ -8,14 +8,6 @@ const Toast = Swal.mixin({
     timerProgressBar: true
 })
 
-/**
- * Hiển thị hộp thoại xác nhận.
- * @param {object} props - Các thuộc tính của alert.
- * @param {string} props.message - Nội dung tin nhắn chính.
- * @param {string} props.title - Tiêu đề của hộp thoại.
- * @param {string} props.confirmText - Văn bản cho nút xác nhận.
- * @returns {Promise<SweetAlertResult>}
- */
 const confirmAlert = ({ message, title, confirmText }) => {
     return Swal.fire({
         title: title,
@@ -25,11 +17,6 @@ const confirmAlert = ({ message, title, confirmText }) => {
         confirmButtonColor: '#ee3131'
     })
 }
-
-/**
- * Hiển thị alert thành công.
- * @param {string} message - Nội dung tin nhắn.
- */
 const showAlertSuccess = (message) => {
     Swal.fire({
         title: 'Success',
@@ -38,10 +25,7 @@ const showAlertSuccess = (message) => {
     })
 }
 
-/**
- * Hiển thị alert lỗi.
- * @param {string} message - Nội dung tin nhắn.
- */
+
 const showAlertError = (message) => {
     Swal.fire({
         title: 'Error',
@@ -50,10 +34,6 @@ const showAlertError = (message) => {
     })
 }
 
-/**
- * Hiển thị toast thành công.
- * @param {string} message - Nội dung tin nhắn.
- */
 const showToastSuccess = (message) => {
     Toast.fire({
         icon: 'success',
