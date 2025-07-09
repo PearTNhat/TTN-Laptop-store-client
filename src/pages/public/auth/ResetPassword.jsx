@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, use } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 
@@ -6,15 +6,23 @@ const ResetPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
+  const [showPasswords, setShowPasswords] = useState({
+    new: false,
+    confirm: false,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const otpRefs = useRef([]);
   const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setError('');
+  };
+
 
   const handleSendEmail = async (e) => {
     e.preventDefault();
@@ -97,6 +105,8 @@ const ResetPassword = () => {
     setError('');
     setSuccess('');
 
+    const { password, confirmPassword } = formData;
+
     try {
       await new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -111,6 +121,7 @@ const ResetPassword = () => {
           }
         }, 1000);
       });
+
       setSuccess('Đặt lại mật khẩu thành công!');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
@@ -119,6 +130,7 @@ const ResetPassword = () => {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-200 flex items-center justify-center p-4 sm:p-6">
@@ -236,22 +248,26 @@ const ResetPassword = () => {
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+                  type={showPasswords.new ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleInputChange}
                   placeholder="Mật khẩu mới"
                   className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] bg-gray-50 transition-all"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() =>
+                    setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                  }
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPasswords.new ?  "🙈" : "👁️"}
                 </button>
               </div>
             </div>
+
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -262,22 +278,29 @@ const ResetPassword = () => {
               <div className="relative">
                 <input
                   id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  name="confirmPassword"
+                  type={showPasswords.confirm ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
                   placeholder="Nhập lại mật khẩu"
                   className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] bg-gray-50 transition-all"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() =>
+                    setShowPasswords((prev) => ({
+                      ...prev,
+                      confirm: !prev.confirm,
+                    }))
+                  }
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPasswords.confirm ?  "🙈" : "👁️"}
                 </button>
               </div>
             </div>
+
             <button
               type="submit"
               disabled={isSubmitting}

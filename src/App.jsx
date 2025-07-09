@@ -14,7 +14,7 @@ import ProfileInfo from "./pages/user/components/ProfileInfo";
 import UserProfileLayout from "./pages/user/UserProfileLayout";
 import {
   DashBoard,
-  Users,
+  UsersManagement,
   Brand,
   Series,
   Products,
@@ -32,7 +32,6 @@ function App() {
     <div className="relative h-full w-full overflow-auto">
       <Modal isOpen={isOpenModal}>{childrenModal}</Modal>
       <Routes>
-
         {/* router public */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
@@ -41,7 +40,6 @@ function App() {
           <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
           <Route path={publicPaths.TEST} element={<Test />} />
         </Route>
-
         {/* router user */}
         <Route path="/user" element={<UserProfileLayout />}>
           <Route path="profile" element={<ProfileInfo />} />
@@ -52,7 +50,7 @@ function App() {
         {/* router admin */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />
-          <Route path={adminPaths.USERS} element={<Users />} />
+          <Route path={adminPaths.USERSMANAGEMENT} element={<UsersManagement />} />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />

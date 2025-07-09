@@ -4,8 +4,10 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    confirm: false,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -97,7 +99,7 @@ const Register = () => {
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPasswords ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
@@ -106,10 +108,12 @@ const Register = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick= {()=>
+                  setShowPasswords((prev)=> ({...prev, current:!prev.current}))
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPasswords.current ?  "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -125,7 +129,7 @@ const Register = () => {
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
+                type={showPasswords ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="••••••••"
@@ -134,10 +138,12 @@ const Register = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={()=>
+                  setShowPasswords((prev) => ({ ... prev, confirm: !prev.confirm}))
+                }
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
               >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPasswords.confirm ?  "🙈" : "👁️"}
               </button>
             </div>
           </div>

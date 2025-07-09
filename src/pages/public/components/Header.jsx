@@ -12,45 +12,6 @@ import {
 
 // --- DỮ LIỆU VÀ HÀM GIẢ ---
 
-// 1. Đường dẫn công khai (Giả lập từ file constance)
-const publicPaths = {
-  PUBLIC: "/",
-  ABOUT: "/about",
-  PRODUCT: "/products",
-  SERVICE: "/services",
-  CONTACT: "/contact",
-  PROFILE: "/profile",
-  ADMIN: "/admin",
-  TEST: "/test",
-};
-
-// 2. Dữ liệu dropdown cho profile (Giả lập)
-const dropDownProfile = [
-  {
-    id: 1,
-    name: "Profile",
-    icon: <User size={16} className="mr-2" />,
-    to: publicPaths.PROFILE,
-  },
-  {
-    id: 2,
-    name: "Admin",
-    icon: <Settings size={16} className="mr-2" />,
-    to: publicPaths.ADMIN,
-  },
-  {
-    id: 3,
-    name: "Logout",
-    icon: <LogOut size={16} className="mr-2" />,
-    style: "text-red-500 hover:bg-red-50",
-    styleParent: "border-t mt-1 pt-1",
-    onClick: true, // Dùng để xác định hàm cần gọi
-  },
-];
-
-// 3. Hàm hiển thị thông báo giả
-const showToastSuccess = (message) => alert(`SUCCESS: ${message}`);
-
 // 4. Component Search giả
 const SearchWithSuggestions = () => {
   return (

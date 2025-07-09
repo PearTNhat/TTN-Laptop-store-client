@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 
-function Users() {
+function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
@@ -263,4 +263,4 @@ function Users() {
   );
 }
 
-export default Users;
+export default UsersManagement;

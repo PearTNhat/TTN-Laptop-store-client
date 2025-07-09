@@ -3,7 +3,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
@@ -62,7 +62,7 @@ const Login = () => {
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPasswords ? "text" : "password"}
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
@@ -71,10 +71,10 @@ const Login = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() =>setShowPasswords(!showPasswords)}          
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPasswords ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -124,7 +124,10 @@ const Login = () => {
 
         <button
           className="mt-4 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={() => console.log('Google login')}
+          onClick={() => {
+            const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=378323217488-16f9jv2kdmlek9oui2orsfmvith1n0u7.apps.googleusercontent.com&redirect_uri=http://localhost:3000&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
+            window.location.href = googleLoginUrl;
+          }}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
