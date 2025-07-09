@@ -27,7 +27,6 @@ function CustomSliceProducts({ customSetting, products, loading }) {
     },
     [isDragging]
   );
-
   return (
     <Slider {...settings}>
       {loading
@@ -36,8 +35,8 @@ function CustomSliceProducts({ customSetting, products, loading }) {
               <div className="p-3 mb-3 mx-3 bg-gray-200 animate-pulse rounded-2xl h-96"></div>
             </div>
           ))
-        : products.map((item) => (
-            <div key={item.id || item._id || item.productId} className="mt-4">
+        : products?.map((item) => (
+            <div key={item.productId} className="mt-4">
               <div className="p-3 mb-3">
                 <ProductCard product={item} onClickLink={handleClick} />
               </div>

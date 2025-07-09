@@ -5,6 +5,8 @@ import ProductCarousel from "./components/ProductCarousel";
 import BrandCarousel from "./components/BrandCarousel";
 import PromotionBanner from "./components/PromotionBanner";
 import NewLetter from "./components/NewLetter";
+import HotProduct from "./hotProduct/HotProduct";
+import NewProduct from "./newProduct/NewProduct";
 
 const Home = () => {
   return (
@@ -15,27 +17,23 @@ const Home = () => {
       </div>
       <CategoryCarousel />
       <BrandCarousel />
-      <div className="bg-white py-4">
-        <ProductCarousel title="🔥 Sản phẩm bán chạy" type="hot" limit={8} />
-      </div>
+      <HotProduct />
+      <NewProduct />
       <PromotionBanner />
-      <div className="bg-gradient-to-br from-red-50 to-pink-50 py-4">
+      {/* <div className="bg-gradient-to-br from-red-50 to-pink-50 py-4">
         <ProductCarousel
           title="⚡ Sản phẩm khuyến mãi"
           type="promotion"
           limit={8}
         />
-      </div>
-      <div className="bg-white py-4">
-        <ProductCarousel title="✨ Sản phẩm mới nhất" type="new" limit={8} />
-      </div>
-      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 py-4">
+      </div> */}
+      {/* <div className="bg-gradient-to-br from-blue-50 to-cyan-50 py-4">
         <ProductCarousel
           title="⭐ Sản phẩm đánh giá cao"
           type="topRated"
           limit={8}
         />
-      </div>
+      </div> */}
       <NewLetter />
     </div>
   );

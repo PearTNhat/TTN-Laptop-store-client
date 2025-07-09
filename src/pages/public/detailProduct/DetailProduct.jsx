@@ -13,6 +13,99 @@ import ProductPrice from "./components/ProductPrice";
 import ColorSelector from "./components/ColorSelector";
 import QuantitySelector from "./components/QuantitySelector";
 import ActionButtons from "./components/ActionButtons";
+import CommentContainer from "~/components/comments/MockCommentContainer";
+const mockUserData = {
+  _id: "user123",
+  firstName: "Nguyen",
+  lastName: "Van A",
+  isLoggedIn: true,
+  accessToken: "fake-token-123",
+  isAdmin: false,
+  avatar: { url: "https://randomuser.me/api/portraits/men/1.jpg" },
+};
+const fakeComments = [
+  {
+    _id: "comment1",
+    user: {
+      _id: "user456",
+      firstName: "Minh",
+      lastName: "Nguyen",
+      avatar: { url: "https://randomuser.me/api/portraits/men/32.jpg" },
+    },
+    content:
+      "Laptop này rất tuyệt vời! Hiệu năng mạnh mẽ, thiết kế đẹp và pin trâu. Rất đáng tiền!",
+    createdAt: new Date(Date.now() - 3600 * 1000 * 5), // 5 giờ trước
+    rating: 5,
+    likes: [mockUserData._id, "user789"],
+    replyOnUser: null,
+    replies: [
+      {
+        _id: "reply1",
+        user: {
+          _id: "user789",
+          firstName: "Hà",
+          lastName: "Tran",
+          avatar: {
+            url: "https://randomuser.me/api/portraits/women/44.jpg",
+          },
+        },
+        content: "Mình cũng đang dùng model này, thật sự rất hài lòng!",
+        createdAt: new Date(Date.now() - 3600 * 1000 * 2), // 2 giờ trước
+        rating: 0,
+        likes: [],
+        replyOnUser: {
+          _id: "user456",
+          firstName: "Minh",
+          lastName: "Nguyen",
+        },
+        replies: [],
+      },
+    ],
+  },
+  {
+    _id: "comment2",
+    user: {
+      _id: "user789",
+      firstName: "Long",
+      lastName: "Pham",
+      avatar: { url: "https://randomuser.me/api/portraits/men/65.jpg" },
+    },
+    content:
+      "Sản phẩm tốt nhưng giá hơi cao. Tuy nhiên chất lượng xứng đáng với giá tiền.",
+    createdAt: new Date(Date.now() - 3600 * 1000 * 24), // 1 ngày trước
+    rating: 4,
+    likes: [mockUserData._id],
+    replyOnUser: null,
+    replies: [],
+  },
+  {
+    _id: "comment3",
+    user: mockUserData, // Comment của user hiện tại
+    content:
+      "Mình vừa mới mua và test thử, cảm giác rất tốt. Màn hình sắc nét, âm thanh chất lượng.",
+    createdAt: new Date(Date.now() - 3600 * 1000 * 12), // 12 giờ trước
+    rating: 5,
+    likes: ["user456", "user789"],
+    replyOnUser: null,
+    replies: [],
+  },
+  {
+    _id: "comment4",
+    user: {
+      _id: "user999",
+      firstName: "An",
+      lastName: "Vo",
+      avatar: { url: "https://randomuser.me/api/portraits/women/68.jpg" },
+    },
+    content:
+      "Giao hàng nhanh, đóng gói cẩn thận. Sản phẩm như mô tả, rất hài lòng!",
+    createdAt: new Date(Date.now() - 3600 * 1000 * 48), // 2 ngày trước
+    rating: 4,
+    likes: [],
+    replyOnUser: null,
+    replies: [],
+  },
+];
 
 function DetailProduct() {
   // const { slug } = useParams(); // Bạn có thể dùng lại khi tích hợp API
@@ -27,18 +120,39 @@ function DetailProduct() {
   const [isClamped, setIsClamped] = useState(false);
   const [isReadMore, setIsReadMore] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [comments, setComments] = useState([]);
+  const [totalRating, setTotalRating] = useState(0);
+  // const getDetailProduct = async (pId) => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const response = await apiGetProducts({
+  //         page: 1,
+  //         size: 10,
+  //         sort: "createdAt",
+  //       });
+  //       console.log("data", response);
+  //       setProducts(response.content);
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     }
+  //   };
+  // };
 
   // Sử dụng mock data thay vì gọi API
   useEffect(() => {
+    // Mock user data để giả lập đăng nhập
     // Giả lập việc fetch dữ liệu
-    window.scrollTo(0, 0);
     setProduct(mockProduct);
-
     // Set màu mặc định
     if (mockProduct.colors && mockProduct.colors.length > 0) {
       setColorProduct(mockProduct.colors[0]);
     }
+    setComments(fakeComments);
+    setTotalRating(4.5);
   }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [product]);
 
   const handleBuyNow = async () => {
     if (!accessToken) {
@@ -163,6 +277,17 @@ function DetailProduct() {
           {/* Specifications */}
           <div className="lg:col-span-1">
             <DetailInfo configs={product.configs} />
+          </div>
+        </div>
+        <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2">
+            <h2 className="font-bold text-2xl flex items-center gap-3">
+              <span className="text-2xl">💬</span>
+              Đánh giá & Bình luận
+            </h2>
+          </div>
+          <div className="p-6">
+            <CommentContainer comments={comments} totalRating={totalRating} />
           </div>
         </div>
       </div>

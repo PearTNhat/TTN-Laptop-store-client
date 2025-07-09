@@ -1,43 +1,17 @@
-import React from "react";
 import CustomSliceProducts from "~/components/customeSlice/CustomSliceProducts";
-import {
-  getHotProducts,
-  getNewProducts,
-  getPromotionProducts,
-  getTopRatedProducts,
-} from "~/data/fakeData";
 
+const defaultSettings = {
+  infinite: true,
+  speed: 500,
+  autoplay: true,
+  autoplaySpeed: 3000,
+  pauseOnHover: true,
+  arrows: true,
+  slidesToScroll: 1,
+  dots: false,
+};
 // Component có thể nhận type để hiển thị các loại sản phẩm khác nhau
-const ProductCarousel = ({ title, type = "hot", limit = 8 }) => {
-  // Lấy sản phẩm theo type
-  const getProductsByType = () => {
-    switch (type) {
-      case "hot":
-        return getHotProducts(limit);
-      case "new":
-        return getNewProducts(limit);
-      case "promotion":
-        return getPromotionProducts(limit);
-      case "topRated":
-        return getTopRatedProducts(limit);
-      default:
-        return getHotProducts(limit);
-    }
-  };
-
-  const products = getProductsByType();
-
-  const defaultSettings = {
-    infinite: true,
-    speed: 500,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true,
-    arrows: true,
-    slidesToScroll: 1,
-    dots: false,
-  };
-
+const ProductCarousel = ({ title, products }) => {
   return (
     <div className="mx-auto py-8">
       {/* Header */}
