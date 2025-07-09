@@ -1,28 +1,20 @@
-import React, { useState, useRef, use } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
 
-const ResetPassword = () => {
+const Test = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
-  const [showPasswords, setShowPasswords] = useState({
-    new: false,
-    confirm: false,
-  });
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const otpRefs = useRef([]);
   const navigate = useNavigate();
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setError('');
-  };
-
 
   const handleSendEmail = async (e) => {
     e.preventDefault();
@@ -42,7 +34,7 @@ const ResetPassword = () => {
           }
         }, 1000);
       });
-      // setSuccess(`Đã gửi mã xác minh đến ${email}`);
+      setSuccess(`Đã gửi mã xác minh đến ${email}`);
       setStep(2);
     } catch (err) {
       setError(err.message || 'Gửi mã thất bại, thử lại nhé!');
@@ -59,10 +51,11 @@ const ResetPassword = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
+    // Tự động focus ô tiếp theo
     if (value && index < 5) {
       otpRefs.current[index + 1].focus();
     }
-
+    // Focus ô trước nếu xóa
     if (!value && index > 0 && e.key === 'Backspace') {
       otpRefs.current[index - 1].focus();
     }
@@ -81,19 +74,19 @@ const ResetPassword = () => {
           if (code.length !== 6) {
             reject(new Error('Vui lòng nhập đủ 6 số!'));
           } else if (code !== '123456') {
-            reject(new Error('Mã xác thực không đúng!'));
+            reject(new Error('Mã xác minh không đúng!'));
           } else {
             resolve();
           }
         }, 1000);
       });
-      // setSuccess('Xác thực thành công!');
-      setOtp(['', '', '', '', '', '']); 
+      setSuccess('Xác thực thành công!');
+      setOtp(['', '', '', '', '', '']); // Xóa OTP sau khi thành công
       setStep(3);
     } catch (err) {
       setError(err.message || 'Xác thực thất bại, thử lại nhé!');
-      setOtp(['', '', '', '', '', '']); 
-      if (otpRefs.current[0]) otpRefs.current[0].focus(); 
+      setOtp(['', '', '', '', '', '']); // Xóa OTP khi sai
+      if (otpRefs.current[0]) otpRefs.current[0].focus(); // Focus ô đầu tiên
     } finally {
       setIsSubmitting(false);
     }
@@ -104,8 +97,6 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     setError('');
     setSuccess('');
-
-    const { password, confirmPassword } = formData;
 
     try {
       await new Promise((resolve, reject) => {
@@ -121,7 +112,6 @@ const ResetPassword = () => {
           }
         }, 1000);
       });
-
       setSuccess('Đặt lại mật khẩu thành công!');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
@@ -130,7 +120,6 @@ const ResetPassword = () => {
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-200 flex items-center justify-center p-4 sm:p-6">
@@ -146,7 +135,7 @@ const ResetPassword = () => {
             {step === 1
               ? 'Nhập email của bạn để nhận mã xác minh.'
               : step === 2
-              ? 'Nhập mã xác minh đã được gửi tới email của bạn.'
+              ? 'Nhập 6 số mã xác minh đã được gửi.'
               : 'Nhập mật khẩu mới để hoàn tất.'}
           </p>
           {error && (
@@ -248,26 +237,22 @@ const ResetPassword = () => {
               <div className="relative">
                 <input
                   id="password"
-                  name="password"
-                  type={showPasswords.new ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange}
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mật khẩu mới"
                   className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] bg-gray-50 transition-all"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  {showPasswords.new ?  "🙈" : "👁️"}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -278,29 +263,22 @@ const ResetPassword = () => {
               <div className="relative">
                 <input
                   id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPasswords.confirm ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Nhập lại mật khẩu"
                   className="w-full px-4 py-2 sm:py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] bg-gray-50 transition-all"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPasswords((prev) => ({
-                      ...prev,
-                      confirm: !prev.confirm,
-                    }))
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                 >
-                  {showPasswords.confirm ?  "🙈" : "👁️"}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-
             <button
               type="submit"
               disabled={isSubmitting}
@@ -317,4 +295,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default Test;

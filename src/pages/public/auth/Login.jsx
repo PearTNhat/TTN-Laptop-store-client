@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react'; 
-
+import React, { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { apiLogin } from "~/apis/authApi";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { userActions } from "~/stores/slice/userSlice";
+import { showToastSuccess } from "~/utils/alert";
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -15,10 +20,16 @@ const Login = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log('Login attempt with:', formData);
+      const body = {
+        username: formData.email,
+        password: formData.password,
+      };
+      const res = await apiLogin({ body });
+      dispatch(userActions.login(res.data));
+      showToastSuccess("Đăng nhập thành công!");
+      navigate("/");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -42,7 +53,7 @@ const Login = () => {
             <input
               id="email"
               name="email"
-              type="email"
+              // type="email"
               value={formData.email}
               onChange={handleInputChange}
               placeholder="example@gmail.com"
@@ -62,7 +73,7 @@ const Login = () => {
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPasswords ? "text" : "password"}
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
@@ -71,10 +82,10 @@ const Login = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPasswords(!showPasswords)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPasswords ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -99,15 +110,15 @@ const Login = () => {
             type="submit"
             disabled={isSubmitting}
             className={`w-full bg-[#1877F2] hover:bg-[#1666D2] text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] ${
-              isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
-            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          Chưa có tài khoản?{' '}
+          Chưa có tài khoản?{" "}
           <a
             href="/register"
             className="text-[#1877F2] hover:underline font-medium"
@@ -124,7 +135,10 @@ const Login = () => {
 
         <button
           className="mt-4 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={() => console.log('Google login')}
+          onClick={() => {
+            const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=378323217488-16f9jv2kdmlek9oui2orsfmvith1n0u7.apps.googleusercontent.com&redirect_uri=http://localhost:3000&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
+            window.location.href = googleLoginUrl;
+          }}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -145,6 +159,19 @@ const Login = () => {
             />
           </svg>
           Đăng nhập với Google
+        </button>
+
+        <button
+          className="mt-2 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+          onClick={() => console.log("Facebook login")}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path
+              fill="#1877F2"
+              d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"
+            />
+          </svg>
+          Đăng nhập với Facebook
         </button>
       </div>
     </div>

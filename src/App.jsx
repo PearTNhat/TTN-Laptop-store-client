@@ -5,6 +5,11 @@ import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
 import Register from "./pages/public/auth/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
+import ChangePassword from "./pages/user/components/ChangePassword";
+import MyOrders from "./pages/user/components/MyOrders";
+import Voucher from "./pages/user/components/Voucher";
+import ProfileInfo from "./pages/user/components/ProfileInfo";
+import UserProfileLayout from "./pages/user/UserProfileLayout";
 import {
   DashBoard,
   Brand,
@@ -29,6 +34,7 @@ function App() {
     <div className="relative h-full w-full overflow-auto">
       <Modal isOpen={isShowModal}>{childrenModal}</Modal>
       <Routes>
+        {/* router public */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
           <Route path={publicPaths.LOGIN} element={<Login />} />
@@ -43,6 +49,14 @@ function App() {
           />
           <Route path={productPaths.PRODUCTS} element={<FilterProductPage />} />
         </Route>
+        {/* router user */}
+        <Route path="/user" element={<UserProfileLayout />}>
+          <Route path="profile" element={<ProfileInfo />} />
+          <Route path="voucher" element={<Voucher />} />
+          <Route path="orders" element={<MyOrders />} />
+          <Route path="change-password" element={<ChangePassword />} />
+        </Route>
+        {/* router admin */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />
           <Route path={adminPaths.USERS} element={<UserManagement />} />
