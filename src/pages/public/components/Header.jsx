@@ -1,88 +1,87 @@
-import React, { useEffect, useState, useRef } from "react";
-import { ShoppingCart, Menu, X, Camera } from "lucide-react";
-import { dropDownProfile } from "~/constances/dropdown";
+import React, { useState, useRef, useEffect } from "react";
+import { ShoppingCart, Menu, X, Home, Laptop, ChevronDown } from "lucide-react";
+import { useNavigate, NavLink, Link } from "react-router-dom";
+import { dropDownProfile } from "~/constants/dropdown";
 import { showToastSuccess } from "~/utils/alert";
-import { publicPaths } from "~/constances/paths";
-import {
-  useNavigate,
-  NavLink,
-  Link,
-  createSearchParams,
-} from "react-router-dom";
+import { productPaths, publicPaths } from "~/constants/paths";
+import { useDispatch } from "react-redux";
+import { userActions } from "~/stores/slice/userSlice";
+import { mockCartItems } from "~/constants/mockCart";
+import Cart from "~/components/cart/Cart";
 
-// --- DỮ LIỆU VÀ HÀM GIẢ ---
-
-// 4. Component Search giả
+// Navigation links data
+const navigationLinks = [
+  {
+    id: 1,
+    name: "Trang chủ",
+    path: publicPaths.HOME,
+    icon: <Home size={18} />,
+  },
+  {
+    id: 2,
+    name: "Sản phẩm",
+    path: productPaths.PRODUCTS,
+    icon: <Laptop size={18} />,
+  },
+];
+// Search component with better styling
 const SearchWithSuggestions = () => {
   return (
     <div className="relative">
       <input
         type="text"
-        placeholder="Search products..."
-        className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Tìm kiếm sản phẩm..."
+        className="w-full md:w-80 px-4 py-2 pl-10 pr-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
       />
-    </div>
-  );
-};
-
-// 5. Component Cart giả
-const Cart = ({ isOpen, onClose, cartItems }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-[100] p-4 transform transition-transform duration-300 ease-in-out"
-      style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
-    >
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">My Cart</h2>
-        <button onClick={onClose} className="p-1">
-          <X size={24} />
-        </button>
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <svg
+          className="w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
       </div>
-      {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <ul>
-          {cartItems.map((item) => (
-            <li
-              key={item.id}
-              className="flex justify-between items-center border-b py-2"
-            >
-              <span>{item.name}</span>
-              <span>x{item.quantity}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <button className="w-full mt-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-        Checkout
-      </button>
     </div>
   );
 };
-
-// --- COMPONENT HEADER CHÍNH ---
 
 function Header() {
   const navigate = useNavigate();
-
-  // --- Thay thế Redux bằng useState ---
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Đặt là `true` để thấy profile, `false` để thấy nút Login/Register
-  const [userData, setUserData] = useState({
+  const dispatch = useDispatch();
+  const dropdownRef = useRef(null);
+  const isLoggedIn = true; // Giả lập trạng thái đăng nhập, thay thế bằng Redux hoặc Context API trong thực tế
+  const [userData] = useState({
     userId: "user123",
-    lastName: "P",
+    firstName: "Nguyễn",
+    lastName: "Văn A",
+    email: "nguyenvana@gmail.com",
     avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", // Ảnh đại diện giả
     role: { roleId: "user" }, // Vai trò 'user' hoặc '112' để test lọc dropdown
   });
-  const [myCart, setMyCart] = useState([
-    { id: 1, name: "Bút bi Thiên Long", quantity: 2 },
-    { id: 2, name: "Vở kẻ ngang", quantity: 5 },
-  ]);
+  const [myCart, setMyCart] = useState(mockCartItems);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  // --- Kết thúc phần thay thế Redux ---
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const fileInputRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Lọc danh sách dropdown dựa trên vai trò người dùng
   const filteredDropDownProfile = dropDownProfile.filter((item) => {
@@ -100,256 +99,317 @@ function Header() {
   const handleLogout = () => {
     // Mô phỏng việc đăng xuất
     console.log("Logging out...");
-    setIsLoggedIn(false);
-    setUserData(null);
     showToastSuccess("Logout successfully");
+    dispatch(userActions.logout()); // Gọi action logout từ Redux
     navigate("/login");
   };
 
-  const handleImageSearch = (file) => {
-    console.log("Searching with image:", file.name);
-    showToastSuccess("Đang phân tích hình ảnh...");
-
-    // Mô phỏng API call với setTimeout
-    setTimeout(() => {
-      const fakeLabel = "Bút chì 2B"; // Kết quả giả
-      const newParams = { search: fakeLabel };
-      navigate({
-        pathname: publicPaths.PRODUCT,
-        search: createSearchParams(newParams).toString(),
-      });
-      showToastSuccess(`Tìm thấy sản phẩm: ${fakeLabel}`);
-    }, 1500); // Giả lập độ trễ 1.5 giây
+  // Calculate total quantity in cart
+  const getTotalCartQuantity = () => {
+    return myCart.reduce((total, item) => total + item.quantity, 0);
+  };
+  const updateCartItemQuantity = (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+    setMyCart((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      )
+    );
   };
 
-  const handleCameraClick = () => {
-    fileInputRef.current?.click();
+  const removeCartItem = (itemId) => {
+    setMyCart((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageSearch(file);
-    }
+  const clearCart = () => {
+    console.log("Clearing cart...");
+    setMyCart([]);
   };
-
-  // useEffect này không còn cần thiết vì chúng ta không fetch dữ liệu thật nữa.
-  // Bạn có thể giữ lại nếu muốn thực hiện hành động nào đó khi trạng thái đăng nhập thay đổi.
-  useEffect(() => {
-    if (isLoggedIn) {
-      console.log("User is logged in. Welcome!");
-    } else {
-      console.log("User is logged out.");
-    }
-  }, [isLoggedIn]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 shadow-md bg-white px-6 py-3 flex items-center justify-between md:px-10">
-      <Link to="/">
-        <div className="text-2xl font-bold text-blue-600 cursor-pointer">
-          LAPTOP SHOP 
-        </div>
-      </Link>
-
-      <div className="hidden md:flex space-x-6 text-gray-700">
-        <NavLink
-          to={publicPaths.PUBLIC}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          Home
-        </NavLink>
-        <NavLink
-          to={publicPaths.ABOUT}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          About
-        </NavLink>
-        <NavLink
-          to={publicPaths.PRODUCT}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          Product
-        </NavLink>
-        <NavLink
-          to={publicPaths.SERVICE}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          Service
-        </NavLink>
-        <NavLink
-          to={publicPaths.CONTACT}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          Contact
-        </NavLink>
-
-
-
-        {/* test các giao diện */}
-
-        <NavLink
-          to={publicPaths.TEST}
-          className={({ isActive }) =>
-            isActive
-              ? "text-blue-600 font-bold"
-              : "text-gray-700 hover:text-blue-500 transition"
-          }
-        >
-          Test giao diện
-        </NavLink>
-
-        
-      </div>
-
-      <div className="hidden md:flex items-center space-x-2">
-        <SearchWithSuggestions />
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        <button
-          type="button"
-          onClick={handleCameraClick}
-          className="p-2 text-gray-500 hover:text-blue-500"
-          aria-label="Search by image"
-        >
-          <Camera size={20} />
-        </button>
-      </div>
-
-      <div className="flex items-center space-x-4">
-        <div className="relative cursor-pointer" onClick={handleCartToggle}>
-          <ShoppingCart
-            size={24}
-            className="text-gray-700 hover:text-blue-500 transition"
-          />
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-            {myCart.length}
-          </span>
-        </div>
-
-        {isLoggedIn ? (
-          <div className="d-dropdown d-dropdown-hover d-dropdown-end">
-            <div
-              tabIndex={0}
-              className="w-10 h-10 rounded-full overflow-hidden"
-            >
-              <img
-                src={userData?.avatar}
-                alt={userData?.lastName}
-                className="w-full h-full object-cover"
-              />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <Laptop className="w-5 h-5 text-white" />
             </div>
-            <ul
-              tabIndex={0}
-              className="d-dropdown-content d-menu bg-base-100 rounded-md z-10 w-52 p-2 shadow-md"
-            >
-              {filteredDropDownProfile.map((item) => {
-                let Comp = "button";
-                if (item.to) {
-                  Comp = Link;
-                }
-                return (
-                  <li
-                    key={item.id}
-                    className={`${item.styleParent ? item.styleParent : ""}`}
-                  >
-                    <Comp
-                      {...(item.to ? { to: item.to } : {})}
-                      onClick={item?.onClick ? handleLogout : undefined}
-                      className={`flex items-center w-full px-4 py-2 ${
-                        item.style
-                          ? item.style
-                          : "text-gray-700 hover:bg-gray-100 transition  "
-                      }`}
-                    >
-                      {item.icon}
-                      {item.name}
-                    </Comp>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : (
-          <div className="hidden md:flex space-x-3">
-            <button
-              onClick={() => navigate("/login")}
-              className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-            >
-              Register
-            </button>
-          </div>
-        )}
+            <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Laptop Store
+            </div>
+          </Link>
 
-        <button
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1">
+            {navigationLinks.map((link) => (
+              <NavLink
+                key={link.id}
+                to={link.path}
+                end
+                className={({ isActive }) =>
+                  `flex items-center p-1 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "text-blue-600 bg-blue-50 shadow-sm"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  }`
+                }
+              >
+                {link.icon}
+                <span>{link.name}</span>
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Search Bar - Desktop */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+            <SearchWithSuggestions />
+          </div>
+
+          {/* Right Side Actions */}
+          <div className="flex items-center space-x-4">
+            {/* Cart */}
+            <div className="relative">
+              <button
+                onClick={handleCartToggle}
+                className="relative p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+              >
+                <ShoppingCart size={20} />
+                {myCart.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                    {getTotalCartQuantity()}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* User Menu */}
+            {isLoggedIn ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-blue-100">
+                    <img
+                      src={userData?.avatar || "https://via.placeholder.com/32"}
+                      alt={userData?.lastName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                          <img
+                            src={
+                              userData?.avatar ||
+                              "https://via.placeholder.com/40"
+                            }
+                            alt={userData?.lastName}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {userData?.firstName} {userData?.lastName}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {userData?.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    {filteredDropDownProfile.map((item) => {
+                      const Component = item.to ? Link : "button";
+                      const isLogoutItem = item.name === "Đăng xuất";
+
+                      return (
+                        <Component
+                          key={item.id}
+                          {...(item.to ? { to: item.to } : {})}
+                          onClick={() => {
+                            if (isLogoutItem) {
+                              handleLogout();
+                            }
+                            setIsMenuOpen(false);
+                          }}
+                          className={`flex items-center w-full px-2 text-left transition-all duration-200 ${
+                            isLogoutItem
+                              ? "text-red-600 hover:bg-red-50 hover:text-red-700"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                          }`}
+                        >
+                          <span
+                            className={`w-10 h-10 flex items-center justify-center ${
+                              isLogoutItem ? "text-red-500" : "text-gray-400"
+                            }`}
+                          >
+                            {item.icon}
+                          </span>
+                          <span className="font-medium">{item.name}</span>
+                        </Component>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center space-x-3">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 font-medium"
+                >
+                  Đăng nhập
+                </button>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="px-4 py-2 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
+                >
+                  Đăng ký
+                </button>
+              </div>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Search Bar */}
+        <div className="lg:hidden px-4 pb-4">
+          <SearchWithSuggestions />
+        </div>
       </div>
 
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white shadow-md md:hidden z-[999]">
-          <div className="flex flex-col space-y-4 p-4 text-gray-700">
-            {/* ... (Các NavLink cho mobile view) ... */}
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-xl">
+          <div className="px-4 py-6 space-y-4">
+            {/* Mobile Navigation Links */}
+            <div className="space-y-2">
+              {navigationLinks.map((link) => (
+                <NavLink
+                  key={link.id}
+                  to={link.path}
+                  onClick={() => setIsMenuOpen(false)}
+                  end
+                  className={({ isActive }) =>
+                    `flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? "text-blue-600 bg-blue-50 border border-blue-200"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    }`
+                  }
+                >
+                  {link.icon}
+                  <span>{link.name}</span>
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Mobile Auth Buttons */}
             {!isLoggedIn && (
-              <>
+              <div className="pt-4 border-t border-gray-200 space-y-3">
                 <button
                   onClick={() => {
-                    navigate("/auth?mode=login");
+                    navigate("/login");
                     setIsMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition"
+                  className="w-full px-4 py-3 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 font-medium"
                 >
-                  Login
+                  Đăng nhập
                 </button>
                 <button
                   onClick={() => {
-                    navigate("/auth?mode=register");
+                    navigate("/register");
                     setIsMenuOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                  className="w-full px-4 py-3 text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg"
                 >
-                  Register
+                  Đăng ký
                 </button>
-              </>
+              </div>
+            )}
+
+            {/* Mobile User Menu */}
+            {isLoggedIn && (
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl mb-4">
+                  <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-blue-200">
+                    <img
+                      src={userData?.avatar}
+                      alt={userData?.lastName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Xin chào!</p>
+                    <p className="text-sm text-gray-600">
+                      {userData?.lastName}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  {filteredDropDownProfile.map((item) => {
+                    const isLogoutItem = item?.onClick;
+                    const Component = item.to ? Link : "button";
+
+                    return (
+                      <Component
+                        key={item.id}
+                        {...(item.to ? { to: item.to } : {})}
+                        onClick={() => {
+                          if (isLogoutItem) {
+                            handleLogout();
+                          }
+                          setIsMenuOpen(false);
+                        }}
+                        className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-200 ${
+                          isLogoutItem
+                            ? "text-red-600 hover:bg-red-50 hover:text-red-700"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                        }`}
+                      >
+                        <span
+                          className={`w-5 h-5 flex items-center justify-center ${
+                            isLogoutItem ? "text-red-500" : "text-gray-400"
+                          }`}
+                        >
+                          {item.icon}
+                        </span>
+                        <span className="font-medium">{item.name}</span>
+                      </Component>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
         </div>
       )}
-      <Cart isOpen={isCartOpen} onClose={handleCartToggle} cartItems={myCart} />
+
+      <Cart
+        isOpen={isCartOpen}
+        onClose={handleCartToggle}
+        cartItems={myCart}
+        onUpdateQuantity={updateCartItemQuantity}
+        onRemoveItem={removeCartItem}
+        onClearCart={clearCart}
+      />
     </nav>
   );
 }

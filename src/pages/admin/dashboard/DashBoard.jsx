@@ -10,7 +10,6 @@ import {
   RecentOrders,
   TopProducts,
   RevenueChart,
-  QuickActions,
 } from "./components";
 
 function DashBoard() {
@@ -161,9 +160,6 @@ function DashBoard() {
         {/* Top Products */}
         <TopProducts topProducts={topProducts} />
       </div>
-
-      {/* Quick Actions */}
-      <QuickActions />
     </div>
   );
 }

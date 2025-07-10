@@ -9,6 +9,7 @@ const modalSlice = createSlice({
     },
     reducers: {
         toggleModal: (state, action) => {
+            console.log(action.payload);
             state.isShowModal = action.payload.isShowModal;
             state.childrenModal = action.payload.childrenModal
             state.animation = action.payload.animation

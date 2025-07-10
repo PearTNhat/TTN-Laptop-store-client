@@ -4,26 +4,18 @@ import { FaRegStarHalfStroke } from 'react-icons/fa6';
 
 // Các import kiểu (ProductDetail, Promotion) đã được loại bỏ vì chúng không tồn tại trong JavaScript.
 
-/**
- * Định dạng một số theo chuẩn của Đức (dấu chấm ngăn cách hàng nghìn).
- * @param {number | string} number - Số cần định dạng.
- * @returns {string | number} Trả về số đã định dạng hoặc 0.
- */
 const formatNumber = (number) => {
-    const numberParse = Number(number);
+    let numberParse = Number(number);
     if (!numberParse || numberParse === 0) {
         return 0;
     }
-    return numberParse.toLocaleString('de-DE');
+    return numberParse.toLocaleString("de-DE");
 };
-
-
-
-/**
- * Chuyển đổi một số (ví dụ: 4.5) thành một mảng các component ngôi sao (Star).
- * @param {number} number - Số điểm rating.
- * @returns {React.ReactElement[]} Mảng các component sao.
- */
+const covertMoneyToNumber = (money) => {
+    if (!money) return 0;
+    const cleanedStr = money.replace(/\./g, ""); // Loại bỏ dấu chấm
+    return Number(cleanedStr);
+}
 const convertNumberToStar = (number) => {
     if (!number) {
         // Trả về 5 ngôi sao rỗng nếu không có số điểm
@@ -50,12 +42,6 @@ const convertNumberToStar = (number) => {
     return stars;
 };
 
-/**
- * Tính toán phần trăm giảm giá.
- * @param {number | undefined} price - Giá gốc.
- * @param {number | undefined} priceDiscount - Giá sau khi giảm.
- * @returns {number} Phần trăm giảm giá.
- */
 const calculatePercent = (price, priceDiscount) => {
     if (price === 0 || !price || priceDiscount === 0 || !priceDiscount) {
         return 0;
@@ -63,5 +49,14 @@ const calculatePercent = (price, priceDiscount) => {
     // toFixed trả về string, nên cần Number() để chuyển lại thành số
     return Number((((price - priceDiscount) / price) * 100).toFixed(2));
 };
-
-export { formatNumber, convertNumberToStar, calculatePercent };
+const formatPrice = (price) => {
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    }).format(price);
+};
+function capitalizeFirstCharacter(str) {
+    if (!str) return str; // Handle empty or null strings
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter };

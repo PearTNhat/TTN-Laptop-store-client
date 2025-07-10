@@ -13,22 +13,6 @@ import {
 import { FaChartArea, FaChartBar } from "react-icons/fa";
 
 const RevenueChart = () => {
-  // Dữ liệu doanh thu theo tháng
-  const revenueData = [
-    { month: "T1", revenue: 1200, orders: 45 },
-    { month: "T2", revenue: 1800, orders: 52 },
-    { month: "T3", revenue: 2200, orders: 61 },
-    { month: "T4", revenue: 1900, orders: 48 },
-    { month: "T5", revenue: 2400, orders: 70 },
-    { month: "T6", revenue: 2800, orders: 85 },
-    { month: "T7", revenue: 2600, orders: 78 },
-    { month: "T8", revenue: 3200, orders: 92 },
-    { month: "T9", revenue: 2900, orders: 86 },
-    { month: "T10", revenue: 3600, orders: 108 },
-    { month: "T11", revenue: 3800, orders: 115 },
-    { month: "T12", revenue: 4200, orders: 128 },
-  ];
-
   // Dữ liệu so sánh tiền mua và tiền bán
   const buyVsSellData = [
     { month: "T1", buy: 800, sell: 1200, profit: 400 },
@@ -59,78 +43,8 @@ const RevenueChart = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1  gap-6 mb-8">
       {/* Biểu đồ doanh thu theo tháng */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-            <FaChartArea className="mr-3 text-blue-600" />
-            Doanh thu theo tháng
-          </h3>
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-              <span className="text-gray-600">Doanh thu</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              <span className="text-gray-600">Đơn hàng</span>
-            </div>
-          </div>
-        </div>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueData}>
-              <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
-              <YAxis
-                stroke="#6B7280"
-                fontSize={12}
-                tickFormatter={formatCurrency}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  border: "none",
-                  borderRadius: "12px",
-                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
-                }}
-                formatter={(value, name) => [
-                  name === "revenue" ? formatCurrency(value) : `${value} đơn`,
-                  name === "revenue" ? "Doanh thu" : "Đơn hàng",
-                ]}
-              />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#3B82F6"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorRevenue)"
-              />
-              <Area
-                type="monotone"
-                dataKey="orders"
-                stroke="#10B981"
-                strokeWidth={3}
-                fillOpacity={1}
-                fill="url(#colorOrders)"
-                yAxisId="right"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
       {/* Biểu đồ so sánh tiền mua và tiền bán */}
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">

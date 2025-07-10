@@ -5,7 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { sideBarActions } from "~/stores/slice/sideBar";
-import { navItems } from "~/constances/navAdmin";
+import { navItems } from "~/constants/navAdmin";
 
 const SideBar = () => {
   const { isExpanded, isMobileOpen, isHovered } = useSelector(

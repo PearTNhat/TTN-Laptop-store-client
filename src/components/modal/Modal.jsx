@@ -21,7 +21,7 @@ const Modal = ({ children, isOpen }) => {
   }, []);
 
   if (!isOpen) return null;
-
+  console.log("Modal isOpen:", isOpen);
   return (
     <div
       className="fixed inset-0 z-[9999] overflow-y-auto"
