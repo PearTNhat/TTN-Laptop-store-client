@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 // Import mock data
 import { mockProduct } from "~/constants/mockProduct";
 
 // Import utils and components
 import Breadcrumbs from "~/components/Breadcrumbs";
 import DetailInfo from "./components/DetailInfo";
-import { showToastSuccess } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import ProductImageGallery from "./components/ProductImageGallery";
 import ProductInfo from "./components/ProductInfo";
 import ProductPrice from "./components/ProductPrice";
@@ -14,6 +14,7 @@ import ColorSelector from "./components/ColorSelector";
 import QuantitySelector from "./components/QuantitySelector";
 import ActionButtons from "./components/ActionButtons";
 import CommentContainer from "~/components/comments/MockCommentContainer";
+import { apiGetDetailProduct } from "~/apis/productApi";
 const mockUserData = {
   _id: "user123",
   firstName: "Nguyen",
@@ -108,50 +109,47 @@ const fakeComments = [
 ];
 
 function DetailProduct() {
-  // const { slug } = useParams(); // Bạn có thể dùng lại khi tích hợp API
+  const { pId } = useParams(); // Bạn có thể dùng lại khi tích hợp API
   const descRef = useRef(null);
   const navigate = useNavigate();
-
   // Giả sử accessToken có tồn tại để test luồng đã đăng nhập
   const accessToken = "fake-access-token";
-
   const [product, setProduct] = useState({});
+  const [productDetails, setProductDetails] = useState([]);
   const [colorProduct, setColorProduct] = useState({});
   const [isClamped, setIsClamped] = useState(false);
   const [isReadMore, setIsReadMore] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState([]);
   const [totalRating, setTotalRating] = useState(0);
-  // const getDetailProduct = async (pId) => {
-  //   const fetchProducts = async () => {
-  //     try {
-  //       const response = await apiGetProducts({
-  //         page: 1,
-  //         size: 10,
-  //         sort: "createdAt",
-  //       });
-  //       console.log("data", response);
-  //       setProducts(response.content);
-  //     } catch (error) {
-  //       console.error("Error fetching products:", error);
-  //     }
-  //   };
-  // };
-
+  const getDetailProduct = async (pId) => {
+    try {
+      const response = await apiGetDetailProduct({ pId });
+      if (response.code !== 200) {
+        showToastError(response.message);
+      } else {
+        setProduct(response.data);
+        console.log("daa", response.data);
+        setProductDetails(response?.data?.productDetails);
+        if (response?.data?.productDetails?.length > 0) {
+          setColorProduct(response.data.productDetails[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
   // Sử dụng mock data thay vì gọi API
   useEffect(() => {
     // Mock user data để giả lập đăng nhập
     // Giả lập việc fetch dữ liệu
-    setProduct(mockProduct);
+    getDetailProduct(pId);
     // Set màu mặc định
-    if (mockProduct.colors && mockProduct.colors.length > 0) {
-      setColorProduct(mockProduct.colors[0]);
-    }
     setComments(fakeComments);
     setTotalRating(4.5);
   }, []);
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // window.scrollTo(0, 0);
   }, [product]);
 
   const handleBuyNow = async () => {
@@ -179,9 +177,9 @@ function DetailProduct() {
       }, 300);
     }
   }, [product, isReadMore]);
-
+  console.log("colorProduct:", colorProduct);
   return (
-    <div className="max-w-7xl mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
+    <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Breadcrumb Section */}
       <div className="py-6 bg-white shadow-sm border-b border-gray-200">
         <div className="main-container">
@@ -201,28 +199,24 @@ function DetailProduct() {
             {/* Cột thông tin sản phẩm */}
             <div className="lg:col-span-3 p-8">
               {/* Product Info Component */}
-              <ProductInfo product={product} />
+              <ProductInfo
+                product={product}
+                colorProduct={colorProduct}
+                totalRating={colorProduct.totalRating || 0}
+              />
               {/* Product Price Component */}
-              <ProductPrice product={product} />
-
-              {/* Features Section */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 mb-6">
-                <div
-                  className="prose prose-sm text-gray-700 max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product?.features }}
-                ></div>
-              </div>
-
+              <ProductPrice colorProduct={colorProduct} />
               <div className="space-y-8">
                 {/* Color Selector Component */}
                 <ColorSelector
-                  product={product}
+                  product={productDetails}
                   colorProduct={colorProduct}
                   setColorProduct={setColorProduct}
                 />
 
                 {/* Quantity Selector Component */}
                 <QuantitySelector
+                  colorProduct={colorProduct}
                   quantity={quantity}
                   setQuantity={setQuantity}
                 />
@@ -256,7 +250,9 @@ function DetailProduct() {
                       !isReadMore ? "line-clamp-[15]" : ""
                     }`}
                     dangerouslySetInnerHTML={{
-                      __html: product?.description?.[0] || "",
+                      __html: Array.isArray(product?.description)
+                        ? product.description.join("")
+                        : product?.description || "",
                     }}
                   ></div>
                   {(isClamped || isReadMore) && (
@@ -276,7 +272,7 @@ function DetailProduct() {
 
           {/* Specifications */}
           <div className="lg:col-span-1">
-            <DetailInfo configs={product.configs} />
+            <DetailInfo configs={colorProduct?.configs} />
           </div>
         </div>
         <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">

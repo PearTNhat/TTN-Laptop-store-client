@@ -12,7 +12,7 @@ const publicPaths = {
 }
 const productPaths = {
     PRODUCTS: '/products',
-    PRODUCT_DETAIL: '/products/:slug',
+    PRODUCT_DETAIL: '/products/:pId',
 }
 const adminPaths = {
     DASHBOARD: '',

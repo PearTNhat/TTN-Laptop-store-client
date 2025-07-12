@@ -9,6 +9,7 @@ import { userActions } from "~/stores/slice/userSlice";
 import { mockCartItems } from "~/constants/mockCart";
 import Cart from "~/components/cart/Cart";
 import { fetchCurrentUser } from "~/stores/action/user";
+import { fetchCategories } from "~/stores/action/category";
 
 // Navigation links data
 const navigationLinks = [
@@ -123,6 +124,7 @@ function Header() {
   useEffect(() => {
     console.log("access___", accessToken);
     dispatch(fetchCurrentUser({ accessToken }));
+    dispatch(fetchCategories());
   }, [accessToken]);
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">

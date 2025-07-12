@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
       <Link to={`/products/${product.productId}`}>
         <div className="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 overflow-hidden">
           <img
-            src={product.thumbnail || DefaultProduct}
+            src={product.itemImage || DefaultProduct}
             alt={product.title}
             className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
           />
@@ -40,11 +40,9 @@ const ProductCard = ({ product }) => {
       {/* Thông tin sản phẩm */}
       <div className="p-5">
         {/* Tên sản phẩm */}
-        <Link to={`/san-pham/${product.slug || product.id}`} className="block">
-          <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 line-clamp-2 mb-2 group-hover:text-blue-600">
-            {product.title}
-          </h3>
-        </Link>
+        <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 line-clamp-2 mb-2 group-hover:text-blue-600">
+          {product.title}
+        </h3>
 
         {/* Rating */}
         <div className="flex items-center space-x-2 mb-3">

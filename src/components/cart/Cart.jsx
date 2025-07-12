@@ -11,7 +11,6 @@ const Cart = ({
   onClearCart,
 }) => {
   const [selectedItems, setSelectedItems] = useState([]);
-  console.log("Cart items:", cartItems.length);
   // Handle select all items
   const handleSelectAll = (checked) => {
     if (checked) {

@@ -6,10 +6,8 @@ function DetailInfo({ configs }) {
   const dispatch = useDispatch();
 
   // Chuyển đổi object configs thành mảng và sắp xếp
-  let configsArr = Object.values(configs || {})
-    .filter((item) => item?.description) // Lọc những item có description
-    .sort((a, b) => a.priority - b.priority); // Sắp xếp theo priority
-
+  let configsArr = Object.values(configs || {}).filter(() => Boolean); // Lọc những item có description
+  console.log("DetailInfo configsArr:", Object.values(configs || {}));
   // Lấy ra một số thông tin ngắn gọn để hiển thị
   const shortInfo = configsArr.slice(0, 6);
 
