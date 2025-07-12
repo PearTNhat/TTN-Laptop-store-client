@@ -1,5 +1,10 @@
 import { Route, Routes } from "react-router-dom";
-import { adminPaths, publicPaths, productPaths } from "./constants/paths";
+import {
+  adminPaths,
+  publicPaths,
+  productPaths,
+  orderPaths,
+} from "./constants/paths";
 import PublicLayout from "./pages/public/PublicLayout";
 import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
@@ -26,6 +31,7 @@ import OrderManagement from "./pages/admin/orders/manageOrder/OrderManagement";
 import NotFound from "./components/NotFound";
 import DetailProduct from "./pages/public/detailProduct/DetailProduct";
 import FilterProductPage from "./pages/public/filterProduct/FilterProductPage";
+import PaymentConfirmation from "./pages/payment/PaymentConfirmation";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -48,6 +54,7 @@ function App() {
             element={<DetailProduct />}
           />
           <Route path={productPaths.PRODUCTS} element={<FilterProductPage />} />
+          <Route path={orderPaths.ORDER} element={<PaymentConfirmation />} />
         </Route>
         {/* router user */}
         <Route path="/user" element={<UserProfileLayout />}>
