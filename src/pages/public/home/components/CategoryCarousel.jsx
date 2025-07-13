@@ -101,7 +101,6 @@ const CategoryCarousel = () => {
     autoplay: true,
     dots: false,
   };
-
   return (
     <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 py-10">
       <div className="mx-auto px-4">

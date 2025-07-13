@@ -1,22 +1,22 @@
 import { useCallback } from "react";
 import { capitalizeFirstCharacter, convertNumberToStar } from "~/utils/helper";
 
-function ProductInfo({ product }) {
+function ProductInfo({ product, colorProduct, totalRating }) {
   const stars = useCallback(() => {
-    return convertNumberToStar(product?.totalRating);
-  }, [product]);
+    return convertNumberToStar(totalRating);
+  }, [totalRating]);
 
   return (
     <div className="mb-6">
       {/* Product Title */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight">
-          {product.title}
+          {colorProduct?.title}
         </h1>
         <div className="flex items-center gap-4 mt-3">
           <span className="text-gray-500 text-sm">Thương hiệu:</span>
           <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
-            {capitalizeFirstCharacter(product.brand || "")}
+            {capitalizeFirstCharacter(product?.brand?.name || "")}
           </span>
         </div>
       </div>
@@ -35,7 +35,7 @@ function ProductInfo({ product }) {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-gray-600 text-sm font-medium">
-            ({product.totalRating} đánh giá)
+            ({totalRating} đánh giá)
           </span>
           <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-lg text-xs font-semibold">
             Đánh giá tốt

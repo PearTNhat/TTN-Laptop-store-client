@@ -1,6 +1,12 @@
 import { http } from "~/utils/http";
 
-const apiGetProducts = async ({ page = 1, size = 10, minPrice, maxPrice, sort }) => {
+const apiGetProducts = async ({ page = 1, size = 10, minPrice,
+    maxPrice,
+    categoryId,
+    brandId,
+    seriesId,
+    sortBy,
+    sortDirection }) => {
     try {
         page = page <= 1 ? 0 : page - 1;
         const params = {
@@ -8,7 +14,11 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice, maxPrice, sort })
             size,
             minPrice,
             maxPrice,
-            sort
+            categoryId,
+            brandId,
+            seriesId,
+            sortBy,
+            sortDirection
         }
         const config = {
             params

@@ -12,7 +12,10 @@ const publicPaths = {
 }
 const productPaths = {
     PRODUCTS: '/products',
-    PRODUCT_DETAIL: '/products/:slug',
+    PRODUCT_DETAIL: '/products/:pId',
+}
+const orderPaths = {
+    ORDER: '/orders',
 }
 const adminPaths = {
     DASHBOARD: '',
@@ -29,4 +32,4 @@ const demoPaths = {
     CART_DEMO: '/demo/cart',
     TEST_CART: '    ',
 }
-export { publicPaths, adminPaths, productPaths, demoPaths };
+export { publicPaths, adminPaths, productPaths, demoPaths, orderPaths };

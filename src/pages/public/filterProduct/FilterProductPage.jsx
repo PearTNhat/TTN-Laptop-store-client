@@ -8,6 +8,7 @@ import { fakeProducts } from "~/data/fakeData";
 // Bạn sẽ thay thế phần này bằng hàm gọi API thật
 import { showToastError } from "~/utils/alert";
 import Pagination from "~/components/pagination/Pagination";
+import { apiGetProducts } from "~/apis/productApi";
 
 const FilterProductPage = () => {
   const [searchParams] = useSearchParams();
@@ -33,8 +34,12 @@ const FilterProductPage = () => {
           limit: currentParams.limit || "12",
           ...currentParams,
         };
-        console.log("Đang gọi API với params:", params);
-        setProducts(fakeProducts); // Sẽ sử dụng fake data từ ProductGrid
+        console.log(params);
+        const res = await apiGetProducts({
+          ...params,
+        });
+        console.log("data", res);
+        setProducts(res.data.content);
       } catch (err) {
         console.error(err);
         const errorMessage = err.message || "Không thể kết nối đến máy chủ.";

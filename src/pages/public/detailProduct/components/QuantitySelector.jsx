@@ -1,6 +1,6 @@
 import QuantityInput from "~/components/QuantityInput";
 
-function QuantitySelector({ quantity, setQuantity }) {
+function QuantitySelector({ colorProduct, quantity, setQuantity }) {
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -20,13 +20,6 @@ function QuantitySelector({ quantity, setQuantity }) {
         <div className="w-48">
           <QuantityInput quantity={quantity} setQuantity={setQuantity} />
         </div>
-      </div>
-
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-        <p className="text-yellow-800 text-sm font-medium flex items-center gap-2">
-          <span>⚠️</span>
-          <span>Chỉ còn lại ít sản phẩm, hãy đặt hàng ngay!</span>
-        </p>
       </div>
     </div>
   );

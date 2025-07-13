@@ -1,38 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Select from "react-select";
-import { fakeCategories } from "~/data/fakeData";
-
-// --- Giả lập API call ---
-const fetchCategoriesAPI = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(fakeCategories);
-    }, 300);
-  });
-};
-
+import { useSelector } from "react-redux";
 const CategoryFilter = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-
+  const { categories } = useSelector((state) => state.category);
   const selectedCategoryId = searchParams.get("categoryId");
   console.log("Selected Category ID:", selectedCategoryId);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const data = await fetchCategoriesAPI();
-        setCategories(data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCategories();
-  }, []);
 
   const handleSelectCategory = (selectedOption) => {
     const newSearchParams = new URLSearchParams(searchParams);
@@ -46,32 +21,19 @@ const CategoryFilter = () => {
     newSearchParams.set("page", "0");
     setSearchParams(newSearchParams);
   };
-
-  // Tạo options cho react-select
-  const categoryOptions = [
-    ...categories.map((category) => ({
+  useEffect(() => {
+    const categoryOptions = categories.map((category) => ({
       value: category.id,
       label: category.name,
-      icon: getCategoryIcon(category.name),
-    })),
-  ];
-
-  // Hàm lấy icon cho từng category
-  function getCategoryIcon(categoryName) {
-    const iconMap = {
-      "Laptop Gaming": "🎮",
-      "Laptop Văn phòng": "💼",
-      Macbook: "🍎",
-      "Laptop Đồ họa": "🎨",
-      "Laptop Ultrabook": "✨",
-      "Laptop Workstation": "🔧",
-    };
-    return iconMap[categoryName] || "💻";
-  }
-
+    }));
+    setCategoryOptions(categoryOptions);
+  }, [categories]);
+  // Tạo options cho react-select
+  console.log("Category Options:", categoryOptions);
   // Tìm option đang được chọn
   const selectedOption =
-    categoryOptions.find((option) => option.value === selectedCategoryId) || "";
+    categoryOptions.find((option) => option.value === selectedCategoryId) ||
+    null;
   // Custom styles cho react-select
   const customStyles = {
     control: (provided, state) => ({
@@ -125,20 +87,11 @@ const CategoryFilter = () => {
   };
 
   // Custom component để hiển thị option với icon
-  const formatOptionLabel = ({ label, icon }) => (
+  const formatOptionLabel = ({ label }) => (
     <div className="flex items-center space-x-2">
-      <span className="text-lg">{icon}</span>
       <span>{label}</span>
     </div>
   );
-
-  if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-12 bg-gray-200 rounded-xl"></div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -149,7 +102,7 @@ const CategoryFilter = () => {
         styles={customStyles}
         formatOptionLabel={formatOptionLabel}
         placeholder="Chọn danh mục..."
-        isClearable={false}
+        isClearable={true}
         isSearchable={true}
         menuPortalTarget={document.body}
       />
