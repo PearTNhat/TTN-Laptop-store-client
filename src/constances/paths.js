@@ -11,7 +11,6 @@ const publicPaths = {
     CONTACT: '/contact',
     ABOUT: '/about',
     PROFILE: '/profile',
-    TEST: '/test',
     //
     USER_HOME: '/user',
     USER_PROFILE: '/user/profile',

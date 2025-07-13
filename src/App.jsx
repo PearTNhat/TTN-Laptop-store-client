@@ -5,8 +5,6 @@ import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
 import Register from "./pages/public/auth/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
-import Test from "./pages/public/auth/test";
-
 import ChangePassword from "./pages/user/components/ChangePassword";
 import MyOrders from "./pages/user/components/MyOrders";
 import Voucher from "./pages/user/components/Voucher";
@@ -43,7 +41,6 @@ function App() {
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
           <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
-          <Route path={publicPaths.TEST} element={<Test />} />
            <Route
             path={productPaths.PRODUCT_DETAIL}
             element={<DetailProduct />}

@@ -6,13 +6,13 @@ import {
   calculatePercent,
 } from "~/utils/helper";
 import { Link } from "react-router-dom";
+import { DefaultProduct } from "~/assets/images";
 
 const ProductCard = ({ product }) => {
   const discountPercent = calculatePercent(
     product.originalPrice,
-    product.price
+    product.discountPrice
   );
-
   return (
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-200 transform hover:-translate-y-2 relative">
       {/* Badge giảm giá */}
@@ -24,69 +24,51 @@ const ProductCard = ({ product }) => {
         </div>
       )}
 
-      {/* Action buttons */}
-      {/* <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-8 group-hover:translate-x-0">
-        <div className="flex flex-col space-y-2">
-          <button className="bg-white/90 backdrop-blur-sm text-gray-600 hover:text-red-500 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110">
-            <FaHeart className="w-4 h-4" />
-          </button>
-          <Link
-            to={`/san-pham/${product.slug || product.id}`}
-            className="bg-white/90 backdrop-blur-sm text-gray-600 hover:text-blue-500 hover:bg-white p-2 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
-          >
-            <FaEye className="w-4 h-4" />
-          </Link>
-        </div>
-      </div> */}
-
       {/* Hình ảnh sản phẩm */}
-      <div className="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 overflow-hidden">
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
-          onError={(e) => {
-            e.target.src = "https://via.placeholder.com/300x200?text=No+Image";
-          }}
-        />
-        {/* Overlay gradient khi hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      </div>
+      <Link to={`/products/${product.productId}`}>
+        <div className="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 overflow-hidden">
+          <img
+            src={product.thumbnail || DefaultProduct}
+            alt={product.title}
+            className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
+          />
+          {/* Overlay gradient khi hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
+      </Link>
 
       {/* Thông tin sản phẩm */}
       <div className="p-5">
         {/* Tên sản phẩm */}
         <Link to={`/san-pham/${product.slug || product.id}`} className="block">
           <h3 className="text-lg font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-300 line-clamp-2 mb-2 group-hover:text-blue-600">
-            {product.name}
+            {product.title}
           </h3>
         </Link>
 
         {/* Rating */}
         <div className="flex items-center space-x-2 mb-3">
           <div className="flex items-center space-x-1 text-yellow-400">
-            {convertNumberToStar(product.rating || 4.5).map((star, index) => (
+            {convertNumberToStar(product.totalRating).map((star, index) => (
               <span key={index} className="text-sm">
                 {star}
               </span>
             ))}
           </div>
-          <span className="text-sm text-gray-500">
-            ({product.reviewCount || 0} đánh giá)
-          </span>
         </div>
 
         {/* Giá */}
         <div className="mb-4">
           <div className="flex items-center space-x-2 flex-wrap">
             <span className="text-xl font-bold text-red-600">
-              {formatPrice(product.price)}
+              {formatPrice(product.discountPrice)}
             </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-gray-400 line-through">
-                {formatPrice(product.originalPrice)}
-              </span>
-            )}
+            {product.originalPrice &&
+              product.originalPrice > product.discountPrice && (
+                <span className="text-sm text-gray-400 line-through">
+                  {formatPrice(product.originalPrice)}
+                </span>
+              )}
           </div>
         </div>
 

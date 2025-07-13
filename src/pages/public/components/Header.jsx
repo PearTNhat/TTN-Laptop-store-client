@@ -4,10 +4,11 @@ import { useNavigate, NavLink, Link } from "react-router-dom";
 import { dropDownProfile } from "~/constants/dropdown";
 import { showToastSuccess } from "~/utils/alert";
 import { productPaths, publicPaths } from "~/constants/paths";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "~/stores/slice/userSlice";
 import { mockCartItems } from "~/constants/mockCart";
 import Cart from "~/components/cart/Cart";
+import { fetchCurrentUser } from "~/stores/action/user";
 
 // Navigation links data
 const navigationLinks = [
@@ -55,16 +56,10 @@ const SearchWithSuggestions = () => {
 function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { userData, accessToken } = useSelector((state) => state.user);
   const dropdownRef = useRef(null);
   const isLoggedIn = true; // Giả lập trạng thái đăng nhập, thay thế bằng Redux hoặc Context API trong thực tế
-  const [userData] = useState({
-    userId: "user123",
-    firstName: "Nguyễn",
-    lastName: "Văn A",
-    email: "nguyenvana@gmail.com",
-    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", // Ảnh đại diện giả
-    role: { roleId: "user" }, // Vai trò 'user' hoặc '112' để test lọc dropdown
-  });
+
   const [myCart, setMyCart] = useState(mockCartItems);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -82,7 +77,7 @@ function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  console.log("userData", userData);
   // Lọc danh sách dropdown dựa trên vai trò người dùng
   const filteredDropDownProfile = dropDownProfile.filter((item) => {
     // Ẩn mục 'Admin' nếu vai trò người dùng là '112' (giống logic gốc)
@@ -125,7 +120,10 @@ function Header() {
     console.log("Clearing cart...");
     setMyCart([]);
   };
-
+  useEffect(() => {
+    console.log("access___", accessToken);
+    dispatch(fetchCurrentUser({ accessToken }));
+  }, [accessToken]);
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
