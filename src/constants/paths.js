@@ -15,6 +15,7 @@ const productPaths = {
     PRODUCT_DETAIL: '/products/:pId',
 }
 const orderPaths = {
+    CHECKOUT: '/checkout',
     ORDER: '/orders',
 }
 const adminPaths = {

@@ -1,27 +1,55 @@
 import React from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const FilterHeader = ({ totalProducts = 0 }) => {
+const FilterHeader = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categories } = useSelector((state) => state.category);
+  const { brands } = useSelector((state) => state.brand);
 
   // Lấy các filter đang active
   const getActiveFilters = () => {
     const filters = [];
 
     if (searchParams.get("categoryId")) {
+      const categoryId = searchParams.get("categoryId");
+      const category = categories.find(
+        (cat) => cat.id.toString() === categoryId
+      );
       filters.push({
         key: "categoryId",
         label: "Danh mục",
-        value: searchParams.get("categoryId"),
+        value: category ? category.name : categoryId,
       });
     }
 
-    if (searchParams.get("brandIds")) {
-      const brands = searchParams.get("brandIds").split(",");
+    if (searchParams.get("brandId")) {
+      const brandId = searchParams.get("brandId");
+      const brand = brands.find((b) => b.id.toString() === brandId);
       filters.push({
-        key: "brandIds",
+        key: "brandId",
         label: "Thương hiệu",
-        value: `${brands.length} thương hiệu`,
+        value: brand ? brand.name : `Brand ID: ${brandId}`,
+      });
+    }
+
+    if (searchParams.get("seriesId")) {
+      const seriesId = searchParams.get("seriesId");
+      const brandId = searchParams.get("brandId");
+      let seriesName = `Series ID: ${seriesId}`;
+
+      if (brandId) {
+        const brand = brands.find((b) => b.id.toString() === brandId);
+        if (brand && brand.series) {
+          const series = brand.series.find((s) => s.id.toString() === seriesId);
+          seriesName = series ? series.name : seriesName;
+        }
+      }
+
+      filters.push({
+        key: "seriesId",
+        label: "Dòng sản phẩm",
+        value: seriesName,
       });
     }
 

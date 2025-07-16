@@ -1,7 +1,6 @@
 import ImageWithFallback from "~/components/ImageWithFallback";
 
 function ColorSelector({ product, colorProduct, setColorProduct }) {
-  console.log("ColorSelector product:", product);
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="flex items-center gap-4 mb-4">

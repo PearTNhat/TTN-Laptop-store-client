@@ -19,7 +19,7 @@ const store = configureStore({
         modal: modalReducer,
         user: persistedReducer, // use persisted reducer for user
         category: categoryReducer,
-        brands: brandReducer
+        brand: brandReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

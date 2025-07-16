@@ -54,7 +54,7 @@ function App() {
             element={<DetailProduct />}
           />
           <Route path={productPaths.PRODUCTS} element={<FilterProductPage />} />
-          <Route path={orderPaths.ORDER} element={<PaymentConfirmation />} />
+          <Route path={orderPaths.CHECKOUT} element={<PaymentConfirmation />} />
         </Route>
         {/* router user */}
         <Route path="/user" element={<UserProfileLayout />}>

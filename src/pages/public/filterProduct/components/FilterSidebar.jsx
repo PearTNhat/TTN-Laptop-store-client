@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { fetchBrands } from "~/stores/action/brand";
 import Accordion from "./Accordion";
 import CategoryFilter from "./CategoryFilter";
 import BrandFilter from "./BrandFilter";
+import SeriesFilter from "./SeriesFilter";
 import PriceFilter from "./PriceFilter";
 import RamFilter from "./RamFilter";
 import SsdFilter from "./SsdFilter";
 import RamIcon from "~/assets/images/ram.png"; // Giả sử bạn có icon RAM trong assets
 const FilterSidebar = () => {
   const [, setSearchParams] = useSearchParams();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchBrands());
+  }, [dispatch]);
 
   // Hàm này sẽ xóa hết các param trên URL để reset bộ lọc
   const handleClearFilters = () => {
@@ -38,6 +46,10 @@ const FilterSidebar = () => {
 
         <Accordion title="🏷️ Thương hiệu" defaultOpen={true}>
           <BrandFilter />
+        </Accordion>
+
+        <Accordion title="📱 Dòng sản phẩm" defaultOpen={true}>
+          <SeriesFilter />
         </Accordion>
 
         <Accordion title="💰 Khoảng giá" defaultOpen={true}>

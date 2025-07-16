@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// Import mock data
-import { mockProduct } from "~/constants/mockProduct";
 
 // Import utils and components
 import Breadcrumbs from "~/components/Breadcrumbs";
@@ -15,6 +13,12 @@ import QuantitySelector from "./components/QuantitySelector";
 import ActionButtons from "./components/ActionButtons";
 import CommentContainer from "~/components/comments/MockCommentContainer";
 import { apiGetDetailProduct } from "~/apis/productApi";
+import { apiCreateCart } from "~/apis/cartApi";
+import { useSelector } from "react-redux";
+import DOMPurify from "dompurify";
+
+// ✨ Import the new ToggleIcon component
+
 const mockUserData = {
   _id: "user123",
   firstName: "Nguyen",
@@ -109,11 +113,10 @@ const fakeComments = [
 ];
 
 function DetailProduct() {
-  const { pId } = useParams(); // Bạn có thể dùng lại khi tích hợp API
+  const { pId } = useParams();
   const descRef = useRef(null);
   const navigate = useNavigate();
-  // Giả sử accessToken có tồn tại để test luồng đã đăng nhập
-  const accessToken = "fake-access-token";
+  const { accessToken } = useSelector((state) => state.user);
   const [product, setProduct] = useState({});
   const [productDetails, setProductDetails] = useState([]);
   const [colorProduct, setColorProduct] = useState({});
@@ -122,6 +125,7 @@ function DetailProduct() {
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState([]);
   const [totalRating, setTotalRating] = useState(0);
+
   const getDetailProduct = async (pId) => {
     try {
       const response = await apiGetDetailProduct({ pId });
@@ -129,7 +133,6 @@ function DetailProduct() {
         showToastError(response.message);
       } else {
         setProduct(response.data);
-        console.log("daa", response.data);
         setProductDetails(response?.data?.productDetails);
         if (response?.data?.productDetails?.length > 0) {
           setColorProduct(response.data.productDetails[0]);
@@ -139,45 +142,83 @@ function DetailProduct() {
       console.error("Error fetching products:", error);
     }
   };
-  // Sử dụng mock data thay vì gọi API
+
   useEffect(() => {
-    // Mock user data để giả lập đăng nhập
-    // Giả lập việc fetch dữ liệu
     getDetailProduct(pId);
-    // Set màu mặc định
     setComments(fakeComments);
     setTotalRating(4.5);
   }, []);
+
   useEffect(() => {
     // window.scrollTo(0, 0);
   }, [product]);
 
   const handleBuyNow = async () => {
     if (!accessToken) {
-      // Logic khi chưa đăng nhập
+      showToastError("Vui lòng đăng nhập để mua hàng.");
+      return;
     }
-    showToastSuccess("Chuyển hướng đến trang thanh toán...");
-    setTimeout(() => navigate("/user/cart"), 1500);
+    const orderData = {
+      product: colorProduct,
+      type: "buy-now",
+    };
+    navigate("/checkout", {
+      state: {
+        orderData: orderData,
+        source: "buy-now",
+      },
+    });
   };
 
   const handleAddToCart = async () => {
     if (!accessToken) {
-      // Logic khi chưa đăng nhập
+      showToastError("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+      return;
     }
-    showToastSuccess("Thêm vào giỏ hàng thành công!");
+    const res = await apiCreateCart({
+      token: accessToken,
+      productDetailId: colorProduct.productDetailId,
+      quantity,
+    });
+    if (res.code !== 200) {
+      showToastError(res.message);
+    } else {
+      showToastSuccess("Thêm vào giỏ hàng thành công!");
+    }
   };
 
   useEffect(() => {
     const element = descRef.current;
     if (element) {
-      // Kiểm tra xem nội dung có bị cắt hay không sau một khoảng trễ nhỏ để DOM render xong
       setTimeout(() => {
         const isOverflowing = element.scrollHeight > element.clientHeight;
         setIsClamped(isOverflowing);
       }, 300);
     }
   }, [product, isReadMore]);
+
+  // Function to remove specific elements if they are part of the HTML string
+  const removeSpecificElements = (htmlString) => {
+    if (!htmlString) return "";
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, "text/html");
+    // Remove the .btn-show-hide div that contains the SVG
+    const btnShowHideDiv = doc.querySelector(".btn-show-hide");
+    if (btnShowHideDiv) {
+      btnShowHideDiv.remove();
+    }
+    // You might also want to remove other elements like data-v- attributes
+    // This is a more complex task and depends on how clean you need the HTML
+    // For simplicity, let's just remove the SVG container for now.
+    return doc.body.innerHTML;
+  };
+
+  // Get the cleaned HTML before sanitization
+  const cleanedHtml = removeSpecificElements(product?.description);
+  const sanitizedDescription = DOMPurify.sanitize(cleanedHtml);
+
   console.log("colorProduct:", colorProduct);
+
   return (
     <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Breadcrumb Section */}
@@ -244,17 +285,20 @@ function DetailProduct() {
               </div>
               <div className="p-8">
                 <div className="relative">
+                  {/* The main content div */}
                   <div
                     ref={descRef}
                     className={`prose max-w-none transition-all duration-500 text-gray-700 ${
                       !isReadMore ? "line-clamp-[15]" : ""
                     }`}
                     dangerouslySetInnerHTML={{
-                      __html: Array.isArray(product?.description)
-                        ? product.description.join("")
-                        : product?.description || "",
+                      __html: sanitizedDescription, // Use the sanitized HTML
                     }}
-                  ></div>
+                  />
+                  {/* ✨ Add the ToggleIcon component and its container */}
+                  {/* You'll need to replicate the structure around the SVG */}
+                  {/* This assumes the button should always be there if isClamped or isReadMore */}
+
                   {(isClamped || isReadMore) && (
                     <div className="text-center mt-6">
                       <button
@@ -272,7 +316,7 @@ function DetailProduct() {
 
           {/* Specifications */}
           <div className="lg:col-span-1">
-            <DetailInfo configs={colorProduct?.configs} />
+            <DetailInfo configs={colorProduct?.config} />
           </div>
         </div>
         <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">
