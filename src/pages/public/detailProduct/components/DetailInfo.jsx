@@ -1,13 +1,20 @@
 import { modalActions } from "~/stores/slice/modal";
 import DetailInfoModal from "./DetailInfoModal";
 import { useDispatch } from "react-redux";
+import { capitalizeFirstCharacter } from "~/utils/helper";
 
 function DetailInfo({ configs }) {
   const dispatch = useDispatch();
-
   // Chuyển đổi object configs thành mảng và sắp xếp
-  let configsArr = Object.values(configs || {}).filter(() => Boolean); // Lọc những item có description
-  console.log("DetailInfo configsArr:", Object.values(configs || {}));
+  let configsArr = Object.entries(configs || {}).filter(
+    ([key, value]) =>
+      key !== "ramValue" &&
+      key !== "hardDriveValue" &&
+      key !== "id" &&
+      key !== "productDetailId" &&
+      Boolean(value)
+  );
+  console.log("DetailInfo configs:", configsArr);
   // Lấy ra một số thông tin ngắn gọn để hiển thị
   const shortInfo = configsArr.slice(0, 6);
 
@@ -42,7 +49,7 @@ function DetailInfo({ configs }) {
                   ? "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100"
                   : "bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100"
               }`}
-              key={config.name}
+              key={config[0]}
             >
               <span className="font-semibold text-gray-700 flex-shrink-0 flex items-center gap-2">
                 <span
@@ -50,11 +57,11 @@ function DetailInfo({ configs }) {
                     index % 2 === 0 ? "bg-blue-500" : "bg-purple-500"
                   }`}
                 ></span>
-                {config.name}
+                {capitalizeFirstCharacter(config[0])}
               </span>
               <span
                 className="text-right text-gray-800 font-medium group-hover:text-gray-900"
-                dangerouslySetInnerHTML={{ __html: config.description }}
+                dangerouslySetInnerHTML={{ __html: config[1] }}
               ></span>
             </div>
           ))}

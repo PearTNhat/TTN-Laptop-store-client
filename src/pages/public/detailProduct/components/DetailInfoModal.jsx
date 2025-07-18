@@ -1,6 +1,7 @@
 import { IoClose } from "react-icons/io5";
 import { useDispatch } from "react-redux";
 import { modalActions } from "~/stores/slice/modal";
+import { capitalizeFirstCharacter } from "~/utils/helper";
 
 function DetailInfoModal({ configs }) {
   const dispatch = useDispatch();
@@ -49,7 +50,7 @@ function DetailInfoModal({ configs }) {
                   ? "bg-gradient-to-r from-purple-50 to-pink-50 border-purple-500"
                   : "bg-gradient-to-r from-green-50 to-emerald-50 border-green-500"
               }`}
-              key={config.name}
+              key={config[0]}
             >
               <div className="flex items-center gap-3 w-1/3">
                 <span
@@ -62,12 +63,12 @@ function DetailInfoModal({ configs }) {
                   }`}
                 ></span>
                 <span className="font-bold text-gray-800 group-hover:text-gray-900">
-                  {config.name}
+                  {capitalizeFirstCharacter(config[0])}
                 </span>
               </div>
               <span
                 className="w-2/3 text-gray-700 font-medium group-hover:text-gray-900"
-                dangerouslySetInnerHTML={{ __html: config.description }}
+                dangerouslySetInnerHTML={{ __html: config[1] }}
               ></span>
             </div>
           ))}

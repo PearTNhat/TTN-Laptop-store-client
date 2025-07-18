@@ -78,7 +78,6 @@ function Header() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  console.log("userData", userData);
   // Lọc danh sách dropdown dựa trên vai trò người dùng
   const filteredDropDownProfile = dropDownProfile.filter((item) => {
     // Ẩn mục 'Admin' nếu vai trò người dùng là '112' (giống logic gốc)

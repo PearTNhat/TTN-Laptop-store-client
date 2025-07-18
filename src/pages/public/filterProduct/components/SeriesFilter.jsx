@@ -1,47 +1,52 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import Select from "react-select";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchBrands } from "~/stores/action/brand";
+import { useSelector } from "react-redux";
 
-const BrandFilter = () => {
-  const dispatch = useDispatch();
+const SeriesFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { brands, isLoading: loading } = useSelector((state) => state.brand);
+  const { brands } = useSelector((state) => state.brand);
 
   const selectedBrandId = searchParams.get("brandId");
+  const selectedSeriesId = searchParams.get("seriesId");
 
-  useEffect(() => {
-    if (brands.length === 0) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length]);
-
-  const handleSelectBrand = (selectedOption) => {
+  const handleSelectSeries = (selectedOption) => {
     const newSearchParams = new URLSearchParams(searchParams);
 
     if (selectedOption && selectedOption.value) {
-      newSearchParams.set("brandId", selectedOption.value);
+      newSearchParams.set("seriesId", selectedOption.value);
     } else {
-      newSearchParams.delete("brandId");
+      newSearchParams.delete("seriesId");
     }
 
-    // Xóa series khi thay đổi brand
-    newSearchParams.delete("seriesId");
     newSearchParams.set("page", "0");
     setSearchParams(newSearchParams);
   };
 
-  // Tạo options cho react-select
-  const brandOptions = brands.map((brand) => ({
-    value: brand.id.toString(),
-    label: brand.name,
-    image: brand.image,
+  // Tìm brand đã chọn để lấy danh sách series
+  const selectedBrand = brands.find(
+    (brand) => brand.id.toString() === selectedBrandId
+  );
+
+  // Nếu chưa chọn brand hoặc brand không có series thì không hiển thị gì
+  if (
+    !selectedBrandId ||
+    !selectedBrand ||
+    !selectedBrand.series ||
+    selectedBrand.series.length === 0
+  ) {
+    return null;
+  }
+
+  // Tạo options cho react-select từ series của brand đã chọn
+  const seriesOptions = selectedBrand.series.map((series) => ({
+    value: series.id.toString(),
+    label: series.name,
   }));
 
   // Tìm option đang được chọn
   const selectedOption =
-    brandOptions.find((option) => option.value === selectedBrandId) || null;
+    seriesOptions.find((option) => option.value === selectedSeriesId) || null;
 
   // Custom styles cho react-select
   const customStyles = {
@@ -71,23 +76,10 @@ const BrandFilter = () => {
         backgroundColor: state.isSelected ? "#3b82f6" : "#f3f4f6",
       },
     }),
-    multiValue: (provided) => ({
+    singleValue: (provided) => ({
       ...provided,
-      backgroundColor: "#eff6ff",
-      borderRadius: "8px",
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: "#1e40af",
+      color: "#374151",
       fontWeight: "500",
-    }),
-    multiValueRemove: (provided) => ({
-      ...provided,
-      color: "#1e40af",
-      "&:hover": {
-        backgroundColor: "#dc2626",
-        color: "white",
-      },
     }),
     placeholder: (provided) => ({
       ...provided,
@@ -108,42 +100,31 @@ const BrandFilter = () => {
     },
   };
 
-  // Custom component để hiển thị option với logo
-  const formatOptionLabel = ({ label, image }) => (
-    <div className="flex items-center space-x-2">
-      {image && (
-        <img src={image} alt={label} className="w-6 h-6 object-contain" />
-      )}
-      <span>{label}</span>
+  // Custom component để hiển thị option với description
+  const formatOptionLabel = ({ label }) => (
+    <div className="flex flex-col">
+      <span className="font-medium">{label}</span>
     </div>
   );
-
-  if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-12 bg-gray-200 rounded-xl"></div>
-      </div>
-    );
-  }
 
   return (
     <div>
       <Select
         value={selectedOption}
-        onChange={handleSelectBrand}
-        options={brandOptions}
+        onChange={handleSelectSeries}
+        options={seriesOptions}
         styles={customStyles}
         formatOptionLabel={formatOptionLabel}
-        placeholder="Chọn thương hiệu..."
+        placeholder="Chọn dòng sản phẩm..."
         isClearable={true}
         isSearchable={true}
         className="text-sm"
         classNamePrefix="react-select"
-        noOptionsMessage={() => "Không tìm thấy thương hiệu"}
+        noOptionsMessage={() => "Không tìm thấy dòng sản phẩm"}
         menuPortalTarget={document.body}
       />
     </div>
   );
 };
 
-export default BrandFilter;
+export default SeriesFilter;

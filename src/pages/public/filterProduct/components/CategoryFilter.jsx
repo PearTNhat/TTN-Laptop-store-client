@@ -17,19 +17,17 @@ const CategoryFilter = () => {
     } else {
       newSearchParams.delete("categoryId");
     }
-
     newSearchParams.set("page", "0");
     setSearchParams(newSearchParams);
   };
   useEffect(() => {
     const categoryOptions = categories.map((category) => ({
-      value: category.id,
+      value: category.id.toString(),
       label: category.name,
     }));
     setCategoryOptions(categoryOptions);
   }, [categories]);
   // Tạo options cho react-select
-  console.log("Category Options:", categoryOptions);
   // Tìm option đang được chọn
   const selectedOption =
     categoryOptions.find((option) => option.value === selectedCategoryId) ||
@@ -85,7 +83,7 @@ const CategoryFilter = () => {
       };
     },
   };
-
+  console.log("Category Options:", selectedOption);
   // Custom component để hiển thị option với icon
   const formatOptionLabel = ({ label }) => (
     <div className="flex items-center space-x-2">

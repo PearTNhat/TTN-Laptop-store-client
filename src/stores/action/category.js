@@ -1,11 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit"
-import { apiGetBrands } from "~/apis/brandApi"
+import { apiGetCategories } from "~/apis/categoryApi"
 
 export const fetchCategories = createAsyncThunk(
     'categoy/getCategories',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await apiGetBrands()
+            const response = await apiGetCategories()
             if (response?.code !== 200) {
                 throw new Error(response?.message || 'Failed to fetch brands')
             }
