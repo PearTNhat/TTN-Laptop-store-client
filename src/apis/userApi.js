@@ -1,10 +1,10 @@
 import { http } from "~/utils/http";
 
-const apiFetchMyInfo = async ({ token }) => {
+const apiFetchMyInfo = async ({ accessToken }) => {
     try {
         const config = {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${accessToken}`,
             },
         }
         const { data } = await http.get("users/fetchInfo", config);

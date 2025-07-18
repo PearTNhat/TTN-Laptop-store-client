@@ -27,16 +27,16 @@ const CartItem = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={(e) => onSelectItem(item.id, e.target.checked)}
+          onChange={(e) => onSelectItem(item.productId, e.target.checked)}
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-offset-2 mt-1"
         />
 
         {/* Product Image */}
         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
-          {item.image ? (
+          {item.thumbnail ? (
             <img
-              src={item.image}
-              alt={item.name}
+              src={item.itemImage}
+              alt={item.title}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
             />
           ) : (
@@ -49,36 +49,55 @@ const CartItem = ({
         {/* Product Details */}
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-medium text-gray-800 truncate mb-1">
-            {item.name}
+            {item.title}
           </h4>
 
           {/* Color Display */}
-          {item.color && (
+          {item?.color?.name && (
             <div className="flex items-center space-x-2 mb-2">
               <span className="text-xs text-gray-500">Màu:</span>
               <div className="flex items-center space-x-1">
                 <div
                   className="w-4 h-4 rounded-full border-2 border-white shadow-sm ring-1 ring-gray-200"
                   style={{
-                    backgroundColor: item.colorCode || "#gray",
+                    backgroundColor: item.color.hex || "#gray",
                   }}
                 ></div>
                 <span className="text-xs font-medium text-gray-600">
-                  {item.color}
+                  {item.color.name}
                 </span>
               </div>
             </div>
           )}
 
-          <p className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            {formatPrice(item.price)}
-          </p>
+          <div className="mb-2">
+            {item.originalPrice &&
+            item.discountPrice &&
+            item.originalPrice > item.discountPrice ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-400 line-through">
+                  {formatPrice(item.originalPrice)}
+                </span>
+                <span className="text-sm font-semibold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                  {formatPrice(item.discountPrice)}
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {formatPrice(
+                  item.discountPrice || item.originalPrice || item.price
+                )}
+              </p>
+            )}
+          </div>
 
           {/* Quantity Controls */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 bg-gray-50 rounded-full p-1">
               <button
-                onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                onClick={() =>
+                  onUpdateQuantity(item.productId, item.quantity - 1)
+                }
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all duration-200 disabled:opacity-50"
                 disabled={item.quantity <= 1}
               >
@@ -88,7 +107,9 @@ const CartItem = ({
                 {item.quantity}
               </span>
               <button
-                onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                onClick={() =>
+                  onUpdateQuantity(item.productId || item.id, item.quantity + 1)
+                }
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-green-50 hover:border-green-300 transition-all duration-200"
               >
                 <Plus
@@ -99,7 +120,7 @@ const CartItem = ({
             </div>
 
             <button
-              onClick={() => onRemoveItem(item.id)}
+              onClick={() => onRemoveItem(item.productId || item.id)}
               className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-200 hover:scale-110"
             >
               <Trash2 size={14} />
@@ -109,7 +130,11 @@ const CartItem = ({
           {/* Item Total */}
           <div className="mt-2 text-right">
             <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Tổng: {formatPrice(item.price * item.quantity)}
+              Tổng:{" "}
+              {formatPrice(
+                (item.discountPrice || item.originalPrice || item.price) *
+                  item.quantity
+              )}
             </span>
           </div>
         </div>

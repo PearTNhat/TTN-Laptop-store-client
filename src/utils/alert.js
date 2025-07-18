@@ -19,16 +19,22 @@ const confirmAlert = ({ message, title, confirmText }) => {
 }
 const showAlertSuccess = (message) => {
     Swal.fire({
-        title: 'Success',
+        title: 'Thành công',
         text: message,
         icon: 'success'
     })
 }
-
+const showAlertInfo = (message) => {
+    Swal.fire({
+        title: 'Thông tin',
+        text: message,
+        icon: 'info'
+    })
+}
 
 const showAlertError = (message) => {
     Swal.fire({
-        title: 'Error',
+        title: 'Lỗi',
         text: message,
         icon: 'error'
     })
@@ -64,6 +70,7 @@ const showToastError = (message) => {
 }
 
 export {
+    showAlertInfo,
     showToastSuccess,
     showToastError,
     showToastWarning,

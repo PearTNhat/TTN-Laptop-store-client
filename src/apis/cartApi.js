@@ -1,10 +1,28 @@
 import { http } from "~/utils/http";
 
-const apiCreateCart = async ({ token, productDetailId, quantity }) => {
+const apiGetMyCart = async ({ accessToken }) => {
     try {
         const config = {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${accessToken}`,
+            },
+
+        }
+        console.log("Fetching cart with access token:", accessToken);
+        const { data } = await http.get("carts", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiCreateCart = async ({ accessToken, productDetailId, quantity }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
             },
 
         }
@@ -21,15 +39,15 @@ const apiCreateCart = async ({ token, productDetailId, quantity }) => {
         throw new Error(error.message);
     }
 };
-const apiUpdateCart = async ({ token, body }) => {
+const apiUpdateCart = async ({ accessToken, body }) => {
     try {
         const config = {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${accessToken}`,
             },
 
         }
-        const { data } = await http.post("carts/update", body, config);
+        const { data } = await http.put("carts/update", body, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -38,11 +56,11 @@ const apiUpdateCart = async ({ token, body }) => {
         throw new Error(error.message);
     }
 };
-const apiDeleteCart = async ({ token, pId }) => {
+const apiDeleteCart = async ({ accessToken, pId }) => {
     try {
         const config = {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${accessToken}`,
             },
 
         }
@@ -55,4 +73,4 @@ const apiDeleteCart = async ({ token, pId }) => {
         throw new Error(error.message);
     }
 };
-export { apiCreateCart, apiUpdateCart, apiDeleteCart };
+export { apiGetMyCart, apiCreateCart, apiUpdateCart, apiDeleteCart };
