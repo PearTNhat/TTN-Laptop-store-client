@@ -175,9 +175,10 @@ function DetailProduct() {
       showToastError("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
       return;
     }
+    console.log(colorProduct);
     const res = await apiCreateCart({
-      token: accessToken,
-      productDetailId: colorProduct.productDetailId,
+      accessToken,
+      productDetailId: colorProduct.productId,
       quantity,
     });
     if (res.code !== 200) {

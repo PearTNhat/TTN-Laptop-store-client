@@ -12,7 +12,7 @@ import { fetchCategories } from "~/stores/action/category";
 import { fetchCart } from "~/stores/action/cart";
 import { cartActions } from "~/stores/slice/cartSlice";
 import { mockCartItems } from "~/constants/mockCart";
-import { apiUpdateCart } from "~/apis/cartApi";
+import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
 
 // Navigation links data
 const navigationLinks = [
@@ -106,14 +106,18 @@ function Header() {
   const updateCartItemQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
     try {
-      const response = await apiUpdateCart({
+      const body = {
         productDetailId: itemId,
         quantity: newQuantity,
+      };
+      const response = await apiUpdateCart({
+        accessToken,
+        body,
       });
       if (response.code !== 200) {
         throw new Error(response.message || "Failed to update cart item");
       }
-      console.log("data", response);
+      showToastSuccess("Cập nhật giỏ hàng thành công");
       dispatch(
         cartActions.updateCartQuantity({
           id: itemId, // Thay đổi từ productDetailId thành id
@@ -125,20 +129,30 @@ function Header() {
     }
   };
 
-  const removeCartItem = (itemId) => {
-    dispatch(cartActions.removeFromCart(itemId));
+  const removeCartItem = async (itemId) => {
+    try {
+      const response = await apiDeleteCart({
+        accessToken,
+        pId: itemId,
+      });
+      if (response.code !== 200) {
+        throw new Error(response.message || "Xóa giỏ hàng thất bại");
+      }
+      showToastSuccess("Xóa giỏ hàng thành công");
+      dispatch(cartActions.removeFromCart(itemId));
+    } catch (error) {
+      showToastError(error.message || "Xóa giỏ hàng thất bại");
+    }
   };
 
   const clearCart = () => {
     dispatch(cartActions.clearCart());
   };
   useEffect(() => {
-    console.log("__", accessToken);
     dispatch(fetchCurrentUser({ accessToken }));
     dispatch(fetchCategories());
     dispatch(fetchCart({ accessToken }));
   }, [accessToken, dispatch]);
-  console.log("My Cart:", myCart);
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
