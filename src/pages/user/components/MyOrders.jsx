@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Dialog } from "@headlessui/react";
+import RatingBox from "./RatingBox";
 
 const MyOrders = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -132,7 +133,7 @@ const MyOrders = () => {
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl max-w-2xl w-full">
+          <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <Dialog.Title className="text-lg font-bold mb-4 text-gray-800">
               📋 Đơn hàng {selectedOrder?.id}
             </Dialog.Title>
@@ -148,15 +149,23 @@ const MyOrders = () => {
             {/* Danh sách sản phẩm */}
             <div className="space-y-4">
               {selectedOrder?.items.map((item, idx) => (
-                <div key={idx} className="border rounded-lg p-4 flex gap-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{item.name}</p>
-                    <p className="text-sm text-gray-500">Giá: {item.price} | SL: {item.quantity}</p>
+                <div key={idx} className="border rounded-lg p-4 flex flex-col gap-3">
+                  <div className="flex gap-4 items-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg shadow-inner" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900">{item.name}</p>
+                      <p className="text-sm text-gray-500">Giá: {item.price} | SL: {item.quantity}</p>
+                    </div>
+                    <div className="text-right font-medium text-blue-600">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })
+                        .format(parseInt(item.price.replace(/\./g, "")) * item.quantity)
+                        .replace("₫", "đ")}
+                    </div>
                   </div>
-                  <div className="text-right font-medium text-gray-800">
-                    {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(parseInt(item.price.replace(/\./g, "")) * item.quantity).replace("₫", "đ")}
-                  </div>
+                  <RatingBox />
                 </div>
               ))}
             </div>

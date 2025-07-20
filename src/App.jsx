@@ -17,6 +17,7 @@ import ProfileInfo from "./pages/user/components/ProfileInfo";
 import UserProfileLayout from "./pages/user/UserProfileLayout";
 import {
   DashBoard,
+  UsersManagement,
   Brand,
   Series,
   Products,
@@ -45,11 +46,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
-          <Route
-            path={publicPaths.RESET_PASSWORD}
-            element={<ResetPassword />}
-          />
-          <Route
+          <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
+           <Route
             path={productPaths.PRODUCT_DETAIL}
             element={<DetailProduct />}
           />
@@ -67,6 +65,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />
           <Route path={adminPaths.USERS} element={<UserManagement />} />
+          <Route path={adminPaths.USERSMANAGEMENT} element={<UsersManagement />} />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />

@@ -5,7 +5,14 @@ import Voucher from "./components/Voucher";
 import ChangePassword from "./components/ChangePassword";
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("activeTab") || "info";
+  });
+
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+    localStorage.setItem("activeTab", tab); 
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -62,10 +69,10 @@ const Profile = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            <TabButton active={activeTab === "info"} onClick={() => setActiveTab("info")}>👤 Thông tin</TabButton>
-            <TabButton active={activeTab === "orders"} onClick={() => setActiveTab("orders")}>📦 Đơn hàng</TabButton>
-            <TabButton active={activeTab === "vouchers"} onClick={() => setActiveTab("vouchers")}>🎟 Voucher</TabButton>
-            <TabButton active={activeTab === "password"} onClick={() => setActiveTab("password")}>🔒 Đổi mật khẩu</TabButton>
+            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
+            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
+            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
+            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
           </nav>
 
           {/* Section Title */}
