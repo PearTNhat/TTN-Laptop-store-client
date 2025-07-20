@@ -1,6 +1,7 @@
 import React from "react";
 import { Plus, Minus, Trash2, Laptop } from "lucide-react";
 import { formatPrice } from "~/utils/helper";
+import { Link } from "react-router-dom";
 
 const CartItem = ({
   item,
@@ -34,11 +35,16 @@ const CartItem = ({
         {/* Product Image */}
         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
           {item.thumbnail ? (
-            <img
-              src={item.itemImage}
-              alt={item.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-            />
+            <Link
+              to={`/products/${item.productId}`}
+              className="block w-full h-full"
+            >
+              <img
+                src={item.itemImage}
+                alt={item.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+              />
+            </Link>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-slate-200 via-gray-300 to-slate-400 flex items-center justify-center">
               <Laptop className="w-6 h-6 text-gray-500" />

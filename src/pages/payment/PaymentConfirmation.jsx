@@ -54,18 +54,22 @@ export default function PaymentConfirmation() {
   };
   useEffect(() => {
     const { orderData: receivedOrderData, source } = location.state || {};
-
+    console.log("Received order data:", receivedOrderData, "Source:", source);
     if (receivedOrderData && source === "buy-now") {
       // Chuyển đổi dữ liệu từ buy-now thành format order
+      const product = receivedOrderData.product;
       const formattedOrder = {
         items: [
           {
-            id: receivedOrderData.productDetailId,
-            imageUrl: receivedOrderData.imageUrl,
-            productName: receivedOrderData.title,
-            quantity: receivedOrderData.quantity,
-            discountPrice: receivedOrderData.discountPrice,
-            originalPrice: receivedOrderData.discountPrice,
+            id: product.id,
+            imageUrl: product.images[0],
+            productName: product.title,
+            quantity: product.quantity,
+            color: product.color,
+            ram: product.config.ramValue,
+            hardDrive: product.config.hardDriveValue,
+            discountPrice: product.discountPrice,
+            originalPrice: product.discountPrice,
           },
         ],
       };

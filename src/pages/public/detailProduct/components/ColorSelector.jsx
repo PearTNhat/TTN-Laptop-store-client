@@ -18,7 +18,6 @@ function ColorSelector({ product, colorProduct, setColorProduct }) {
       <div className="flex flex-wrap gap-3">
         {product?.map((item) => {
           const config = item.config;
-          console.log("config:", config, "selectedProduct:", colorProduct);
           return (
             <div
               key={item.id}

@@ -3,18 +3,10 @@ import VoteBar from "./VoteBar";
 import Comment from "./Comment";
 import YourRating from "./YourRating";
 import Button from "../Button";
-
+//https://randomuser.me/api/portraits/men/1.jpg
 // Mock CommentContainer cho demo
 function MockCommentContainer({ comments, totalRating }) {
   const [affectedComment, setAffectedComment] = useState(null);
-
-  // Mock user data
-  const mockUserData = {
-    _id: "user123",
-    firstName: "Nguyen",
-    lastName: "Van A",
-    avatar: { url: "https://randomuser.me/api/portraits/men/1.jpg" },
-  };
 
   // Mock handlers
   const handleSubmitComment = ({ rating, content, parentId, replyOnUser }) => {
@@ -35,17 +27,13 @@ function MockCommentContainer({ comments, totalRating }) {
     console.log("Like comment:", { commentId });
   };
 
-  const handleClickShowModalRating = () => {
-    console.log("Show rating modal");
-  };
-
   const handleShowModalUpdateRating = () => {
     console.log("Show update rating modal");
   };
 
   // Tìm comment của user hiện tại
   const rated = comments?.find(
-    (comment) => comment.user._id === mockUserData._id
+    (comment) => comment._id === comments._id && comment?.rating > 0
   );
 
   return (
@@ -56,24 +44,18 @@ function MockCommentContainer({ comments, totalRating }) {
       </div>
 
       {/* Rating Section */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          ⭐ Đánh giá của bạn
-        </h3>
-        {rated ? (
+      {/* <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        ⭐ Đánh giá của bạn
+      </h3> */}
+      {rated && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
           <YourRating
             comment={rated}
             handleShowModalUpdateRating={handleShowModalUpdateRating}
             handleDeleteComment={handleDeleteComment}
           />
-        ) : (
-          <div className="text-center">
-            <Button onClick={handleClickShowModalRating}>
-              ⭐ Đánh giá ngay
-            </Button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Comments List */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -88,7 +70,7 @@ function MockCommentContainer({ comments, totalRating }) {
               className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0"
             >
               <Comment
-                userId={mockUserData._id}
+                userId={comment.userId}
                 comment={comment}
                 isAdmin={false}
                 affectedComment={affectedComment}
@@ -97,7 +79,7 @@ function MockCommentContainer({ comments, totalRating }) {
                 handleUpdateComment={handleUpdateComment}
                 handleDeleteComment={handleDeleteComment}
                 handleLikeComment={handleLikeComment}
-                replies={comment.replies}
+                replies={comment.childReviewResponses || []}
               />
             </div>
           ))}
