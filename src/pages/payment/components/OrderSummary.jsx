@@ -4,7 +4,7 @@ import { FaShoppingCart } from "react-icons/fa";
 const formatNumber = (num) => (num || 0).toLocaleString("vi-VN");
 
 const OrderSummary = ({ order, discountAmount }) => {
-  const finalTotal = order.totalAmount - discountAmount;
+  const finalTotal = order?.totalAmount || 10 - discountAmount;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -60,7 +60,7 @@ const OrderSummary = ({ order, discountAmount }) => {
           <div className="flex justify-between text-gray-700">
             <span>Tổng tiền hàng:</span>
             <span className="font-semibold">
-              {formatNumber(order.totalAmount)} đ
+              {formatNumber(order?.totalAmount)} đ
             </span>
           </div>
 

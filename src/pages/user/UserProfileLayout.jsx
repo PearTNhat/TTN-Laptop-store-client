@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import ProfileInfo from "./components/ProfileInfo";
 import MyOrders from "./components/MyOrders";
-import Voucher from "./components/Voucher";
+import VoucherList from "./components/VoucherList";
+
 import ChangePassword from "./components/ChangePassword";
 
 const Profile = () => {
@@ -11,26 +12,36 @@ const Profile = () => {
 
   const changeTab = (tab) => {
     setActiveTab(tab);
-    localStorage.setItem("activeTab", tab); 
+    localStorage.setItem("activeTab", tab);
   };
 
   const renderContent = () => {
     switch (activeTab) {
-      case "info": return <ProfileInfo />;
-      case "orders": return <MyOrders />;
-      case "vouchers": return <Voucher />;
-      case "password": return <ChangePassword />;
-      default: return null;
+      case "info":
+        return <ProfileInfo />;
+      case "orders":
+        return <MyOrders />;
+      case "vouchers":
+        return <VoucherList />;
+      case "password":
+        return <ChangePassword />;
+      default:
+        return null;
     }
   };
 
   const getTabLabel = () => {
     switch (activeTab) {
-      case "info": return "Thông tin cá nhân";
-      case "orders": return "Đơn hàng của tôi";
-      case "vouchers": return "Kho voucher";
-      case "password": return "Đổi mật khẩu";
-      default: return "";
+      case "info":
+        return "Thông tin cá nhân";
+      case "orders":
+        return "Đơn hàng của tôi";
+      case "vouchers":
+        return "Kho voucher";
+      case "password":
+        return "Đổi mật khẩu";
+      default:
+        return "";
     }
   };
 
@@ -48,8 +59,12 @@ const Profile = () => {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">Nguyễn Văn A</h1>
-              <p className="text-sm text-sky-600 dark:text-gray-400">Thành viên từ 2025 • TP.HCM</p>
+              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">
+                Nguyễn Văn A
+              </h1>
+              <p className="text-sm text-sky-600 dark:text-gray-400">
+                Thành viên từ 2025 • TP.HCM
+              </p>
             </div>
           </div>
 
@@ -62,21 +77,41 @@ const Profile = () => {
         </div>
       </header>
 
-
-
       {/* Body */}
       <div className="max-w-5xl mx-auto px-6 mt-6">
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
-            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
-            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
-            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
+            <TabButton
+              active={activeTab === "info"}
+              onClick={() => changeTab("info")}
+            >
+              👤 Thông tin
+            </TabButton>
+            <TabButton
+              active={activeTab === "orders"}
+              onClick={() => changeTab("orders")}
+            >
+              📦 Đơn hàng
+            </TabButton>
+            <TabButton
+              active={activeTab === "vouchers"}
+              onClick={() => changeTab("vouchers")}
+            >
+              🎟 Voucher
+            </TabButton>
+            <TabButton
+              active={activeTab === "password"}
+              onClick={() => changeTab("password")}
+            >
+              🔒 Đổi mật khẩu
+            </TabButton>
           </nav>
 
           {/* Section Title */}
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">{getTabLabel()}</h2>
+          <h2 className="text-lg font-semibold text-indigo-700 mb-4">
+            {getTabLabel()}
+          </h2>
 
           {/* Tab Content */}
           <div className="animate-fade-in">{renderContent()}</div>
@@ -91,9 +126,11 @@ const TabButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={`px-4 py-2 rounded-full text-sm font-medium transition-all 
-      ${active
-        ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
-        : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
+      ${
+        active
+          ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
+          : "bg-sky-100 text-sky-700 hover:bg-sky-200"
+      }`}
   >
     {children}
   </button>

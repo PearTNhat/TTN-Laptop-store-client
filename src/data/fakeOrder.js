@@ -22,33 +22,6 @@ export const fakeUserData = {
         },
     ],
 };
-
-export const fakeOrder = {
-    totalAmount: 1150000,
-    items: [
-        {
-            productDetailId: 'pd1',
-            imageUrl: 'https://via.placeholder.com/150/0000FF/FFFFFF?text=Product+A',
-            productName: 'Áo Sơ Mi Cao Cấp',
-            quantity: 1,
-            colorName: 'Trắng',
-            sizeName: 'L',
-            discountPrice: 500000,
-            originalPrice: 600000,
-        },
-        {
-            productDetailId: 'pd2',
-            imageUrl: 'https://via.placeholder.com/150/FF0000/FFFFFF?text=Product+B',
-            productName: 'Quần Jeans Rách Gối',
-            quantity: 1,
-            colorName: 'Xanh Đen',
-            sizeName: '32',
-            discountPrice: 650000,
-            originalPrice: 700000,
-        },
-    ],
-};
-
 export const fakeVouchers = [
     {
         userPromotionId: 'user_promo_1',

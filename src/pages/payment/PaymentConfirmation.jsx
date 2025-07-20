@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import ShippingAddress from "./components/ShippingAddress";
 import CustomerInfo from "./components/CustomerInfo";
 import OrderSummary from "./components/OrderSummary";
-import DiscountSection from "./components/DiscountSction";
+import DiscountSection from "./components/DiscountSection";
 import PaymentMethod from "./components/PaymentMethod";
 
 // Import dữ liệu giả
-import { fakeUserData, fakeOrder } from "~/data/fakeOrder";
+import { fakeUserData } from "~/data/fakeOrder";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function PaymentConfirmation() {
@@ -36,11 +36,11 @@ export default function PaymentConfirmation() {
     const finalOrderData = {
       shippingAddress: selectedShippingInfo,
       customerInfo: userInfo,
-      order: orderData || fakeOrder,
+      order: orderData,
       paymentMethod: selectedPayment,
       coupon: selectedCoupon,
       discountAmount: discountAmount,
-      finalTotal: (orderData || fakeOrder).totalAmount - discountAmount,
+      finalTotal: orderData?.totalAmount - discountAmount,
     };
 
     console.log("--- SUBMITTING ORDER ---", finalOrderData);
@@ -77,9 +77,6 @@ export default function PaymentConfirmation() {
     } else if (receivedOrderData && source === "cart-checkout") {
       // Dữ liệu từ cart đã được format sẵn
       setOrderData(receivedOrderData);
-    } else if (!receivedOrderData) {
-      // Nếu không có dữ liệu, sử dụng fake data hoặc redirect về trang chủ
-      setOrderData(fakeOrder);
     }
   }, [location.state]);
   return (
@@ -107,13 +104,10 @@ export default function PaymentConfirmation() {
             selectedShippingInfo={selectedShippingInfo}
           />
 
-          <OrderSummary
-            order={orderData || fakeOrder}
-            discountAmount={discountAmount}
-          />
+          <OrderSummary order={orderData} discountAmount={discountAmount} />
 
           <DiscountSection
-            orderTotal={(orderData || fakeOrder).totalAmount}
+            orderTotal={10}
             selectedCoupon={selectedCoupon}
             setSelectdCoupon={setSelectdCoupon}
             setDiscountAmount={setDiscountAmount}
