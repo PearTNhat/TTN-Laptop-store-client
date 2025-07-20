@@ -8,7 +8,7 @@ const apiGetMyAddresss = async ({ accessToken }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         }
-        const { data } = await http.get("addresses", config);
+        const { data } = await http.get("/addresses", config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -17,36 +17,36 @@ const apiGetMyAddresss = async ({ accessToken }) => {
         throw new Error(error.message);
     }
 };
-// const apiUpdateAddresss = async ({ accessToken, id, address }) => {
-//     try {
-//         const config = {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//             },
-//         }
-//         const { data } = await http.put("addresses/" + id, { address }, config);
-//         return data;
-//     } catch (error) {
-//         if (error.response && error.response.data) {
-//             return error.response.data;
-//         }
-//         throw new Error(error.message);
-//     }
-// };
-// const apiUpdateAddresss = async ({ accessToken, id, address }) => {
-//     try {
-//         const config = {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//             },
-//         }
-//         const { data } = await http.get("addresses/" + id, { address }, config);
-//         return data;
-//     } catch (error) {
-//         if (error.response && error.response.data) {
-//             return error.response.data;
-//         }
-//         throw new Error(error.message);
-//     }
-// };
-export { apiGetMyAddresss, };
+const apiUpdateAddress = async ({ accessToken, id, address }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.put("/addresses/" + id, { address }, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiDeleteAddress = async ({ accessToken, id, address }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.delete("/addresses/" + id, { address }, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+export { apiGetMyAddresss, apiUpdateAddress, apiDeleteAddress };

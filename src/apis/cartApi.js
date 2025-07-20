@@ -8,7 +8,6 @@ const apiGetMyCart = async ({ accessToken }) => {
             },
 
         }
-        console.log("Fetching cart with access token:", accessToken);
         const { data } = await http.get("carts", config);
         return data;
     } catch (error) {

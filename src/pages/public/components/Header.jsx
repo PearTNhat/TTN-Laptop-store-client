@@ -13,6 +13,7 @@ import { fetchCart } from "~/stores/action/cart";
 import { cartActions } from "~/stores/slice/cartSlice";
 import { mockCartItems } from "~/constants/mockCart";
 import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
+import { fetchMyAddress } from "~/stores/action/address";
 
 // Navigation links data
 const navigationLinks = [
@@ -152,6 +153,7 @@ function Header() {
     dispatch(fetchCurrentUser({ accessToken }));
     dispatch(fetchCategories());
     dispatch(fetchCart({ accessToken }));
+    dispatch(fetchMyAddress({ accessToken }));
   }, [accessToken, dispatch]);
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">
