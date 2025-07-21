@@ -1,25 +1,149 @@
-import React, { useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { PencilSquareIcon, UserIcon, EnvelopeIcon, PhoneIcon, CalendarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from "react";
+import { Dialog } from "@headlessui/react";
+import {
+  PencilSquareIcon,
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  CalendarIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
+import { apiFetchMyInfo, apiUpdateUserInfo } from "~/apis/userApi";
+import { showToastSuccess, showToastError } from "~/utils/alert";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { userActions } from "~/stores/slice/userSlice";
 
 const ProfileInfo = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@gmail.com',
-    phone: '0123 456 789',
-    dob: '01/01/2000',
-    address: '123 Đường ABC, Quận 1, TP.HCM',
+    id: "",
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    dob: "",
+    gender: "",
+    address: { address: "" },
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Không tìm thấy token, vui lòng đăng nhập lại.");
+        }
+        const response = await apiFetchMyInfo({ token });
+        if (response.code === 200 && response.data) {
+          const data = response.data;
+          setProfile({
+            id: data.id,
+            fullName: `${data.lastName || ""} ${data.firstName || ""}`.trim(),
+            email: data.email || "",
+            phoneNumber: data.phoneNumber || "",
+            dob: data.dob || "",
+            gender: data.gender || "",
+            address:
+              Array.isArray(data.address) && data.address.length > 0
+                ? data.address[0]
+                : { address: "" }, 
+          });
+        } else {
+          throw new Error(response.message || "Lỗi khi lấy thông tin cá nhân.");
+        }
+      } catch (error) {
+        console.error("Fetch profile failed:", error);
+        showToastError(error.message || "Không thể tải thông tin cá nhân.");
+        navigate("/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [navigate]);
 
   const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "address") {
+      setProfile({ ...profile, address: { ...profile.address, address: value } });
+    } else {
+      setProfile({ ...profile, [name]: value });
+    }
   };
 
-  const handleSave = () => {
-    // Xử lý lưu thông tin ở đây (gửi API, v.v.)
-    setIsOpen(false);
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Không tìm thấy token, vui lòng đăng nhập lại.");
+      }
+      let dobFormatted = null;
+      if (profile.dob) {
+        const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const match = profile.dob.match(regex);
+        if (!match) {
+          throw new Error("Ngày sinh không đúng định dạng dd/MM/yyyy");
+        }
+        const [_, dd, mm, yyyy] = match;
+        const dateObj = new Date(`${yyyy}-${mm}-${dd}`);
+        if (
+          dateObj.getFullYear() !== parseInt(yyyy) ||
+          dateObj.getMonth() + 1 !== parseInt(mm) ||
+          dateObj.getDate() !== parseInt(dd)
+        ) {
+          throw new Error("Ngày sinh không hợp lệ");
+        }
+        dobFormatted = `${dd}/${mm}/${yyyy}`; 
+      }
+
+      const body = {
+        firstName: profile.fullName.split(" ").pop() || "",
+        lastName: profile.fullName.split(" ").slice(0, -1).join(" ") || "",
+        email: profile.email,
+        phoneNumber: profile.phoneNumber,
+        gender: profile.gender || null,
+        dob: dobFormatted, 
+        addressRequests: profile.address?.address?.trim()
+          ? [{ address: profile.address.address }]
+          : [],
+      };
+
+      const response = await apiUpdateUserInfo({ body, token });
+      if (response.success) {
+        const updated = response.data;
+        dispatch(userActions.setUserData({ userData: updated }));
+        setProfile({
+          id: updated.id,
+          fullName: `${updated.lastName || ""} ${updated.firstName || ""}`.trim(),
+          email: updated.email || "",
+          phoneNumber: updated.phoneNumber || "",
+          dob: updated.dob || "",
+          gender: updated.gender || "",
+          address:
+            Array.isArray(updated.address) && updated.address.length > 0
+              ? updated.address[0]
+              : { address: "" },
+        });
+        showToastSuccess("Cập nhật thông tin thành công!");
+        setIsOpen(false);
+      }else {
+        throw new Error(response.message || "Cập nhật thất bại.");
+      }
+    } catch (error) {
+      console.error("Save profile failed:", error);
+      showToastError(error.message || "Cập nhật thông tin thất bại.");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
 
   const InfoRow = ({ icon: Icon, label, value }) => (
     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -35,6 +159,10 @@ const ProfileInfo = () => {
     </div>
   );
 
+  if (isLoading) {
+    return <div className="text-center py-4">Đang tải thông tin...</div>;
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <div className="border-b border-gray-100 pb-4 mb-6">
@@ -45,11 +173,16 @@ const ProfileInfo = () => {
       </div>
 
       <div className="space-y-6">
-        <InfoRow icon={UserIcon} label="Họ tên" value={profile.name} />
+        <InfoRow icon={UserIcon} label="Họ tên" value={profile.fullName} />
         <InfoRow icon={EnvelopeIcon} label="Email" value={profile.email} />
-        <InfoRow icon={PhoneIcon} label="Số điện thoại" value={profile.phone} />
+        <InfoRow icon={PhoneIcon} label="Số điện thoại" value={profile.phoneNumber} />
         <InfoRow icon={CalendarIcon} label="Ngày sinh" value={profile.dob} />
-        <InfoRow icon={MapPinIcon} label="Địa chỉ" value={profile.address} />
+        <InfoRow icon={UserIcon} label="Giới tính" value={profile.gender} />
+        <InfoRow
+          icon={MapPinIcon}
+          label="Địa chỉ"
+          value={profile.address?.address || ""} 
+        />
 
         <div className="pt-4 border-t border-gray-100 flex justify-end">
           <button
@@ -66,31 +199,96 @@ const ProfileInfo = () => {
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="bg-white rounded-xl w-full max-w-lg p-6 shadow-xl">
-            <Dialog.Title className="text-lg font-bold text-gray-800 mb-4">Chỉnh sửa thông tin</Dialog.Title>
-            <div className="space-y-4">
-              {['name', 'email', 'phone', 'dob', 'address'].map((field) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-600 capitalize">
-                    {field === 'dob' ? 'Ngày sinh' : field === 'name' ? 'Họ tên' : field === 'phone' ? 'Số điện thoại' : field}
-                  </label>
-                  <input
-                    type="text"
-                    name={field}
-                    value={profile[field]}
-                    onChange={handleChange}
-                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setIsOpen(false)} className="px-4 py-2 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300">
-                Hủy
-              </button>
-              <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Lưu
-              </button>
-            </div>
+            <Dialog.Title className="text-lg font-bold text-gray-800 mb-4">
+              Chỉnh sửa thông tin
+            </Dialog.Title>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Họ tên</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={profile.fullName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={profile.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={profile.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh (dd/mm/yyyy)</label>
+                <input
+                  type="text"
+                  name="dob"
+                  value={profile.dob}
+                  onChange={handleChange}
+                  placeholder="dd/mm/yyyy"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
+                <select
+                  name="gender"
+                  value={profile.gender}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+                >
+                  <option value="">Chọn giới tính</option>
+                  <option value="Nam">Nam</option>
+                  <option value="Nữ">Nữ</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={profile.address?.address || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                />
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-3 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300 transition-all duration-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className={`px-4 py-3 bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-[1.02] ${
+                    isSaving ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isSaving ? "Đang lưu..." : "Lưu"}
+                </button>
+              </div>
+            </form>
           </Dialog.Panel>
         </div>
       </Dialog>
@@ -99,4 +297,3 @@ const ProfileInfo = () => {
 };
 
 export default ProfileInfo;
-

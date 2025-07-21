@@ -8,6 +8,7 @@ import {
 import PublicLayout from "./pages/public/PublicLayout";
 import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
+import GoogleCallback from "./pages/public/auth/GoogleCallback";
 import Register from "./pages/public/auth/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
 import ChangePassword from "./pages/user/components/ChangePassword";
@@ -47,6 +48,8 @@ function App() {
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
           <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
+          <Route path="/login/callback" element={<GoogleCallback />} />
+
            <Route
             path={productPaths.PRODUCT_DETAIL}
             element={<DetailProduct />}

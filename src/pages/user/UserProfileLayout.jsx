@@ -3,6 +3,7 @@ import ProfileInfo from "./components/ProfileInfo";
 import MyOrders from "./components/MyOrders";
 import Voucher from "./components/Voucher";
 import ChangePassword from "./components/ChangePassword";
+import ChangeEmail from "./components/ChangeEmail"; // 👉 mới
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -11,7 +12,7 @@ const Profile = () => {
 
   const changeTab = (tab) => {
     setActiveTab(tab);
-    localStorage.setItem("activeTab", tab); 
+    localStorage.setItem("activeTab", tab);
   };
 
   const renderContent = () => {
@@ -20,6 +21,7 @@ const Profile = () => {
       case "orders": return <MyOrders />;
       case "vouchers": return <Voucher />;
       case "password": return <ChangePassword />;
+      case "email": return <ChangeEmail />; // 👉 thêm
       default: return null;
     }
   };
@@ -30,6 +32,7 @@ const Profile = () => {
       case "orders": return "Đơn hàng của tôi";
       case "vouchers": return "Kho voucher";
       case "password": return "Đổi mật khẩu";
+      case "email": return "Đổi email"; // 👉 thêm
       default: return "";
     }
   };
@@ -55,14 +58,13 @@ const Profile = () => {
 
           <a
             href="/"
+            onClick={() => localStorage.removeItem("activeTab")} 
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-indigo-600 hover:to-sky-600 rounded-lg shadow transition"
           >
             🏠 Về trang chủ
           </a>
         </div>
       </header>
-
-
 
       {/* Body */}
       <div className="max-w-5xl mx-auto px-6 mt-6">
@@ -73,6 +75,7 @@ const Profile = () => {
             <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
             <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
             <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
+            <TabButton active={activeTab === "email"} onClick={() => changeTab("email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
           </nav>
 
           {/* Section Title */}
