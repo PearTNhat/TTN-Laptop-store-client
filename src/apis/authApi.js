@@ -2,7 +2,10 @@ import { axiosPrivate, http } from "~/utils/http";
 
 const apiLogin = async ({ body }) => {
     try {
-        const { data } = await http.post("/auth/login", body);
+        const config = {
+            withCredentials: true
+        }
+        const { data } = await http.post("/auth/login", body, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

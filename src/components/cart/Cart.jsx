@@ -52,14 +52,14 @@ const Cart = ({
   // Calculate total for selected items
   const calculateSelectedTotal = () => {
     return cartItems
-      .filter((item) => selectedItems.includes(item.id))
-      .reduce((total, item) => total + item.price * item.quantity, 0);
+      .filter((item) => selectedItems.includes(item.productDetailId))
+      .reduce((total, item) => total + item.discountPrice * item.quantity, 0);
   };
 
   // Calculate total quantity for selected items
   const calculateSelectedQuantity = () => {
     return cartItems
-      .filter((item) => selectedItems.includes(item.productId))
+      .filter((item) => selectedItems.includes(item.productDetailId))
       .reduce((total, item) => total + item.quantity, 0);
   };
 
@@ -72,20 +72,25 @@ const Cart = ({
 
     // Lấy các item đã chọn
     const selectedCartItems = cartItems.filter((item) =>
-      selectedItems.includes(item.id)
+      selectedItems.includes(item.productDetailId)
     );
-
+    const totalAmount = selectedCartItems.reduce(
+      (total, item) => total + item.quantity * item.discountPrice,
+      0 // Giá trị khởi tạo của total là 0
+    );
     // Format theo structure yêu cầu
     const formattedOrder = {
       items: selectedCartItems.map((item) => ({
-        id: item.productId,
+        id: item.productDetailId,
         imageUrl: item.itemImage,
         productName: item.title,
         quantity: item.quantity,
         discountPrice: item.discountPrice,
         originalPrice: item.originalPrice,
       })),
+      totalAmount: totalAmount,
     };
+    console.log("Formatted order for checkout:", formattedOrder);
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {

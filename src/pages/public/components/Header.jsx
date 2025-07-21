@@ -11,7 +11,6 @@ import { fetchCurrentUser } from "~/stores/action/user";
 import { fetchCategories } from "~/stores/action/category";
 import { fetchCart } from "~/stores/action/cart";
 import { cartActions } from "~/stores/slice/cartSlice";
-import { mockCartItems } from "~/constants/mockCart";
 import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
 import { fetchMyAddress } from "~/stores/action/address";
 
@@ -98,7 +97,6 @@ function Header() {
 
   const handleLogout = () => {
     // Mô phỏng việc đăng xuất
-    console.log("Logging out...");
     showToastSuccess("Logout successfully");
     dispatch(userActions.logout()); // Gọi action logout từ Redux
     navigate("/login");
@@ -107,6 +105,7 @@ function Header() {
   const updateCartItemQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
     try {
+      console.log("Updating cart item:", itemId, "to quantity:", newQuantity);
       const body = {
         productDetailId: itemId,
         quantity: newQuantity,

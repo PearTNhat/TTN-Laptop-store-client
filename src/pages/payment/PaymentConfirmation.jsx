@@ -6,7 +6,7 @@ import CustomerInfo from "./components/CustomerInfo";
 import OrderSummary from "./components/OrderSummary";
 import DiscountSection from "./components/DiscountSection";
 import PaymentMethod from "./components/PaymentMethod";
-
+import { useSelector } from "react-redux";
 // Import dữ liệu giả
 import { fakeUserData } from "~/data/fakeOrder";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,9 +14,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function PaymentConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { accessToken } = useSelector((state) => state.user);
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
-  const [selectedCoupon, setSelectdCoupon] = useState(null);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [selectedShippingInfo, setSelectedShippingInfo] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -107,9 +108,10 @@ export default function PaymentConfirmation() {
           <OrderSummary order={orderData} discountAmount={discountAmount} />
 
           <DiscountSection
-            orderTotal={10}
+            accessToken={accessToken}
+            orderTotal={orderData?.totalAmount}
             selectedCoupon={selectedCoupon}
-            setSelectdCoupon={setSelectdCoupon}
+            setSelectedCoupon={setSelectedCoupon}
             setDiscountAmount={setDiscountAmount}
           />
 

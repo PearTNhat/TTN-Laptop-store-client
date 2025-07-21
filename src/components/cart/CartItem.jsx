@@ -28,15 +28,14 @@ const CartItem = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={(e) => onSelectItem(item.productId, e.target.checked)}
+          onChange={(e) => onSelectItem(item.productDetailId, e.target.checked)}
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-offset-2 mt-1"
         />
-
         {/* Product Image */}
         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
           {item.thumbnail ? (
             <Link
-              to={`/products/${item.productId}`}
+              to={`/products/${item.productDetailId}`}
               className="block w-full h-full"
             >
               <img
@@ -102,7 +101,7 @@ const CartItem = ({
             <div className="flex items-center space-x-2 bg-gray-50 rounded-full p-1">
               <button
                 onClick={() =>
-                  onUpdateQuantity(item.productId, item.quantity - 1)
+                  onUpdateQuantity(item.productDetailId, item.quantity - 1)
                 }
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all duration-200 disabled:opacity-50"
                 disabled={item.quantity <= 1}
@@ -114,7 +113,7 @@ const CartItem = ({
               </span>
               <button
                 onClick={() =>
-                  onUpdateQuantity(item.productId || item.id, item.quantity + 1)
+                  onUpdateQuantity(item.productDetailId, item.quantity + 1)
                 }
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-green-50 hover:border-green-300 transition-all duration-200"
               >
@@ -126,7 +125,7 @@ const CartItem = ({
             </div>
 
             <button
-              onClick={() => onRemoveItem(item.productId || item.id)}
+              onClick={() => onRemoveItem(item.productDetailId || item.id)}
               className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-200 hover:scale-110"
             >
               <Trash2 size={14} />

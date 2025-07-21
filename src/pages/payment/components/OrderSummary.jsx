@@ -72,12 +72,6 @@ const OrderSummary = ({ order, discountAmount }) => {
               </span>
             </div>
           )}
-
-          <div className="flex justify-between text-gray-700">
-            <span>Phí vận chuyển:</span>
-            <span className="font-semibold text-green-600">Miễn phí</span>
-          </div>
-
           <div className="flex justify-between text-xl font-bold text-blue-600 pt-3 border-t border-gray-200">
             <span>Thành tiền:</span>
             <span>{formatNumber(finalTotal > 0 ? finalTotal : 0)} đ</span>
