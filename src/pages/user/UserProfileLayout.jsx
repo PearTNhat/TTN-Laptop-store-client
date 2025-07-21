@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import ProfileInfo from "./components/ProfileInfo";
 import MyOrders from "./components/MyOrders";
-import Voucher from "./components/Voucher";
+import VoucherList from "./components/VoucherList";
+
 import ChangePassword from "./components/ChangePassword";
 import ChangeEmail from "./components/ChangeEmail"; // 👉 mới
 
@@ -21,7 +22,6 @@ const Profile = () => {
       case "orders": return <MyOrders />;
       case "vouchers": return <Voucher />;
       case "password": return <ChangePassword />;
-      case "email": return <ChangeEmail />; // 👉 thêm
       default: return null;
     }
   };
@@ -32,7 +32,6 @@ const Profile = () => {
       case "orders": return "Đơn hàng của tôi";
       case "vouchers": return "Kho voucher";
       case "password": return "Đổi mật khẩu";
-      case "email": return "Đổi email"; // 👉 thêm
       default: return "";
     }
   };
@@ -51,8 +50,12 @@ const Profile = () => {
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">Nguyễn Văn A</h1>
-              <p className="text-sm text-sky-600 dark:text-gray-400">Thành viên từ 2025 • TP.HCM</p>
+              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">
+                Nguyễn Văn A
+              </h1>
+              <p className="text-sm text-sky-600 dark:text-gray-400">
+                Thành viên từ 2025 • TP.HCM
+              </p>
             </div>
           </div>
 
@@ -79,7 +82,9 @@ const Profile = () => {
           </nav>
 
           {/* Section Title */}
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">{getTabLabel()}</h2>
+          <h2 className="text-lg font-semibold text-indigo-700 mb-4">
+            {getTabLabel()}
+          </h2>
 
           {/* Tab Content */}
           <div className="animate-fade-in">{renderContent()}</div>
@@ -94,12 +99,15 @@ const TabButton = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={`px-4 py-2 rounded-full text-sm font-medium transition-all 
-      ${active
-        ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
-        : "bg-sky-100 text-sky-700 hover:bg-sky-200"}`}
+      ${
+        active
+          ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
+          : "bg-sky-100 text-sky-700 hover:bg-sky-200"
+      }`}
   >
     {children}
   </button>
 );
 
 export default Profile;
+

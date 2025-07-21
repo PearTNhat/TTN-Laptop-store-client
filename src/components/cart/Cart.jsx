@@ -5,6 +5,7 @@ import CartEmptyState from "./CartEmptyState";
 import CartSelectAll from "./CartSelectAll";
 import CartItemsList from "./CartItemsList";
 import CartFooter from "./CartFooter";
+import { showAlertInfo } from "~/utils/alert";
 
 const Cart = ({
   isOpen,
@@ -32,7 +33,6 @@ const Cart = ({
       setSelectedItems((prev) => prev.filter((id) => id !== itemId));
     }
   };
-
   // Update quantity - use parent function
   const updateQuantity = (itemId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -59,14 +59,14 @@ const Cart = ({
   // Calculate total quantity for selected items
   const calculateSelectedQuantity = () => {
     return cartItems
-      .filter((item) => selectedItems.includes(item.id))
+      .filter((item) => selectedItems.includes(item.productId))
       .reduce((total, item) => total + item.quantity, 0);
   };
 
   // Handle checkout
   const handleCheckout = () => {
     if (selectedItems.length === 0) {
-      alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      showAlertInfo("Vui lòng chọn ít nhất một sản phẩm để thanh toán.");
       return;
     }
 
@@ -78,17 +78,14 @@ const Cart = ({
     // Format theo structure yêu cầu
     const formattedOrder = {
       items: selectedCartItems.map((item) => ({
-        id: item.productDetailId || item.id,
-        imageUrl: item.image || item.imageUrl,
-        productName: item.name || item.title,
+        id: item.productId,
+        imageUrl: item.itemImage,
+        productName: item.title,
         quantity: item.quantity,
-        discountPrice: item.price || item.discountPrice,
-        originalPrice: item.originalPrice || item.price,
+        discountPrice: item.discountPrice,
+        originalPrice: item.originalPrice,
       })),
     };
-
-    console.log("Checkout data:", formattedOrder);
-
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {

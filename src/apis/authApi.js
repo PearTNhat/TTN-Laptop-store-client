@@ -1,4 +1,4 @@
-import { http } from "~/utils/http";
+import { axiosPrivate, http } from "~/utils/http";
 
 export const apiLogin = async ({ body }) => {
   try {
@@ -130,10 +130,21 @@ export const apiResetPassword = async ({ email, newPassword, resetToken }) => {
     } else {
       return { success: false, message: res.data?.message || "Đặt lại mật khẩu thất bại." };
     }
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || "Lỗi kết nối khi đặt lại mật khẩu.",
-    };
-  }
 };
+
+const apiRefreshToken = async () => {
+    try {
+        const config = {
+            withCredentials: true
+        }
+        const { data } = await axiosPrivate.get("/auth/refresh-token", config);
+        console.log("Refresh token response:", data);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+export { apiLogin, apiRefreshToken };

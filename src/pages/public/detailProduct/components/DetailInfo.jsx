@@ -14,7 +14,6 @@ function DetailInfo({ configs }) {
       key !== "productDetailId" &&
       Boolean(value)
   );
-  console.log("DetailInfo configs:", configsArr);
   // Lấy ra một số thông tin ngắn gọn để hiển thị
   const shortInfo = configsArr.slice(0, 6);
 

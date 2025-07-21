@@ -14,8 +14,10 @@ import ActionButtons from "./components/ActionButtons";
 import CommentContainer from "~/components/comments/MockCommentContainer";
 import { apiGetDetailProduct } from "~/apis/productApi";
 import { apiCreateCart } from "~/apis/cartApi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import DOMPurify from "dompurify";
+import { apiGetComments } from "~/apis/commentApi";
+import { fetchCart } from "~/stores/action/cart";
 
 // ✨ Import the new ToggleIcon component
 
@@ -114,6 +116,7 @@ const fakeComments = [
 
 function DetailProduct() {
   const { pId } = useParams();
+  const dispatch = useDispatch();
   const descRef = useRef(null);
   const navigate = useNavigate();
   const { accessToken } = useSelector((state) => state.user);
@@ -142,12 +145,23 @@ function DetailProduct() {
       console.error("Error fetching products:", error);
     }
   };
+  const getComments = async (pId) => {
+    try {
+      const response = await apiGetComments({ pId });
+      if (response.code !== 200) {
+        showToastError(response.message);
+      } else {
+        setComments(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
 
   useEffect(() => {
     getDetailProduct(pId);
-    setComments(fakeComments);
-    setTotalRating(4.5);
-  }, []);
+    getComments(pId);
+  }, [pId]);
 
   useEffect(() => {
     // window.scrollTo(0, 0);
@@ -159,7 +173,7 @@ function DetailProduct() {
       return;
     }
     const orderData = {
-      product: colorProduct,
+      product: { ...colorProduct, quantity },
       type: "buy-now",
     };
     navigate("/checkout", {
@@ -176,14 +190,15 @@ function DetailProduct() {
       return;
     }
     const res = await apiCreateCart({
-      token: accessToken,
-      productDetailId: colorProduct.productDetailId,
+      accessToken,
+      productDetailId: colorProduct.productId,
       quantity,
     });
     if (res.code !== 200) {
       showToastError(res.message);
     } else {
       showToastSuccess("Thêm vào giỏ hàng thành công!");
+      dispatch(fetchCart({ accessToken }));
     }
   };
 
@@ -207,17 +222,12 @@ function DetailProduct() {
     if (btnShowHideDiv) {
       btnShowHideDiv.remove();
     }
-    // You might also want to remove other elements like data-v- attributes
-    // This is a more complex task and depends on how clean you need the HTML
-    // For simplicity, let's just remove the SVG container for now.
     return doc.body.innerHTML;
   };
 
   // Get the cleaned HTML before sanitization
   const cleanedHtml = removeSpecificElements(product?.description);
   const sanitizedDescription = DOMPurify.sanitize(cleanedHtml);
-
-  console.log("colorProduct:", colorProduct);
 
   return (
     <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">

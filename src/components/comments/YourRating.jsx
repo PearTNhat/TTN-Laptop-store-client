@@ -17,11 +17,9 @@ function YourRating({
           src={
             comment.user?.avatar?.url ? comment.user?.avatar?.url : DefaultUser
           }
-          alt={comment?.user?.lastName}
+          alt={comment?.username}
         />
-        <p>
-          {comment?.user?.firstName} {comment?.user?.lastName}
-        </p>
+        <p>{comment?.username}</p>
       </div>
       <div className="ml-[32px]">
         {/* start */}
@@ -36,7 +34,7 @@ function YourRating({
             </div>
           )}
           <p className="text-xs text-gray-500">
-            {moment(comment?.createdAt).fromNow()}
+            {moment(comment?.reviewDate).fromNow()}
           </p>
         </div>
         {/* content */}

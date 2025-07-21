@@ -6,6 +6,9 @@ import { userReducer } from "./slice/userSlice";
 import { modalReducer } from "./slice/modal";
 import { categoryReducer } from "./slice/categorySlice";
 import { brandReducer } from "./slice/brandSlice";
+import { cartReducer } from "./slice/cartSlice";
+import { addressReducer } from "./slice/addressSlice";
+
 
 const persistConfig = {
     key: 'shop/user',
@@ -19,7 +22,9 @@ const store = configureStore({
         modal: modalReducer,
         user: persistedReducer, // use persisted reducer for user
         category: categoryReducer,
-        brand: brandReducer
+        brand: brandReducer,
+        cart: cartReducer,
+        address: addressReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

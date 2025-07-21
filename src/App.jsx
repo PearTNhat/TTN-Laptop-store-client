@@ -13,7 +13,7 @@ import Register from "./pages/public/auth/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
 import ChangePassword from "./pages/user/components/ChangePassword";
 import MyOrders from "./pages/user/components/MyOrders";
-import Voucher from "./pages/user/components/Voucher";
+import Voucher from "~/components/Voucher";
 import ProfileInfo from "./pages/user/components/ProfileInfo";
 import UserProfileLayout from "./pages/user/UserProfileLayout";
 import {
@@ -68,7 +68,10 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<DashBoard />} />
           <Route path={adminPaths.USERS} element={<UserManagement />} />
-          <Route path={adminPaths.USERSMANAGEMENT} element={<UsersManagement />} />
+          <Route
+            path={adminPaths.USERSMANAGEMENT}
+            element={<UsersManagement />}
+          />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />

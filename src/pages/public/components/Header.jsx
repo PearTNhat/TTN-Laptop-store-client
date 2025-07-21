@@ -2,14 +2,18 @@ import React, { useState, useRef, useEffect } from "react";
 import { ShoppingCart, Menu, X, Home, Laptop, ChevronDown } from "lucide-react";
 import { useNavigate, NavLink, Link } from "react-router-dom";
 import { dropDownProfile } from "~/constants/dropdown";
-import { showToastSuccess } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import { productPaths, publicPaths } from "~/constants/paths";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "~/stores/slice/userSlice";
-import { mockCartItems } from "~/constants/mockCart";
 import Cart from "~/components/cart/Cart";
 import { fetchCurrentUser } from "~/stores/action/user";
 import { fetchCategories } from "~/stores/action/category";
+import { fetchCart } from "~/stores/action/cart";
+import { cartActions } from "~/stores/slice/cartSlice";
+import { mockCartItems } from "~/constants/mockCart";
+import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
+import { fetchMyAddress } from "~/stores/action/address";
 
 // Navigation links data
 const navigationLinks = [
@@ -58,10 +62,11 @@ function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userData, accessToken } = useSelector((state) => state.user);
+  const { carts: myCart } = useSelector((state) => state.cart);
   const dropdownRef = useRef(null);
   const isLoggedIn = true; // Giả lập trạng thái đăng nhập, thay thế bằng Redux hoặc Context API trong thực tế
 
-  const [myCart, setMyCart] = useState(mockCartItems);
+  // const [myCart, setMyCart] = useState(mockCartItems);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -99,32 +104,57 @@ function Header() {
     navigate("/login");
   };
 
-  // Calculate total quantity in cart
-  const getTotalCartQuantity = () => {
-    return myCart.reduce((total, item) => total + item.quantity, 0);
-  };
-  const updateCartItemQuantity = (itemId, newQuantity) => {
+  const updateCartItemQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-    setMyCart((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    try {
+      const body = {
+        productDetailId: itemId,
+        quantity: newQuantity,
+      };
+      const response = await apiUpdateCart({
+        accessToken,
+        body,
+      });
+      if (response.code !== 200) {
+        throw new Error(response.message || "Failed to update cart item");
+      }
+      showToastSuccess("Cập nhật giỏ hàng thành công");
+      dispatch(
+        cartActions.updateCartQuantity({
+          id: itemId, // Thay đổi từ productDetailId thành id
+          quantity: newQuantity,
+        })
+      );
+    } catch (error) {
+      showToastError(error.message || "Failed to update cart item");
+    }
   };
 
-  const removeCartItem = (itemId) => {
-    setMyCart((prev) => prev.filter((item) => item.id !== itemId));
+  const removeCartItem = async (itemId) => {
+    try {
+      const response = await apiDeleteCart({
+        accessToken,
+        pId: itemId,
+      });
+      if (response.code !== 200) {
+        throw new Error(response.message || "Xóa giỏ hàng thất bại");
+      }
+      showToastSuccess("Xóa giỏ hàng thành công");
+      dispatch(cartActions.removeFromCart(itemId));
+    } catch (error) {
+      showToastError(error.message || "Xóa giỏ hàng thất bại");
+    }
   };
 
   const clearCart = () => {
-    console.log("Clearing cart...");
-    setMyCart([]);
+    dispatch(cartActions.clearCart());
   };
   useEffect(() => {
-    console.log("access___", accessToken);
     dispatch(fetchCurrentUser({ accessToken }));
     dispatch(fetchCategories());
-  }, [accessToken]);
+    dispatch(fetchCart({ accessToken }));
+    dispatch(fetchMyAddress({ accessToken }));
+  }, [accessToken, dispatch]);
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -176,7 +206,7 @@ function Header() {
                 <ShoppingCart size={20} />
                 {myCart.length > 0 && (
                   <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
-                    {getTotalCartQuantity()}
+                    {myCart.length}
                   </span>
                 )}
               </button>

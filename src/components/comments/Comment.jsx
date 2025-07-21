@@ -21,14 +21,12 @@ function Comment({
   handleDeleteComment,
   handleLikeComment,
 }) {
-  const isBelongToUser = userId === comment.user?._id;
-  const liked = comment.likes.includes(userId);
+  const isBelongToUser = userId === comment.userId;
   const replyCommentId = parentId ? parentId : comment._id;
   const isReply =
-    affectedComment?.type === "REPLY" && affectedComment?.id === comment._id;
+    affectedComment?.type === "REPLY" && affectedComment?.id === comment.id;
   const isEdit =
-    affectedComment?.type === "EDIT" && affectedComment?.id === comment._id;
-  const [clickLike, setClickLike] = useState(false);
+    affectedComment?.type === "EDIT" && affectedComment?.id === comment.id;
   return (
     <div className={`mt-4`}>
       <div className="flex gap-1">
@@ -37,11 +35,9 @@ function Comment({
           src={
             comment.user?.avatar?.url ? comment.user?.avatar?.url : DefaultUser
           }
-          alt={comment?.user?.lastName}
+          alt={comment?.username}
         />
-        <p>
-          {comment?.user?.firstName} {comment?.user?.lastName}
-        </p>
+        <p>{comment?.username}</p>
       </div>
       <div className="ml-[32px]">
         {/* start */}
@@ -56,19 +52,16 @@ function Comment({
             </div>
           )}
           <p className="text-xs text-gray-500">
-            {moment(comment?.createdAt).fromNow()}
+            {moment(comment?.reviewDate).fromNow()}
           </p>
         </div>
         {/* content */}
         <div className="mt-3 p-2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] rounded-md">
           <p className="text-sm">
             {comment.replyOnUser &&
-              comment.replyOnUser._id !== comment.user._id && (
+              comment.replyOnUser !== comment.username && (
                 <span className="inline-block text-blue-500 leading-[16px]">
-                  @
-                  {comment.replyOnUser.firstName +
-                    " " +
-                    comment.replyOnUser.lastName}
+                  @{comment?.username}
                 </span>
               )}
             {comment.content}
@@ -77,22 +70,7 @@ function Comment({
             <button
               className="flex justify-center items-center gap-1"
               onClick={() => {
-                handleLikeComment({ commentId: comment._id });
-                setAffectedComment(null);
-                setClickLike(!clickLike);
-              }}
-            >
-              {liked || clickLike ? (
-                <FaHeart className="text-red-500" />
-              ) : (
-                <FaRegHeart />
-              )}
-              <span className="text-xs">{comment.likes.length} Like</span>
-            </button>
-            <button
-              className="flex justify-center items-center gap-1"
-              onClick={() => {
-                setAffectedComment({ type: "REPLY", id: comment._id });
+                setAffectedComment({ type: "REPLY", id: comment.id });
               }}
             >
               <TiMessages />
@@ -151,7 +129,7 @@ function Comment({
           {/* show replies */}
           {replies?.map((reply) => (
             <Comment
-              key={reply._id}
+              key={reply.id}
               userId={userId}
               comment={reply}
               isAdmin={isAdmin}
