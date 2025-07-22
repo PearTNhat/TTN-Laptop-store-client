@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ProfileInfo from "./components/ProfileInfo";
 import MyOrders from "./components/MyOrders";
 import VoucherList from "./components/VoucherList";
+import Voucher from "./components/Voucher";
 
 import ChangePassword from "./components/ChangePassword";
 import ChangeEmail from "./components/ChangeEmail"; // 👉 mới
@@ -20,8 +21,9 @@ const Profile = () => {
     switch (activeTab) {
       case "info": return <ProfileInfo />;
       case "orders": return <MyOrders />;
-      case "vouchers": return <Voucher />;
+      case "vouchers": return <VoucherList  />;
       case "password": return <ChangePassword />;
+      case "change_email": return <ChangeEmail />;
       default: return null;
     }
   };
@@ -32,6 +34,7 @@ const Profile = () => {
       case "orders": return "Đơn hàng của tôi";
       case "vouchers": return "Kho voucher";
       case "password": return "Đổi mật khẩu";
+      case "changemail": return "Đổi Email"
       default: return "";
     }
   };
@@ -78,7 +81,7 @@ const Profile = () => {
             <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
             <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
             <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
-            <TabButton active={activeTab === "email"} onClick={() => changeTab("email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
+            <TabButton active={activeTab === "change_email"} onClick={() => changeTab("change_email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
           </nav>
 
           {/* Section Title */}

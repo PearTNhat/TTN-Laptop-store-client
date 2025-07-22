@@ -20,6 +20,7 @@ const publicPaths = {
     USER_CHANGEPASSWORD: '/user/change_password',
     USER_ORDER: '/user/order',
     USER_VOURCHER: '/user/voucher',
+    USER_CHANGE_EMAIL: "/user/change_email",
 }
 
 const adminPaths = {

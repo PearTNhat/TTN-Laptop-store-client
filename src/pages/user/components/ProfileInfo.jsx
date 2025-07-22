@@ -106,7 +106,6 @@ const ProfileInfo = () => {
       const body = {
         firstName: profile.fullName.split(" ").pop() || "",
         lastName: profile.fullName.split(" ").slice(0, -1).join(" ") || "",
-        email: profile.email,
         phoneNumber: profile.phoneNumber,
         gender: profile.gender || null,
         dob: dobFormatted, 
@@ -122,7 +121,6 @@ const ProfileInfo = () => {
         setProfile({
           id: updated.id,
           fullName: `${updated.lastName || ""} ${updated.firstName || ""}`.trim(),
-          email: updated.email || "",
           phoneNumber: updated.phoneNumber || "",
           dob: updated.dob || "",
           gender: updated.gender || "",
@@ -209,17 +207,6 @@ const ProfileInfo = () => {
                   type="text"
                   name="fullName"
                   value={profile.fullName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={profile.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
                   required

@@ -130,9 +130,15 @@ export const apiResetPassword = async ({ email, newPassword, resetToken }) => {
     } else {
       return { success: false, message: res.data?.message || "Đặt lại mật khẩu thất bại." };
     }
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Lỗi kết nối khi đặt lại mật khẩu.",
+    };
+  }
 };
 
-const apiRefreshToken = async () => {
+export const apiRefreshToken = async () => {
     try {
         const config = {
             withCredentials: true
@@ -147,4 +153,3 @@ const apiRefreshToken = async () => {
         throw new Error(error.message);
     }
 };
-export { apiLogin, apiRefreshToken };
