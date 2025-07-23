@@ -76,7 +76,7 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
 
   const {
     name,
-    discountType,
+    discountUnit,
     discountValue,
     minOrderValue,
     startDate,
@@ -122,7 +122,7 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
           </h3>
           <p className="text-sm mt-1">
             <span className="font-semibold">
-              {discountType === "PERCENTATE"
+              {discountUnit === "PERCENT"
                 ? `Giảm ${discountValue}%`
                 : `Giảm ${formatNumber(discountValue)}`}
             </span>
@@ -164,7 +164,6 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
                 : "bg-yellow-400 text-slate-800 hover:bg-yellow-300"
             }`}
             onClick={() => {
-              console.log(`Applying discount for promo code: ${promoCode}`);
               handleApplyDiscount(promoCode);
             }}
           >

@@ -1,146 +1,147 @@
+// src/components/comments/Comment.js
 import moment from "moment";
-import { DefaultUser } from "~/assets/images";
-import { TiMessages } from "react-icons/ti";
-import { FaRegHeart, FaHeart } from "react-icons/fa";
-import { LuPencil } from "react-icons/lu";
-import { IoTrashOutline } from "react-icons/io5";
-import { convertNumberToStar } from "~/utils/helper";
+import "moment/locale/vi"; // Cho hiển thị "vài giây trước"
 import CommentForm from "./CommentForm";
-import { useState } from "react";
+
+// Ảnh đại diện mặc định, bạn cần thay thế bằng đường dẫn đúng
+import { DefaultUser } from "~/assets/images";
+import StarRating from "./StarRating";
+
+moment.locale("vi");
+
+const ImageGallery = ({ images }) => {
+  if (!images || images.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {images.map((image, index) => (
+        <a
+          href={image.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          key={image.public_id || index}
+        >
+          <img
+            src={image.url}
+            alt={`comment-img-${index}`}
+            className="w-24 h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+          />
+        </a>
+      ))}
+    </div>
+  );
+};
 
 function Comment({
-  userId,
   comment,
-  isAdmin,
-  replies = [],
-  parentId,
+  replies,
+  currentUserId,
+  onDelete,
+  onUpdate,
+  onReply,
   affectedComment,
   setAffectedComment,
-  handleSubmitComment,
-  handleUpdateComment,
-  handleDeleteComment,
-  handleLikeComment,
+  userAvatar,
 }) {
-  const isBelongToUser = userId === comment.userId;
-  const replyCommentId = parentId ? parentId : comment._id;
-  const isReply =
-    affectedComment?.type === "REPLY" && affectedComment?.id === comment.id;
-  const isEdit =
-    affectedComment?.type === "EDIT" && affectedComment?.id === comment.id;
+  const isUserComment = comment.userId === currentUserId;
+  const isReplying =
+    affectedComment?.type === "REPLY" && affectedComment.id === comment._id;
+  const isEditing =
+    affectedComment?.type === "EDIT" && affectedComment.id === comment._id;
+  const replyId = comment._id;
+
   return (
-    <div className={`mt-4`}>
-      <div className="flex gap-1">
-        <img
-          className="w-7 h-7 rounded-full"
-          src={
-            comment.user?.avatar?.url ? comment.user?.avatar?.url : DefaultUser
-          }
-          alt={comment?.username}
-        />
-        <p>{comment?.username}</p>
-      </div>
-      <div className="ml-[32px]">
-        {/* start */}
-        <div className="flex items-center gap-2">
-          {comment?.rating && (
-            <div className="flex">
-              {convertNumberToStar(comment?.rating).map((el, i) => (
-                <div key={i} className="text-yellow-300 text-[14px]">
-                  {el}
-                </div>
-              ))}
+    <div className="flex items-start space-x-3 mt-4">
+      <img
+        src={comment.user?.avatar?.url || DefaultUser}
+        alt={comment.username}
+        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+      />
+      <div className="flex-1">
+        <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+          <div className="flex justify-between items-center">
+            <span className="font-semibold text-sm text-gray-800">
+              {comment.username}
+            </span>
+            {comment.rating > 0 && (
+              <StarRating
+                rating={comment.rating}
+                onRatingChange={() => {}}
+                size="text-sm"
+              />
+            )}
+          </div>
+          {!isEditing && (
+            <div className="text-sm text-gray-700 mt-1">
+              {comment.replyOnUser &&
+                comment.replyOnUser !== comment.username && (
+                  <span className="inline-block text-blue-500 leading-[16px]">
+                    @{comment?.username}
+                  </span>
+                )}
+              {comment.content}
+              <ImageGallery images={comment.images} />
             </div>
           )}
-          <p className="text-xs text-gray-500">
-            {moment(comment?.reviewDate).fromNow()}
-          </p>
         </div>
-        {/* content */}
-        <div className="mt-3 p-2 shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] rounded-md">
-          <p className="text-sm">
-            {comment.replyOnUser &&
-              comment.replyOnUser !== comment.username && (
-                <span className="inline-block text-blue-500 leading-[16px]">
-                  @{comment?.username}
-                </span>
-              )}
-            {comment.content}
-          </p>
-          <div className="flex mt-1 gap-2 text-[14px]">
+
+        {!isEditing ? (
+          <div className="flex items-center mt-1 space-x-4 text-xs text-gray-500 font-medium">
+            <span>{moment(comment.reviewDate).fromNow()}</span>
             <button
-              className="flex justify-center items-center gap-1"
-              onClick={() => {
-                setAffectedComment({ type: "REPLY", id: comment.id });
-              }}
+              className="hover:underline"
+              onClick={() =>
+                setAffectedComment({ type: "REPLY", id: comment._id })
+              }
             >
-              <TiMessages />
-              <span className="text-xs">{replies.length} Reply</span>
+              Trả lời
             </button>
-            {isBelongToUser && parentId && (
+            {isUserComment && (
               <button
-                className="flex justify-center items-center gap-1"
-                onClick={() => {
-                  setAffectedComment({ type: "EDIT", id: comment._id });
-                }}
+                className="hover:underline text-red-500"
+                onClick={() => onDelete({ commentId: comment._id })}
               >
-                <LuPencil />
-                <span className="text-xs">Edit</span>
-              </button>
-            )}
-            {isBelongToUser && (
-              <button
-                className="flex justify-center items-center gap-1"
-                onClick={() => handleDeleteComment({ commentId: comment._id })}
-              >
-                <IoTrashOutline />
-                <span className="text-xs">Delete</span>
+                Xóa
               </button>
             )}
           </div>
-        </div>
-        <div className="">
-          {/* show comment form to edit or reply */}
-          {isReply && (
-            <CommentForm
-              confirmText={"Reply"}
-              setAffectedComment={setAffectedComment}
-              cancelHandler={() => setAffectedComment(null)}
-              handleSubmitComment={(content, rating) =>
-                handleSubmitComment({
-                  content,
-                  rating,
-                  parentId: replyCommentId,
-                  replyOnUser: comment.user._id,
-                })
-              }
-            />
-          )}
-          {isEdit && (
-            <CommentForm
-              confirmText={"Update"}
-              initValue={comment.content}
-              setAffectedComment={setAffectedComment}
-              cancelHandler={() => setAffectedComment(null)}
-              handleSubmitComment={(content) =>
-                handleUpdateComment({ commentId: comment._id, content })
-              }
-            />
-          )}
-          {/* show replies */}
-          {replies?.map((reply) => (
+        ) : (
+          <CommentForm
+            submitLabel="Cập nhật"
+            initialContent={comment.content}
+            onSubmit={(data) => onUpdate({ ...data, commentId: comment._id })}
+            onCancel={() => setAffectedComment(null)}
+          />
+        )}
+
+        {isReplying && (
+          <CommentForm
+            submitLabel="Trả lời"
+            userAvatar={userAvatar}
+            onSubmit={(data) =>
+              onReply({
+                ...data,
+                parentId: replyId,
+                replyOnUser: comment?.userId,
+              })
+            }
+            onCancel={() => setAffectedComment(null)}
+          />
+        )}
+
+        {/* Render Replies Recursively */}
+        <div className="space-y-4">
+          {replies.map((reply) => (
             <Comment
-              key={reply.id}
-              userId={userId}
+              key={reply._id}
               comment={reply}
-              isAdmin={isAdmin}
+              replies={[]} // A reply doesn't have further nested replies in this model
+              currentUserId={currentUserId}
+              onDelete={onDelete}
+              onUpdate={onUpdate}
+              onReply={onReply}
               affectedComment={affectedComment}
-              parentId={replyCommentId}
               setAffectedComment={setAffectedComment}
-              handleSubmitComment={handleSubmitComment}
-              handleUpdateComment={handleUpdateComment}
-              handleDeleteComment={handleDeleteComment}
-              handleLikeComment={handleLikeComment}
-              replies={[]}
+              userAvatar={userAvatar}
             />
           ))}
         </div>

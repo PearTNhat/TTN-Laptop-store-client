@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { apiGetMyPromotion } from "~/apis/promotionApi";
 import VoucherCard from "~/components/voucher/VoucherCard";
 import { showToastError, showToastSuccess } from "~/utils/alert";
+import { formatNumber } from "~/utils/helper";
 
 const DiscountSection = ({
   orderTotal,
@@ -20,7 +21,6 @@ const DiscountSection = ({
       try {
         const response = await apiGetMyPromotion({ accessToken });
         if (response.code === 200) {
-          // Chỉ lấy các voucher còn hạn sử dụng
           const today = new Date();
           const availableVouchers = response.data.filter(
             (v) => new Date(v.endDate) >= today
@@ -39,35 +39,31 @@ const DiscountSection = ({
     }
   }, [accessToken]);
 
+  // useEffect này rất quan trọng, nó đồng bộ input với voucher được chọn
   useEffect(() => {
     if (selectedCoupon?.code) {
       setInputCode(selectedCoupon.code);
     } else {
+      // Khi voucher được bỏ chọn, xóa trống input
       setInputCode("");
     }
   }, [selectedCoupon]);
 
-  // SỬA LẠI HOÀN TOÀN HÀM NÀY
   const applyOrRemoveVoucher = (code) => {
     if (!code) return;
-
-    // Bỏ chọn nếu click/nhập lại code đang active
+    // Logic này vẫn giữ nguyên vì nó đã xử lý cả 2 trường hợp
     if (selectedCoupon?.code === code) {
       showToastSuccess("Đã bỏ chọn voucher.");
       setSelectedCoupon(null);
       setDiscountAmount(0);
       return;
     }
-
-    const foundVoucher = vouchers.find((v) => v.id === code);
+    const foundVoucher = vouchers.find((v) => v.id === Number(code));
 
     if (!foundVoucher) {
       showToastError("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
       return;
     }
-
-    // Giờ đây, chúng ta làm việc trực tiếp với `foundVoucher`
-    // vì nó đã có cấu trúc phẳng, không cần `promotion`.
 
     if (orderTotal >= foundVoucher.minOrderValue) {
       let valueDiscount =
@@ -78,17 +74,9 @@ const DiscountSection = ({
       if (foundVoucher.maxValue && valueDiscount > foundVoucher.maxValue) {
         valueDiscount = foundVoucher.maxValue;
       }
-
       setDiscountAmount(valueDiscount);
-      // Lưu lại thông tin voucher đã chọn
-      // API của bạn có thể không có userPromotionId, nên ta chỉ lưu id (mã code)
-      setSelectedCoupon({
-        code: foundVoucher.id,
-        // Nếu API có trả về một ID duy nhất khác, bạn có thể thêm vào đây
-        // promotionId: foundVoucher.promotionId
-      });
-
-      // setShowVouchers(false); // Tự động đóng danh sách voucher
+      setSelectedCoupon({ code: foundVoucher.id });
+      // Tự động đóng danh sách voucher khi áp dụng thành công từ danh sách
       showToastSuccess(`Áp dụng voucher ${foundVoucher.id} thành công!`);
     } else {
       showToastError(
@@ -99,11 +87,10 @@ const DiscountSection = ({
     }
   };
 
-  // Helper function để format số, tránh lỗi nếu orderTotal chưa có
-  const formatNumber = (num) => {
-    if (typeof num !== "number" || isNaN(num)) return num;
-    return new Intl.NumberFormat("vi-VN").format(num);
-  };
+  // --- LOGIC MỚI ĐỂ ĐIỀU KHIỂN NÚT BẤM ---
+  // Biến này sẽ là `true` khi có voucher được chọn, và mã trong input khớp với voucher đó.
+  const isCodeApplied =
+    selectedCoupon && selectedCoupon.code === inputCode && inputCode !== "";
 
   return (
     <div className="mt-6 bg-white p-5 rounded-lg shadow-sm border border-gray-200">
@@ -117,11 +104,16 @@ const DiscountSection = ({
           placeholder="NHẬP MÃ GIẢM GIÁ"
           onKeyUp={(e) => e.key === "Enter" && applyOrRemoveVoucher(inputCode)}
         />
+        {/* --- NÚT BẤM ĐƯỢC THAY ĐỔI Ở ĐÂY --- */}
         <button
           onClick={() => applyOrRemoveVoucher(inputCode)}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex-shrink-0"
+          className={`px-6 py-2 rounded-lg font-semibold transition-colors flex-shrink-0 text-white ${
+            isCodeApplied
+              ? "bg-red-500 hover:bg-red-600" // Màu đỏ cho hành động "Bỏ chọn"
+              : "bg-blue-600 hover:bg-blue-700" // Màu xanh cho hành động "Áp dụng"
+          }`}
         >
-          Áp dụng
+          {isCodeApplied ? "Bỏ chọn" : "Áp dụng"}
         </button>
       </div>
       <button
@@ -137,9 +129,9 @@ const DiscountSection = ({
             vouchers.map((voucher) => (
               <VoucherCard
                 key={voucher.id}
-                promotion={voucher} // Truyền cả object voucher vào
+                promotion={voucher}
                 isActive={selectedCoupon?.code === voucher.id}
-                handleApplyDiscount={() => applyOrRemoveVoucher(voucher.id)} // Truyền mã code
+                handleApplyDiscount={() => applyOrRemoveVoucher(voucher.id)}
               />
             ))
           ) : (

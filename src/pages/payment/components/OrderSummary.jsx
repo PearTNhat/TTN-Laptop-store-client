@@ -4,7 +4,8 @@ import { FaShoppingCart } from "react-icons/fa";
 const formatNumber = (num) => (num || 0).toLocaleString("vi-VN");
 
 const OrderSummary = ({ order, discountAmount }) => {
-  const finalTotal = order?.totalAmount || 10 - discountAmount;
+  console.log("Order Summary Data:", order, "Discount Amount:", discountAmount);
+  const finalTotal = order?.totalAmount - discountAmount;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">

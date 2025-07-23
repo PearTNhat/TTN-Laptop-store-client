@@ -1,212 +1,162 @@
-import { useSelector, useDispatch } from "react-redux";
-import { appActions } from "~/store/slice/app";
-import Button from "../Button";
+import { useCallback, useState } from "react";
 import VoteBar from "./VoteBar";
-import RatingModal from "./RatingModal";
-import { memo, useCallback, useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
-import {
-  apiCreateComment,
-  apiDeleteComment,
-  apiLikeComment,
-  apiUpdateComment,
-} from "~/apis/comments";
-import { Toast } from "~/utils/alert";
 import Comment from "./Comment";
 import YourRating from "./YourRating";
-import { socket } from "~/socket/connect";
+import CommentForm from "./CommentForm";
+import { DefaultUser } from "~/assets/images";
+import { showToastError } from "~/utils/alert";
+import { apiComment, apiReplyComment } from "~/apis/commentApi";
+import { useSelector } from "react-redux";
 
 function CommentContainer({
-  title,
-  pId,
+  productDetailId,
   comments,
   totalRating,
-  setFetchAgain,
+  setFetchCommentAgain,
 }) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [affectedComment, setAffectedComment] = useState(null);
-  const { isLoggedIn, accessToken, userData, isAdmin } = useSelector(
-    (state) => state.user
-  );
-  const [rated, setRated] = useState({});
-  const requireLogin = useCallback(async () => {
-    if (!isLoggedIn) {
-      Swal.fire({
-        title: "You need to login to comment",
-        showCancelButton: true,
-        confirmButtonText: "Login",
-        confirmButtonColor: "#ee3131",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          dispatch(
-            appActions.toggleModal({ isShowModal: false, childrenModal: false })
-          );
-          navigate("/login");
-        }
-      });
-      return false;
-    }
-    return true;
-  }, [isLoggedIn]);
-  const handleSubmitComment = async ({
-    rating,
-    content,
-    parentId,
-    replyOnUser,
-  }) => {
-    try {
-      if (content.trim() === "") {
-        Swal.fire({
-          title: "Comment is required",
-          icon: "info",
-          confirmButtonColor: "#ee3131",
-        });
-        return;
-      }
-      if (!(await requireLogin())) return;
-      const res = await apiCreateComment({
+  const { accessToken } = useSelector((state) => state.user);
+  console.log("Comments:", comments);
+  // Mock handlers
+  const handleSubmitComment = useCallback(
+    async ({ rating, content, parentId, replyOnUser, images }) => {
+      console.log("Submit comment:", {
         content,
-        rating,
-        pId,
         parentId,
-        token: accessToken,
         replyOnUser,
+        images,
       });
-      if (res.success) {
-        socket.emit("handle-comment");
-        Toast.fire({
-          icon: "success",
-          title: "Bình luận thành công",
-        });
-        setFetchAgain((prev) => !prev);
-        setAffectedComment(null);
-        dispatch(
-          appActions.toggleModal({ isShowModal: false, childrenModal: false })
-        );
-      }
-    } catch (error) {
-      Toast.fire({
-        icon: "error",
-        title: error.message,
-      });
-    }
-  };
-  const handleUpdateComment = async ({ commentId, content, rating }) => {
-    const res = await apiUpdateComment({
-      content,
-      rating,
-      commentId,
-      token: accessToken,
-    });
-    if (res.success) {
-      socket.emit("handle-comment");
-      Toast.fire({
-        icon: "success",
-        title: "Câp nhật bình luận thành công",
-      });
-      if (rating) {
-        dispatch(
-          appActions.toggleModal({ isShowModal: false, childrenModal: false })
-        );
-      }
-      setAffectedComment(null);
-      setFetchAgain((prev) => !prev);
-    }
-  };
-  const handleDeleteComment = async ({ commentId }) => {
-    const res = await apiDeleteComment({ commentId, token: accessToken });
-    if (res.success) {
-      socket.emit("handle-comment");
-      Toast.fire({
-        icon: "success",
-        title: "Xóa bình luận thành công",
-      });
-      setFetchAgain((prev) => !prev);
-    }
-  };
-  const handleLikeComment = async ({ commentId }) => {
-    await apiLikeComment({ commentId, token: accessToken });
-    socket.emit("handle-comment");
-    setFetchAgain((prev) => !prev);
-  };
-  const handleClickShowModalRating = useCallback(async () => {
-    if (!(await requireLogin())) return;
-    dispatch(
-      appActions.toggleModal({
-        isShowModal: true,
-        animation: true,
-        childrenModal: (
-          <RatingModal
-            title={title}
-            handleSubmitComment={handleSubmitComment}
-          />
-        ),
-      })
-    );
-  }, [title]);
-  const handleShowModalUpdateRating = useCallback(async () => {
-    if (!(await requireLogin())) return;
-    dispatch(
-      appActions.toggleModal({
-        isShowModal: true,
-        animation: true,
-        childrenModal: (
-          <RatingModal
-            title={title}
-            rating={rated.rating}
-            content={rated.content}
-            handleSubmitComment={({ rating, content }) =>
-              handleUpdateComment({ rating, content, commentId: rated._id })
-            }
-          />
-        ),
-      })
-    );
-  }, [rated]);
-  useEffect(() => {
-    setRated(comments?.find((comment) => comment.user._id === userData._id));
-  }, [comments]);
-  return (
-    <div>
-      <div className="">
-        <VoteBar totalRating={totalRating} comments={comments} />
-        {
-          rated ? (
-            <YourRating
-              comment={rated}
-              handleShowModalUpdateRating={handleShowModalUpdateRating}
-              handleDeleteComment={handleDeleteComment}
-            />
-          ) : (
-            <div className="flex justify-center">
-              <Button onClick={handleClickShowModalRating}>
-                Đánh giá ngay
-              </Button>
-            </div>
-          )
-          // <Comment
-          // />
+
+      if (!parentId) {
+        try {
+          const res = await apiComment({
+            accessToken,
+            body: {
+              productDetailId,
+              content,
+              rating,
+              reviewImage: images,
+            },
+          });
+          if (res.code === 200) {
+            setFetchCommentAgain((prev) => !prev);
+          } else {
+            showToastError(res.message);
+          }
+        } catch (error) {
+          const errorMessage =
+            error.message || "An unknown error occurred during upload.";
+          showToastError(errorMessage); // Uncomment if 'showToastError' is defined
         }
+      } else {
+        try {
+          const res = await apiReplyComment({
+            accessToken,
+            body: {
+              productDetailId,
+              parentId,
+              replyToUserid: replyOnUser,
+              content,
+              reviewImage: images,
+            },
+          });
+          if (res.code === 200) {
+            setFetchCommentAgain((prev) => !prev);
+          } else {
+            showToastError(res.message);
+          }
+        } catch (error) {
+          const errorMessage =
+            error.message || "An unknown error occurred during upload.";
+          showToastError(errorMessage); // Uncomment if 'showToastError' is defined
+        }
+        setAffectedComment(null);
+      }
+    },
+    [productDetailId]
+  );
+
+  const handleUpdateComment = ({ commentId, content, rating }) => {
+    console.log("Update comment:", { commentId, content, rating });
+    setAffectedComment(null);
+  };
+
+  const handleDeleteComment = ({ commentId }) => {
+    console.log("Delete comment:", { commentId });
+  };
+
+  const handleShowModalUpdateRating = () => {
+    console.log("Show update rating modal");
+  };
+  const currentUserAvatar = "https://randomuser.me/api/portraits/men/1.jpg";
+  // Tìm comment của user hiện tại
+  const rated = comments?.find(
+    (comment) => comment._id === comments._id && comment?.rating > 0
+  );
+
+  return (
+    <div className="space-y-8">
+      {/* Vote Bar */}
+      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
+        <VoteBar totalRating={totalRating} comments={comments} />
       </div>
-      {comments?.map((comment) => (
-        <Comment
-          key={comment._id}
-          userId={userData._id}
-          comment={comment}
-          isAdmin={isAdmin}
-          affectedComment={affectedComment}
-          setAffectedComment={setAffectedComment}
-          handleSubmitComment={handleSubmitComment}
-          handleUpdateComment={handleUpdateComment}
-          handleDeleteComment={handleDeleteComment}
-          handleLikeComment={handleLikeComment}
-          replies={comment.replies}
+      <div className="bg-white p-6 rounded-2xl border">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Bình luận</h3>
+        <CommentForm
+          submitLabel="Gửi đánh giá"
+          userAvatar={currentUserAvatar || DefaultUser}
+          onSubmit={handleSubmitComment}
         />
-      ))}
+      </div>
+      {rated && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
+          <YourRating
+            comment={rated}
+            handleShowModalUpdateRating={handleShowModalUpdateRating}
+            handleDeleteComment={handleDeleteComment}
+          />
+        </div>
+      )}
+
+      {/* Comments List */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+          💬 Tất cả bình luận
+        </h3>
+
+        <div className="space-y-6">
+          {comments?.map((comment) => (
+            <div
+              key={comment._id}
+              className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0"
+            >
+              <Comment
+                userId={comment.userId}
+                comment={comment}
+                isAdmin={false}
+                affectedComment={affectedComment}
+                setAffectedComment={setAffectedComment}
+                handleSubmitComment={handleSubmitComment}
+                handleUpdateComment={handleUpdateComment}
+                handleDeleteComment={handleDeleteComment}
+                replies={comment.childReviewResponses || []}
+              />
+            </div>
+          ))}
+        </div>
+
+        {(!comments || comments.length === 0) && (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-6xl mb-4">💬</div>
+            <p className="text-lg">Chưa có bình luận nào</p>
+            <p className="text-sm mt-2">
+              Hãy là người đầu tiên chia sẻ trải nghiệm!
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default memo(CommentContainer);
+export default CommentContainer;

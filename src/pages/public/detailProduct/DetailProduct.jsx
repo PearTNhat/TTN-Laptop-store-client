@@ -11,7 +11,7 @@ import ProductPrice from "./components/ProductPrice";
 import ColorSelector from "./components/ColorSelector";
 import QuantitySelector from "./components/QuantitySelector";
 import ActionButtons from "./components/ActionButtons";
-import CommentContainer from "~/components/comments/MockCommentContainer";
+import CommentContainer from "~/components/comments/CommentContainer";
 import { apiGetDetailProduct } from "~/apis/productApi";
 import { apiCreateCart } from "~/apis/cartApi";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,100 +20,6 @@ import { apiGetComments } from "~/apis/commentApi";
 import { fetchCart } from "~/stores/action/cart";
 
 // ✨ Import the new ToggleIcon component
-
-const mockUserData = {
-  _id: "user123",
-  firstName: "Nguyen",
-  lastName: "Van A",
-  isLoggedIn: true,
-  accessToken: "fake-token-123",
-  isAdmin: false,
-  avatar: { url: "https://randomuser.me/api/portraits/men/1.jpg" },
-};
-const fakeComments = [
-  {
-    _id: "comment1",
-    user: {
-      _id: "user456",
-      firstName: "Minh",
-      lastName: "Nguyen",
-      avatar: { url: "https://randomuser.me/api/portraits/men/32.jpg" },
-    },
-    content:
-      "Laptop này rất tuyệt vời! Hiệu năng mạnh mẽ, thiết kế đẹp và pin trâu. Rất đáng tiền!",
-    createdAt: new Date(Date.now() - 3600 * 1000 * 5), // 5 giờ trước
-    rating: 5,
-    likes: [mockUserData._id, "user789"],
-    replyOnUser: null,
-    replies: [
-      {
-        _id: "reply1",
-        user: {
-          _id: "user789",
-          firstName: "Hà",
-          lastName: "Tran",
-          avatar: {
-            url: "https://randomuser.me/api/portraits/women/44.jpg",
-          },
-        },
-        content: "Mình cũng đang dùng model này, thật sự rất hài lòng!",
-        createdAt: new Date(Date.now() - 3600 * 1000 * 2), // 2 giờ trước
-        rating: 0,
-        likes: [],
-        replyOnUser: {
-          _id: "user456",
-          firstName: "Minh",
-          lastName: "Nguyen",
-        },
-        replies: [],
-      },
-    ],
-  },
-  {
-    _id: "comment2",
-    user: {
-      _id: "user789",
-      firstName: "Long",
-      lastName: "Pham",
-      avatar: { url: "https://randomuser.me/api/portraits/men/65.jpg" },
-    },
-    content:
-      "Sản phẩm tốt nhưng giá hơi cao. Tuy nhiên chất lượng xứng đáng với giá tiền.",
-    createdAt: new Date(Date.now() - 3600 * 1000 * 24), // 1 ngày trước
-    rating: 4,
-    likes: [mockUserData._id],
-    replyOnUser: null,
-    replies: [],
-  },
-  {
-    _id: "comment3",
-    user: mockUserData, // Comment của user hiện tại
-    content:
-      "Mình vừa mới mua và test thử, cảm giác rất tốt. Màn hình sắc nét, âm thanh chất lượng.",
-    createdAt: new Date(Date.now() - 3600 * 1000 * 12), // 12 giờ trước
-    rating: 5,
-    likes: ["user456", "user789"],
-    replyOnUser: null,
-    replies: [],
-  },
-  {
-    _id: "comment4",
-    user: {
-      _id: "user999",
-      firstName: "An",
-      lastName: "Vo",
-      avatar: { url: "https://randomuser.me/api/portraits/women/68.jpg" },
-    },
-    content:
-      "Giao hàng nhanh, đóng gói cẩn thận. Sản phẩm như mô tả, rất hài lòng!",
-    createdAt: new Date(Date.now() - 3600 * 1000 * 48), // 2 ngày trước
-    rating: 4,
-    likes: [],
-    replyOnUser: null,
-    replies: [],
-  },
-];
-
 function DetailProduct() {
   const { pId } = useParams();
   const dispatch = useDispatch();
@@ -127,7 +33,7 @@ function DetailProduct() {
   const [isReadMore, setIsReadMore] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState([]);
-  const [totalRating, setTotalRating] = useState(0);
+  const [fetchCommentAgain, setFetchCommentAgain] = useState(false);
 
   const getDetailProduct = async (pId) => {
     try {
@@ -160,8 +66,12 @@ function DetailProduct() {
 
   useEffect(() => {
     getDetailProduct(pId);
-    getComments(pId);
   }, [pId]);
+
+  useEffect(() => {
+    getDetailProduct(pId);
+    getComments(pId);
+  }, [pId, fetchCommentAgain]);
 
   useEffect(() => {
     // window.scrollTo(0, 0);
@@ -337,7 +247,12 @@ function DetailProduct() {
             </h2>
           </div>
           <div className="p-6">
-            <CommentContainer comments={comments} totalRating={totalRating} />
+            <CommentContainer
+              productDetailId={pId}
+              setFetchCommentAgain={setFetchCommentAgain}
+              comments={comments}
+              totalRating={productDetails?.totalRating}
+            />
           </div>
         </div>
       </div>

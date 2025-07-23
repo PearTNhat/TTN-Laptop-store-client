@@ -13,7 +13,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export default function PaymentConfirmation() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { accessToken } = useSelector((state) => state.user);
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
@@ -27,7 +26,6 @@ export default function PaymentConfirmation() {
     email: fakeUserData.email,
     note: "",
   });
-
   const handleCreateOrder = () => {
     if (!selectedShippingInfo) {
       alert("Vui lòng chọn hoặc thêm địa chỉ giao hàng!");
