@@ -17,7 +17,7 @@ const apiGetMyCart = async ({ accessToken }) => {
         throw new Error(error.message);
     }
 };
-const apiCreateCart = async ({ accessToken, productDetailId, quantity }) => {
+const apiCreateCart = async ({ accessToken, productDetailId, quantity, productPromotionId }) => {
     try {
         const config = {
             headers: {
@@ -28,6 +28,7 @@ const apiCreateCart = async ({ accessToken, productDetailId, quantity }) => {
         const body = {
             productDetailId,
             quantity,
+            productPromotionId
         }
         console.log(body)
         const { data } = await http.post("carts/create", body, config);

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import ProfileInfo from "./components/ProfileInfo";
 import MyOrders from "./components/MyOrders";
 import VoucherList from "./components/VoucherList";
+import Voucher from "./components/Voucher";
 
 import ChangePassword from "./components/ChangePassword";
+import ChangeEmail from "./components/ChangeEmail"; // 👉 mới
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState(() => {
@@ -17,31 +19,23 @@ const Profile = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "info":
-        return <ProfileInfo />;
-      case "orders":
-        return <MyOrders />;
-      case "vouchers":
-        return <VoucherList />;
-      case "password":
-        return <ChangePassword />;
-      default:
-        return null;
+      case "info": return <ProfileInfo />;
+      case "orders": return <MyOrders />;
+      case "vouchers": return <VoucherList  />;
+      case "password": return <ChangePassword />;
+      case "change_email": return <ChangeEmail />;
+      default: return null;
     }
   };
 
   const getTabLabel = () => {
     switch (activeTab) {
-      case "info":
-        return "Thông tin cá nhân";
-      case "orders":
-        return "Đơn hàng của tôi";
-      case "vouchers":
-        return "Kho voucher";
-      case "password":
-        return "Đổi mật khẩu";
-      default:
-        return "";
+      case "info": return "Thông tin cá nhân";
+      case "orders": return "Đơn hàng của tôi";
+      case "vouchers": return "Kho voucher";
+      case "password": return "Đổi mật khẩu";
+      case "changemail": return "Đổi Email"
+      default: return "";
     }
   };
 
@@ -70,6 +64,7 @@ const Profile = () => {
 
           <a
             href="/"
+            onClick={() => localStorage.removeItem("activeTab")} 
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-indigo-600 hover:to-sky-600 rounded-lg shadow transition"
           >
             🏠 Về trang chủ
@@ -82,30 +77,11 @@ const Profile = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            <TabButton
-              active={activeTab === "info"}
-              onClick={() => changeTab("info")}
-            >
-              👤 Thông tin
-            </TabButton>
-            <TabButton
-              active={activeTab === "orders"}
-              onClick={() => changeTab("orders")}
-            >
-              📦 Đơn hàng
-            </TabButton>
-            <TabButton
-              active={activeTab === "vouchers"}
-              onClick={() => changeTab("vouchers")}
-            >
-              🎟 Voucher
-            </TabButton>
-            <TabButton
-              active={activeTab === "password"}
-              onClick={() => changeTab("password")}
-            >
-              🔒 Đổi mật khẩu
-            </TabButton>
+            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
+            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
+            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
+            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
+            <TabButton active={activeTab === "change_email"} onClick={() => changeTab("change_email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
           </nav>
 
           {/* Section Title */}
@@ -137,3 +113,4 @@ const TabButton = ({ active, onClick, children }) => (
 );
 
 export default Profile;
+

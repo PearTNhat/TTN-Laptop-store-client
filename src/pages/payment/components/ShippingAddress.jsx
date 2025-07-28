@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   FaHome,
   FaCheckCircle,
@@ -11,8 +11,15 @@ import {
   FaPencilAlt, // Thêm icon bút chì
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import {
+  apiCreateAddress,
+  apiDeleteAddress,
+  apiUpdateAddress,
+} from "~/apis/addressApi";
+import ConfirmModal from "~/components/modal/ConfirmModal";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 
-const ShippingAddress = ({ setSelectedShippingInfo }) => {
+const ShippingAddress = ({ accessToken, setSelectedShippingInfo }) => {
   // --- State quản lý UI ---
   const { addresses } = useSelector((state) => state.address);
   const [localAddresses, setLocalAddresses] = useState([]);
@@ -25,7 +32,6 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
   const [name, setName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newAddressName, setNewAddressName] = useState("");
-  console.log("Addresses from Redux:", addresses);
   // --- HOOKS QUẢN LÝ LOGIC ---
   useEffect(() => {
     if (!addresses || addresses.length === 0) {
@@ -41,16 +47,16 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
       const defaultAddress =
         sortedAddresses.find((addr) => addr.default) || sortedAddresses[0];
       if (defaultAddress) {
-        setSelectedAddressId(defaultAddress.addressId);
+        setSelectedAddressId(defaultAddress.id);
         setSelectedShippingInfo(defaultAddress);
       }
     }
   }, [addresses, setSelectedShippingInfo]);
-
+  console.log("Local addresses:__", selectedAddressId);
   useEffect(() => {
     if (selectedAddressId) {
       const selected = localAddresses.find(
-        (addr) => addr.addressId === selectedAddressId
+        (addr) => addr.id === selectedAddressId
       );
       if (selected) {
         setSelectedShippingInfo(selected);
@@ -59,18 +65,61 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
   }, [selectedAddressId, localAddresses, setSelectedShippingInfo]);
 
   // --- CÁC HÀM XỬ LÝ SỰ KIỆN ---
-  const handleDeleteAddress = (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
-    setLocalAddresses((prev) => prev.filter((addr) => addr.addressId !== id));
-  };
+  const handleDeleteAddress = useCallback(
+    async (id) => {
+      const res = await ConfirmModal.show({
+        title: "Xác nhận xóa địa chỉ",
+        text: "Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể hoàn tác.",
+        icon: "warning",
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy",
+      });
+      if (res.isConfirmed) {
+        try {
+          const res = await apiDeleteAddress({ accessToken, id });
+          if (res.code === 200) {
+            showToastSuccess("Địa chỉ đã được xóa thành công.");
+            setLocalAddresses((prev) => prev.filter((addr) => addr.id !== id));
+          } else {
+            showToastError(res.message || "Không thể xóa địa chỉ");
+          }
+        } catch (error) {
+          showToastError(error.message || "Không thể xóa địa chỉ");
+        }
+      }
+    },
+    [accessToken]
+  );
 
-  const handleSetDefault = (id) => {
-    const updated = localAddresses
-      .map((addr) => ({ ...addr, default: addr.addressId === id }))
-      .sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
-    setLocalAddresses(updated);
-    setSelectedAddressId(id);
-  };
+  const handleSetDefault = useCallback(
+    async (addr) => {
+      try {
+        const res = await apiUpdateAddress({
+          accessToken,
+          id: addr.id,
+          address: addr.address,
+          phone: addr.phone,
+          recipient: addr.recipient,
+          isDefault: true,
+        });
+        if (res.code === 200) {
+          showToastSuccess("Địa chỉ đã được cập nhật thành công.");
+          const updated = localAddresses
+            .map((address) => ({ ...address, default: address.id === addr.id }))
+            .sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
+
+          console.log("Updated addresses after setting default:", updated);
+          setLocalAddresses(updated);
+          setSelectedAddressId(addr.id);
+        } else {
+          showToastError(res.message || "Không thể cập nhật địa chỉ");
+        }
+      } catch (error) {
+        showToastError(error.message || "Không thể cập nhật địa chỉ");
+      }
+    },
+    [accessToken, localAddresses]
+  );
 
   // Mở form để thêm địa chỉ mới
   const handleAddNewClick = () => {
@@ -80,10 +129,10 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
   // Mở form để sửa địa chỉ
   const handleEditClick = (address) => {
     setViewMode("EDIT");
-    setEditingAddressId(address.addressId);
+    setEditingAddressId(address.id);
     setName(address.recipient);
     setNewPhone(address.phone);
-    setNewAddressName(address.addressName);
+    setNewAddressName(address.address);
   };
 
   // Hủy và quay lại danh sách
@@ -96,7 +145,7 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
   };
 
   // Xử lý LƯU hoặc CẬP NHẬT địa chỉ
-  const handleSaveOrUpdateAddress = () => {
+  const handleSaveOrUpdateAddress = async () => {
     if (!name || !newPhone || !newAddressName) {
       alert(
         "Vui lòng điền đầy đủ thông tin: Họ tên, Số điện thoại và Địa chỉ."
@@ -105,29 +154,58 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
     }
 
     if (viewMode === "EDIT") {
-      // Logic cập nhật
-      const updatedAddresses = localAddresses.map((addr) =>
-        addr.addressId === editingAddressId
-          ? {
-              ...addr,
-              recipient: name,
-              phone: newPhone,
-              addressName: newAddressName,
-            }
-          : addr
-      );
-      setLocalAddresses(updatedAddresses);
+      try {
+        const res = await apiUpdateAddress({
+          accessToken,
+          id: editingAddressId,
+          address: newAddressName,
+          phone: newPhone,
+          recipient: name,
+        });
+        if (res.code === 200) {
+          showToastSuccess("Địa chỉ đã được cập nhật thành công.");
+          const updatedAddresses = localAddresses.map((addr) =>
+            addr.id === editingAddressId
+              ? {
+                  ...addr,
+                  recipient: name,
+                  phone: newPhone,
+                  address: newAddressName,
+                }
+              : addr
+          );
+          setLocalAddresses(updatedAddresses);
+        } else {
+          showToastError(res.message || "Không thể cập nhật địa chỉ");
+        }
+      } catch (error) {
+        showToastError(error.message || "Không thể cập nhật địa chỉ");
+      }
     } else {
       // Logic thêm mới (viewMode === 'ADD')
-      const newAddress = {
-        addressId: `new_${Date.now()}`,
-        addressName: newAddressName,
-        recipient: name,
-        phone: newPhone,
-        default: localAddresses.length === 0, // Tự động set default nếu là địa chỉ đầu tiên
-      };
-      setLocalAddresses((prev) => [newAddress, ...prev]);
-      setSelectedAddressId(newAddress.addressId);
+      try {
+        const res = await apiCreateAddress({
+          accessToken,
+          address: newAddressName,
+          phone: newPhone,
+          recipient: name,
+        });
+        if (res.code === 200) {
+          showToastSuccess("Địa chỉ đã được thêm thành công.");
+          const newAddress = {
+            id: res.data.id,
+            address: newAddressName,
+            recipient: name,
+            phone: newPhone,
+            default: false,
+          };
+          setLocalAddresses((prev) => [...prev, newAddress]);
+        } else {
+          showToastError(res.message || "Không thể thêm địa chỉ");
+        }
+      } catch (error) {
+        showToastError(error.message || "Không thể thêm địa chỉ");
+      }
     }
 
     handleCancelForm(); // Reset form và quay lại danh sách
@@ -189,9 +267,9 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
       <div className="space-y-4">
         {localAddresses.map((addr) => (
           <div
-            key={addr.addressId}
+            key={addr.id}
             className={`relative p-4 border-2 rounded-xl transition-all ${
-              addr.addressId === selectedAddressId
+              addr.id === selectedAddressId
                 ? "bg-blue-50 border-blue-300 shadow-md"
                 : "bg-gray-50 border-gray-200 hover:bg-white hover:shadow-sm"
             }`}
@@ -216,23 +294,23 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
                 </div>
                 <div className="flex items-start gap-3">
                   <FaMapMarkerAlt className="text-gray-500 mt-1" />
-                  <span className="text-gray-700">{addr.addressName}</span>
+                  <span className="text-gray-700">{addr.address}</span>
                 </div>
               </div>
 
               {/* Các nút hành động */}
               {!isDeleteMode && (
-                <div className="flex flex-row lg:flex-col gap-2 items-center justify-end">
+                <div className="flex flex-row md:flex-col gap-2 items-center justify-end">
                   <div className="flex gap-1">
                     <button
-                      onClick={() => setSelectedAddressId(addr.addressId)}
+                      onClick={() => setSelectedAddressId(addr.id)}
                       className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all w-full lg:w-auto ${
-                        addr.addressId === selectedAddressId
+                        addr.id === selectedAddressId
                           ? "bg-blue-600 text-white shadow-md"
                           : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
                       }`}
                     >
-                      {addr.addressId === selectedAddressId ? (
+                      {addr.id === selectedAddressId ? (
                         <FaCheckCircle />
                       ) : (
                         <FaRegCircle />
@@ -245,15 +323,15 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
                     </button>
                     <button
                       onClick={() => handleEditClick(addr)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-all w-full lg:w-auto"
+                      className="flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-700 hover:bg-yellow-200 transition-all w-full lg:w-auto"
                     >
                       <FaPencilAlt />
                     </button>
                   </div>
                   {!addr.default && (
                     <button
-                      onClick={() => handleSetDefault(addr.addressId)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-all w-full lg:w-auto"
+                      onClick={() => handleSetDefault(addr)}
+                      className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-all w-full"
                     >
                       <FaHome />
                       <span>Đặt mặc định</span>
@@ -265,7 +343,7 @@ const ShippingAddress = ({ setSelectedShippingInfo }) => {
               {/* Nút xóa trong chế độ xóa */}
               {isDeleteMode && (
                 <button
-                  onClick={() => handleDeleteAddress(addr.addressId)}
+                  onClick={() => handleDeleteAddress(addr.id)}
                   className="absolute top-3 right-3 text-red-500 hover:text-red-700 bg-white rounded-full p-2 shadow-md"
                 >
                   <FaTrash size={16} />

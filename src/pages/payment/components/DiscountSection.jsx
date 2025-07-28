@@ -4,6 +4,7 @@ import { apiGetMyPromotion } from "~/apis/promotionApi";
 import VoucherCard from "~/components/voucher/VoucherCard";
 import { showToastError, showToastSuccess } from "~/utils/alert";
 import { formatNumber } from "~/utils/helper";
+import { calculateDiscount } from "~/utils/promotion";
 
 const DiscountSection = ({
   orderTotal,
@@ -15,7 +16,7 @@ const DiscountSection = ({
   const [showVouchers, setShowVouchers] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const [vouchers, setVouchers] = useState([]);
-
+  console.log("--- DISCOUNT SECTION ---", vouchers);
   useEffect(() => {
     const getPromotions = async () => {
       try {
@@ -58,7 +59,7 @@ const DiscountSection = ({
       setDiscountAmount(0);
       return;
     }
-    const foundVoucher = vouchers.find((v) => v.id === Number(code));
+    const foundVoucher = vouchers.find((v) => v.code === code);
 
     if (!foundVoucher) {
       showToastError("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
@@ -66,16 +67,8 @@ const DiscountSection = ({
     }
 
     if (orderTotal >= foundVoucher.minOrderValue) {
-      let valueDiscount =
-        foundVoucher.discountType === "AMOUNT"
-          ? foundVoucher.discountValue
-          : (foundVoucher.discountValue * orderTotal) / 100;
-
-      if (foundVoucher.maxValue && valueDiscount > foundVoucher.maxValue) {
-        valueDiscount = foundVoucher.maxValue;
-      }
-      setDiscountAmount(valueDiscount);
-      setSelectedCoupon({ code: foundVoucher.id });
+      setDiscountAmount(calculateDiscount(orderTotal, foundVoucher));
+      setSelectedCoupon({ code: foundVoucher.code, id: foundVoucher.id });
       // Tự động đóng danh sách voucher khi áp dụng thành công từ danh sách
       showToastSuccess(`Áp dụng voucher ${foundVoucher.id} thành công!`);
     } else {
@@ -130,8 +123,8 @@ const DiscountSection = ({
               <VoucherCard
                 key={voucher.id}
                 promotion={voucher}
-                isActive={selectedCoupon?.code === voucher.id}
-                handleApplyDiscount={() => applyOrRemoveVoucher(voucher.id)}
+                isActive={selectedCoupon?.code === voucher.code}
+                handleApplyDiscount={() => applyOrRemoveVoucher(voucher.code)}
               />
             ))
           ) : (

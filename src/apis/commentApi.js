@@ -34,7 +34,6 @@ const apiComment = async ({ accessToken, body }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         };
-        console.log("apiComment body:", body);
         const { data } = await http.post("/reviews/comment", body, config);
         return data;
     } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CartHeader from "./CartHeader";
 import CartEmptyState from "./CartEmptyState";
@@ -6,7 +6,9 @@ import CartSelectAll from "./CartSelectAll";
 import CartItemsList from "./CartItemsList";
 import CartFooter from "./CartFooter";
 import { showAlertInfo } from "~/utils/alert";
-
+import { useSelector } from "react-redux";
+import { apiGetPromotionId } from "~/apis/promotionApi";
+import { calculateFinalPrice } from "~/utils/promotion";
 const Cart = ({
   isOpen,
   onClose,
@@ -16,6 +18,59 @@ const Cart = ({
 }) => {
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState([]);
+  const { accessToken } = useSelector((state) => state.user);
+  const [processedCartItems, setProcessedCartItems] = useState([]);
+  useEffect(() => {
+    const processItemsWithPromotions = async () => {
+      if (!cartItems || cartItems.length === 0) {
+        setProcessedCartItems([]);
+        return;
+      }
+
+      const promotionCache = new Map();
+      const promotionPromises = cartItems
+        .filter(
+          (item) =>
+            item.productPromotionId &&
+            !promotionCache.has(item.productPromotionId)
+        )
+        .map(async (item) => {
+          promotionCache.set(item.productPromotionId, null);
+          return apiGetPromotionId({
+            accessToken,
+            promotionId: item.productPromotionId,
+          });
+        });
+      const promotionResponses = await Promise.all(promotionPromises);
+      promotionResponses.forEach((response) => {
+        if (response.code === 200 && response.data) {
+          promotionCache.set(response.data.id, response.data);
+        }
+      });
+      // Xử lý từng item trong giỏ hàng để tính toán giá cuối cùng
+      const newProcessedItems = cartItems.map((item) => {
+        const promotion = item.productPromotionId
+          ? promotionCache.get(item.productPromotionId)
+          : null;
+        const priceInfo = calculateFinalPrice(
+          item.originalPrice,
+          promotion ? [promotion] : [], // calculateFinalPrice mong đợi một mảng
+          item.quantity
+        );
+
+        // Trả về một object item mới với giá đã được cập nhật
+        return {
+          ...item,
+          discountPrice: priceInfo.finalPrice, // Giá đã giảm cho 1 sản phẩm
+          appliedPromotion: priceInfo.appliedPromotion, // Lưu lại KM đã áp dụng
+        };
+      });
+
+      setProcessedCartItems(newProcessedItems);
+    };
+    processItemsWithPromotions();
+  }, [cartItems, accessToken]);
+
   // Handle select all items
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -51,7 +106,7 @@ const Cart = ({
 
   // Calculate total for selected items
   const calculateSelectedTotal = () => {
-    return cartItems
+    return processedCartItems
       .filter((item) => selectedItems.includes(item.productDetailId))
       .reduce((total, item) => total + item.discountPrice * item.quantity, 0);
   };
@@ -71,7 +126,7 @@ const Cart = ({
     }
 
     // Lấy các item đã chọn
-    const selectedCartItems = cartItems.filter((item) =>
+    const selectedCartItems = processedCartItems.filter((item) =>
       selectedItems.includes(item.productDetailId)
     );
     const totalAmount = selectedCartItems.reduce(
@@ -90,7 +145,6 @@ const Cart = ({
       })),
       totalAmount: totalAmount,
     };
-    console.log("Formatted order for checkout:", formattedOrder);
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {
@@ -124,12 +178,12 @@ const Cart = ({
               <CartSelectAll
                 isOpen={isOpen}
                 selectedItems={selectedItems}
-                cartItems={cartItems}
+                cartItems={processedCartItems}
                 onSelectAll={handleSelectAll}
               />
 
               <CartItemsList
-                cartItems={cartItems}
+                cartItems={processedCartItems}
                 isOpen={isOpen}
                 selectedItems={selectedItems}
                 onSelectItem={handleSelectItem}

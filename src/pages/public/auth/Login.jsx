@@ -1,44 +1,121 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { apiLogin } from "~/apis/authApi";
-import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userActions } from "~/stores/slice/userSlice";
-import { showToastSuccess } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // Khi người dùng nhập email → kiểm tra localStorage để auto-fill password
+  useEffect(() => {
+    const remembered = JSON.parse(
+      localStorage.getItem("rememberedUsers") || "{}"
+    );
+    const savedPassword = remembered[formData.email];
+    if (savedPassword) {
+      setFormData((prev) => ({ ...prev, password: savedPassword }));
+      setRememberMe(true);
+    } else {
+      setRememberMe(false);
+      setFormData((prev) => ({ ...prev, password: "" }));
+    }
+  }, [formData.email]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     try {
       const body = {
         username: formData.email,
         password: formData.password,
       };
+
       const res = await apiLogin({ body });
-      dispatch(userActions.login(res.data));
-      showToastSuccess("Đăng nhập thành công!");
-      navigate("/");
+      if (res.code === 200) {
+        showToastSuccess("Đăng nhập thành công!");
+        dispatch(
+          userActions.login({
+            accessToken: res.data,
+          })
+        );
+        navigate("/");
+      } else {
+        showToastError(res.message || "Đăng nhập thất bại.");
+      }
+      // if (res.success && res.token) {
+      //   const token = res.token;
+      //   localStorage.setItem("token", token);
+
+      //   // Ghi nhớ mật khẩu nếu được chọn
+      //   const remembered = JSON.parse(
+      //     localStorage.getItem("rememberedUsers") || "{}"
+      //   );
+      //   if (rememberMe) {
+      //     remembered[formData.email] = formData.password;
+      //   } else {
+      //     delete remembered[formData.email];
+      //   }
+      //   localStorage.setItem("rememberedUsers", JSON.stringify(remembered));
+
+      //   const fetchRes = await apiFetchMyInfo({ token });
+
+      //   if (fetchRes.code === 200 && fetchRes.data) {
+      //     dispatch(
+      //       userActions.login({
+      //         accessToken: token,
+      //         userData: fetchRes.data,
+      //       })
+      //     );
+      //     showToastSuccess("Đăng nhập thành công!");
+      //     navigate("/");
+      //   } else {
+      //     alert(fetchRes.message || "Không thể lấy thông tin người dùng.");
+      //   }
+      // } else {
+      //   alert(res.message || "Đăng nhập thất bại.");
+      // }
     } catch (error) {
       console.error("Login failed:", error);
+      alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleRememberChange = (e) => {
+    const checked = e.target.checked;
+    setRememberMe(checked);
+    if (!checked) {
+      const remembered = JSON.parse(
+        localStorage.getItem("rememberedUsers") || "{}"
+      );
+      delete remembered[formData.email];
+      localStorage.setItem("rememberedUsers", JSON.stringify(remembered));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl">
-        <h2 className="text-3xl font-bold text-center text-[#1877F2] mb-8 tracking-tight">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <h2 className="text-3xl font-bold text-center text-[#1877F2] mb-8">
           Đăng nhập
         </h2>
 
@@ -53,11 +130,10 @@ const Login = () => {
             <input
               id="email"
               name="email"
-              // type="email"
               value={formData.email}
               onChange={handleInputChange}
               placeholder="example@gmail.com"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#1877F2] bg-gray-50"
               required
             />
           </div>
@@ -77,15 +153,15 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2] focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#1877F2] bg-gray-50"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPasswords(!showPasswords)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
               >
-                {showPasswords ? "🙈" : "👁️"}
+                {showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
@@ -94,7 +170,9 @@ const Login = () => {
             <label className="flex items-center text-sm text-gray-600">
               <input
                 type="checkbox"
-                className="mr-2 rounded border-gray-300 text-[#1877F2] focus:ring-[#1877F2]"
+                className="mr-2 rounded border-gray-300 text-[#1877F2]"
+                checked={rememberMe}
+                onChange={handleRememberChange}
               />
               Ghi nhớ đăng nhập
             </label>
@@ -109,7 +187,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full bg-[#1877F2] hover:bg-[#1666D2] text-white font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] ${
+            className={`w-full bg-[#1877F2] hover:bg-[#1666D2] text-white font-semibold py-3 rounded-lg transition-all duration-200 ${
               isSubmitting ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
@@ -128,15 +206,18 @@ const Login = () => {
         </p>
 
         <div className="mt-6 flex items-center justify-center gap-4">
-          <div className="h-px bg-gray-200 flex-1"></div>
+          <div className="h-px bg-gray-200 flex-1" />
           <span className="text-sm text-gray-500">hoặc</span>
-          <div className="h-px bg-gray-200 flex-1"></div>
+          <div className="h-px bg-gray-200 flex-1" />
         </div>
 
         <button
-          className="mt-4 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+          className="mt-4 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
           onClick={() => {
-            const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=378323217488-16f9jv2kdmlek9oui2orsfmvith1n0u7.apps.googleusercontent.com&redirect_uri=http://localhost:3000&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
+            const redirectUri = "http://localhost:5173/login/callback";
+            const googleClientId =
+              "917950957036-qujvo7u12pod1nemt3jv34l7qlj9dqop.apps.googleusercontent.com";
+            const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&access_type=offline`;
             window.location.href = googleLoginUrl;
           }}
         >
@@ -159,19 +240,6 @@ const Login = () => {
             />
           </svg>
           Đăng nhập với Google
-        </button>
-
-        <button
-          className="mt-2 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={() => console.log("Facebook login")}
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path
-              fill="#1877F2"
-              d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"
-            />
-          </svg>
-          Đăng nhập với Facebook
         </button>
       </div>
     </div>

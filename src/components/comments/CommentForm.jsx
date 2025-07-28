@@ -58,7 +58,7 @@ function CommentForm({
         formData.append("file", file);
         const response = await apiGetImgString({ accessToken, formData });
         if (response.code === 200) {
-          return { success: true, url: response.data.url };
+          return { success: true, url: response.data };
         } else {
           showToastError(response.message);
           return { success: false, error: response.message };
@@ -140,7 +140,10 @@ function CommentForm({
       .filter((img) => img.status === "uploaded")
       .map((img) => img.serverUrl);
 
-    if (!content.trim() && successfulImages.length === 0) return;
+    if (!content || content.trim() === "") {
+      showToastError("Nội dung bình luận không được để trống.");
+      return;
+    }
 
     // Truyền mảng các URL đã upload thành công đi
     onSubmit({ content, images: successfulImages });

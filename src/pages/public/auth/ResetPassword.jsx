@@ -1,16 +1,19 @@
 import React, { useState, useRef, use } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Eye, EyeOff } from 'lucide-react';
+import {
+  apiSendOtpForgotPw,
+  apiVerifyOtp,
+  apiResetPassword,
+} from "~/apis/authApi";
 
 const ResetPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [resetToken, setResetToken] = useState('');
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
-  const [showPasswords, setShowPasswords] = useState({
-    new: false,
-    confirm: false,
-  });
+  const [showPasswords, setShowPasswords] = useState({ new: false, confirm: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -23,7 +26,7 @@ const ResetPassword = () => {
     setError('');
   };
 
-
+  // ✅ Step 1: Gửi OTP qua email
   const handleSendEmail = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -31,26 +34,23 @@ const ResetPassword = () => {
     setSuccess('');
 
     try {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (!email) {
-            reject(new Error('Vui lòng nhập email!'));
-          } else if (!/\S+@\S+\.\S+/.test(email)) {
-            reject(new Error('Email không hợp lệ!'));
-          } else {
-            resolve();
-          }
-        }, 1000);
-      });
-      // setSuccess(`Đã gửi mã xác minh đến ${email}`);
-      setStep(2);
+      // Gọi API gửi OTP
+      const res = await apiSendOtpForgotPw(email);
+      if (res.success) {
+        setSuccess(`Đã gửi mã xác minh đến ${email}`);
+        setStep(2); // Chuyển sang bước nhập OTP
+      } else {
+        setError(res.message);
+      }
     } catch (err) {
-      setError(err.message || 'Gửi mã thất bại, thử lại nhé!');
+      setError("Gửi mã thất bại, thử lại nhé!");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+
+  // ✅ Xử lý nhập mã OTP
   const handleChangeOtp = (e, index) => {
     const value = e.target.value;
     if (!/^\d?$/.test(value)) return;
@@ -59,46 +59,52 @@ const ResetPassword = () => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    if (value && index < 5) {
-      otpRefs.current[index + 1].focus();
-    }
+    // Tự động focus ô tiếp theo
+    if (value && index < 5) otpRefs.current[index + 1]?.focus();
 
+    // Bấm backspace thì lùi về ô trước
     if (!value && index > 0 && e.key === 'Backspace') {
-      otpRefs.current[index - 1].focus();
+      otpRefs.current[index - 1]?.focus();
     }
   };
 
+
+  // ✅ Step 2: Xác minh OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
     setSuccess('');
 
+    const code = otp.join('');
+    if (code.length !== 6) {
+      setError('Vui lòng nhập đủ 6 số!');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const code = otp.join('');
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (code.length !== 6) {
-            reject(new Error('Vui lòng nhập đủ 6 số!'));
-          } else if (code !== '123456') {
-            reject(new Error('Mã xác thực không đúng!'));
-          } else {
-            resolve();
-          }
-        }, 1000);
-      });
-      // setSuccess('Xác thực thành công!');
-      setOtp(['', '', '', '', '', '']); 
-      setStep(3);
+      // Gọi API xác minh OTP
+      const res = await apiVerifyOtp({ email, otp: code });
+
+      if (res.success) {
+        setResetToken(res.resetToken); // ✅ Lưu resetToken để dùng bước 3
+        setOtp(['', '', '', '', '', '']);
+        setStep(3); // ✅ Chuyển bước nhập mật khẩu mới
+      } else {
+        setError(res.message);
+        setOtp(['', '', '', '', '', '']);
+        otpRefs.current[0]?.focus(); // Focus lại ô đầu tiên
+      }
     } catch (err) {
-      setError(err.message || 'Xác thực thất bại, thử lại nhé!');
-      setOtp(['', '', '', '', '', '']); 
-      if (otpRefs.current[0]) otpRefs.current[0].focus(); 
+      setError('Xác thực thất bại, thử lại nhé!');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+
+  // ✅ Step 3: Gửi mật khẩu mới kèm resetToken
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -107,29 +113,39 @@ const ResetPassword = () => {
 
     const { password, confirmPassword } = formData;
 
+    if (!password || !confirmPassword) {
+      setError("Vui lòng nhập mật khẩu mới và xác nhận!");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp!");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (!password || !confirmPassword) {
-            reject(new Error('Vui lòng nhập mật khẩu mới và xác nhận!'));
-          } else if (password !== confirmPassword) {
-            reject(new Error('Mật khẩu xác nhận không khớp!'));
-          } else if (password.length < 6) {
-            reject(new Error('Mật khẩu phải có ít nhất 6 ký tự!'));
-          } else {
-            resolve();
-          }
-        }, 1000);
+      // Gọi API reset password kèm resetToken
+      const res = await apiResetPassword({
+        email,
+        newPassword: password,
+        resetToken, // ✅ Cần phải có resetToken
       });
 
-      setSuccess('Đặt lại mật khẩu thành công!');
-      setTimeout(() => navigate('/login'), 1500);
+      if (res.success) {
+        setSuccess("Đặt lại mật khẩu thành công!");
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setError(res.message || "Đặt lại mật khẩu thất bại.");
+      }
     } catch (err) {
-      setError(err.message || 'Đặt lại mật khẩu thất bại, thử lại nhé!');
+      setError("Đặt lại mật khẩu thất bại, thử lại nhé!");
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
 
   return (

@@ -28,7 +28,7 @@ const Voucher = () => {
       title: "Ưu đãi khách hàng mới 100K",
       discount: "100.000đ",
       minOrder: "Đơn từ 600.000đ",
-      expiry: "2025-07-15",
+      expiry: "2025-07-20",
       description: "Dành riêng cho tài khoản mới tạo",
       brand: "BeautyMart",
     },

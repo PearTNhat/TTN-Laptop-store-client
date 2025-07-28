@@ -1,3 +1,5 @@
+import GoogleCallback from "~/pages/public/auth/GoogleCallback";
+
 const publicPaths = {
     HOME: '/',
     LOGIN: '/login',
@@ -11,12 +13,14 @@ const publicPaths = {
     CONTACT: '/contact',
     ABOUT: '/about',
     PROFILE: '/profile',
+    GOOGLECALLBACK: "/login/callback",
     //
     USER_HOME: '/user',
     USER_PROFILE: '/user/profile',
     USER_CHANGEPASSWORD: '/user/change_password',
     USER_ORDER: '/user/order',
     USER_VOURCHER: '/user/voucher',
+    USER_CHANGE_EMAIL: "/user/change_email",
 }
 
 const adminPaths = {

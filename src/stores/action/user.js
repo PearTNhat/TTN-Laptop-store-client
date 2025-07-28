@@ -6,7 +6,6 @@ export const fetchCurrentUser = createAsyncThunk(
     async ({ accessToken }, { rejectWithValue }) => {
         try {
             const response = await apiFetchMyInfo({ accessToken })
-            console.log("_fetchCurrentUser response", response)
             if (response?.code !== 200) {
                 throw new Error(response?.message || 'Failed to fetch user')
                 // return rejectWithValue(response?.message || 'Failed to fetch user')

@@ -4,7 +4,7 @@ import Comment from "./Comment";
 import YourRating from "./YourRating";
 import CommentForm from "./CommentForm";
 import { DefaultUser } from "~/assets/images";
-import { showToastError } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiComment, apiReplyComment } from "~/apis/commentApi";
 import { useSelector } from "react-redux";
 
@@ -16,18 +16,11 @@ function CommentContainer({
 }) {
   const [affectedComment, setAffectedComment] = useState(null);
   const { accessToken } = useSelector((state) => state.user);
-  console.log("Comments:", comments);
   // Mock handlers
   const handleSubmitComment = useCallback(
     async ({ rating, content, parentId, replyOnUser, images }) => {
-      console.log("Submit comment:", {
-        content,
-        parentId,
-        replyOnUser,
-        images,
-      });
-
       if (!parentId) {
+        // Kiểm tra nội dung bình luận
         try {
           const res = await apiComment({
             accessToken,
@@ -40,6 +33,7 @@ function CommentContainer({
           });
           if (res.code === 200) {
             setFetchCommentAgain((prev) => !prev);
+            showToastSuccess("Bình luận đã được gửi thành công!");
           } else {
             showToastError(res.message);
           }
@@ -73,7 +67,7 @@ function CommentContainer({
         setAffectedComment(null);
       }
     },
-    [productDetailId]
+    [productDetailId, accessToken]
   );
 
   const handleUpdateComment = ({ commentId, content, rating }) => {
@@ -95,7 +89,15 @@ function CommentContainer({
   );
 
   return (
-    <div className="space-y-8">
+    <div
+      className="space-y-8 max-h-[1000px] 
+      overflow-y-auto
+      scrollbar-thin 
+      scrollbar-thumb-gray-300
+      hover:scrollbar-thumb-gray-400
+      scrollbar-track-transparent
+        "
+    >
       {/* Vote Bar */}
       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
         <VoteBar totalRating={totalRating} comments={comments} />

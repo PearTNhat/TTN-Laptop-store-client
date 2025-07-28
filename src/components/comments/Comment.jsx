@@ -8,25 +8,29 @@ import { DefaultUser } from "~/assets/images";
 import StarRating from "./StarRating";
 
 moment.locale("vi");
-
 const ImageGallery = ({ images }) => {
   if (!images || images.length === 0) return null;
   return (
     <div className="mt-2 flex flex-wrap gap-2">
-      {images.map((image, index) => (
-        <a
-          href={image.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          key={image.public_id || index}
-        >
-          <img
-            src={image.url}
-            alt={`comment-img-${index}`}
-            className="w-24 h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-          />
-        </a>
-      ))}
+      {images.map((image, index) => {
+        const imageUrl = typeof image === "string" ? image : image?.url;
+        if (!imageUrl) return null;
+
+        return (
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            key={typeof image === "object" ? image.public_id : imageUrl}
+          >
+            <img
+              src={imageUrl}
+              alt={`comment-img-${index}`}
+              className="w-24 h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </a>
+        );
+      })}
     </div>
   );
 };
@@ -37,18 +41,14 @@ function Comment({
   currentUserId,
   onDelete,
   onUpdate,
-  onReply,
+  handleSubmitComment,
   affectedComment,
   setAffectedComment,
   userAvatar,
 }) {
   const isUserComment = comment.userId === currentUserId;
   const isReplying =
-    affectedComment?.type === "REPLY" && affectedComment.id === comment._id;
-  const isEditing =
-    affectedComment?.type === "EDIT" && affectedComment.id === comment._id;
-  const replyId = comment._id;
-
+    affectedComment?.type === "REPLY" && affectedComment.id === comment.id;
   return (
     <div className="flex items-start space-x-3 mt-4">
       <img
@@ -70,64 +70,50 @@ function Comment({
               />
             )}
           </div>
-          {!isEditing && (
-            <div className="text-sm text-gray-700 mt-1">
-              {comment.replyOnUser &&
-                comment.replyOnUser !== comment.username && (
-                  <span className="inline-block text-blue-500 leading-[16px]">
-                    @{comment?.username}
-                  </span>
-                )}
-              {comment.content}
-              <ImageGallery images={comment.images} />
-            </div>
+          <div className="text-sm text-gray-700 mt-1">
+            {comment.replyOnUser &&
+              comment.replyOnUser !== comment.username && (
+                <span className="inline-block text-blue-500 leading-[16px]">
+                  @{comment?.username}
+                </span>
+              )}
+            {comment.content}
+            <ImageGallery images={comment.reviewImages} />
+          </div>
+        </div>
+        <div className="flex items-center mt-1 space-x-4 text-xs text-gray-500 font-medium">
+          <span>{moment(comment.reviewDate).fromNow()}</span>
+          <button
+            className="hover:underline"
+            onClick={() =>
+              setAffectedComment({ type: "REPLY", id: comment.id })
+            }
+          >
+            Trả lời
+          </button>
+          {isUserComment && (
+            <button
+              className="hover:underline text-red-500"
+              onClick={() => onDelete({ commentId: comment.id })}
+            >
+              Xóa
+            </button>
           )}
         </div>
-
-        {!isEditing ? (
-          <div className="flex items-center mt-1 space-x-4 text-xs text-gray-500 font-medium">
-            <span>{moment(comment.reviewDate).fromNow()}</span>
-            <button
-              className="hover:underline"
-              onClick={() =>
-                setAffectedComment({ type: "REPLY", id: comment._id })
-              }
-            >
-              Trả lời
-            </button>
-            {isUserComment && (
-              <button
-                className="hover:underline text-red-500"
-                onClick={() => onDelete({ commentId: comment._id })}
-              >
-                Xóa
-              </button>
-            )}
-          </div>
-        ) : (
-          <CommentForm
-            submitLabel="Cập nhật"
-            initialContent={comment.content}
-            onSubmit={(data) => onUpdate({ ...data, commentId: comment._id })}
-            onCancel={() => setAffectedComment(null)}
-          />
-        )}
-
         {isReplying && (
           <CommentForm
             submitLabel="Trả lời"
             userAvatar={userAvatar}
-            onSubmit={(data) =>
-              onReply({
+            onSubmit={(data) => {
+              handleSubmitComment({
                 ...data,
-                parentId: replyId,
+                parentId: comment.parentId ? comment.parentId : comment.id,
                 replyOnUser: comment?.userId,
-              })
-            }
+              });
+            }}
             onCancel={() => setAffectedComment(null)}
           />
         )}
-
         {/* Render Replies Recursively */}
         <div className="space-y-4">
           {replies.map((reply) => (
@@ -138,7 +124,7 @@ function Comment({
               currentUserId={currentUserId}
               onDelete={onDelete}
               onUpdate={onUpdate}
-              onReply={onReply}
+              handleSubmitComment={handleSubmitComment}
               affectedComment={affectedComment}
               setAffectedComment={setAffectedComment}
               userAvatar={userAvatar}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { apiChangePassword } from "~/apis/authApi";
 
 const ChangePassword = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const ChangePassword = () => {
     confirm: false,
   });
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [checkError, setCheckError] = useState("");
 
   const {
     register,
@@ -20,6 +23,7 @@ const ChangePassword = () => {
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
+  const currentPassword = watch("currentPassword");
   const newPassword = watch("newPassword");
   const confirmPassword = watch("confirmPassword");
 
@@ -30,16 +34,43 @@ const ChangePassword = () => {
     }
   }, [success, navigate]);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     if (step === 1) {
+      setLoading(true);
+      setCheckError("");
+      // ✅ Kiểm tra mật khẩu hiện tại
+      const res = await apiChangePassword({
+        oldPassword: data.currentPassword,
+        newPassword: data.currentPassword, // fake để xác thực
+      });
+      setLoading(false);
+      if (!res.success) {
+        setCheckError("Mật khẩu hiện tại không chính xác");
+        return;
+      }
       setStep(2);
     } else if (step === 2) {
-      trigger(["newPassword", "confirmPassword"]).then((valid) => {
-        if (valid) setStep(3);
-      });
+      const valid = await trigger(["newPassword", "confirmPassword"]);
+      if (!valid) return;
+      if (data.newPassword === data.currentPassword) {
+        setCheckError("Mật khẩu mới phải khác mật khẩu hiện tại");
+        return;
+      }
+      setCheckError("");
+      setStep(3);
     } else {
-      console.log("Đổi mật khẩu thành công", data);
-      setSuccess(true);
+      // ✅ Gọi API thật để đổi mật khẩu
+      setLoading(true);
+      const res = await apiChangePassword({
+        oldPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      setLoading(false);
+      if (res.success) {
+        setSuccess(true);
+      } else {
+        setCheckError(res.message || "Đổi mật khẩu thất bại");
+      }
     }
   };
 
@@ -49,6 +80,7 @@ const ChangePassword = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-md">
+      {/* Bước UI */}
       <div className="mb-8">
         <div className="flex justify-between relative pb-6">
           {[1, 2, 3].map((stepNumber) => (
@@ -84,6 +116,12 @@ const ChangePassword = () => {
         </div>
       </div>
 
+      {/* Thông báo lỗi */}
+      {checkError && (
+        <p className="text-red-500 text-sm mb-4 text-center">{checkError}</p>
+      )}
+
+      {/* Success UI */}
       {success ? (
         <div className="text-center py-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -105,6 +143,7 @@ const ChangePassword = () => {
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Bước 1 */}
           {step === 1 && (
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-4">Xác thực mật khẩu</h2>
@@ -113,7 +152,9 @@ const ChangePassword = () => {
                 <div className="relative">
                   <input
                     type={showPasswords.current ? "text" : "password"}
-                    {...register("currentPassword", { required: "Vui lòng nhập mật khẩu hiện tại" })}
+                    {...register("currentPassword", {
+                      required: "Vui lòng nhập mật khẩu hiện tại",
+                    })}
                     className="w-full p-2 border rounded"
                   />
                   <button
@@ -133,6 +174,7 @@ const ChangePassword = () => {
             </div>
           )}
 
+          {/* Bước 2 */}
           {step === 2 && (
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-4">Tạo mật khẩu mới</h2>
@@ -149,9 +191,9 @@ const ChangePassword = () => {
                       },
                       validate: {
                         hasUppercase: (value) =>
-                          /[A-Z]/.test(value) || "Chứa ít nhất 1 chữ hoa",
+                          /[A-Z]/.test(value) || "Phải có ít nhất 1 chữ hoa",
                         hasNumber: (value) =>
-                          /[0-9]/.test(value) || "Chứa ít nhất 1 số",
+                          /[0-9]/.test(value) || "Phải có ít nhất 1 số",
                       },
                     })}
                     className="w-full p-2 border rounded"
@@ -200,24 +242,28 @@ const ChangePassword = () => {
             </div>
           )}
 
+          {/* Bước 3 */}
           {step === 3 && (
             <div className="mb-6 text-center">
               <h2 className="text-xl font-bold mb-4">Xác nhận đổi mật khẩu</h2>
               <p className="mb-4">Bạn có chắc chắn muốn đổi mật khẩu?</p>
               <div className="bg-gray-50 p-4 rounded text-left">
                 <p className="text-sm">
-                  <span className="font-medium">Thời gian:</span> {new Date().toLocaleString()}
+                  <span className="font-medium">Thời gian:</span>{" "}
+                  {new Date().toLocaleString()}
                 </p>
               </div>
             </div>
           )}
 
+          {/* Buttons */}
           <div className="flex justify-between mt-6">
             {step > 1 && (
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
                 className="px-4 py-2 border rounded text-gray-700"
+                disabled={loading}
               >
                 Quay lại
               </button>
@@ -227,8 +273,9 @@ const ChangePassword = () => {
               className={`px-4 py-2 rounded text-white ml-auto ${
                 step === 3 ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600"
               }`}
+              disabled={loading}
             >
-              {step === 3 ? "Hoàn tất" : "Tiếp tục"}
+              {loading ? "Đang xử lý..." : step === 3 ? "Hoàn tất" : "Tiếp tục"}
             </button>
           </div>
         </form>
