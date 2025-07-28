@@ -7,102 +7,94 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Pagination from "~/components/pagination/Pagination";
 
-import SeriesStats from "./components/SeriesStats";
-import SeriesTableRow from "./components/SeriesTableRow";
-import SeriesForm from "./components/SeriesForm";
+import CategoryStats from "./components/CategoryStats";
+import CategoryTableRow from "./components/CategoryTableRow";
+import CategoryForm from "./components/CategoryForm";
 
-function Series() {
-  const [series, setSeries] = useState([]);
+
+function Category() {
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedSeries, setSelectedSeries] = useState(null);
-  const [seriesToDelete, setSeriesToDelete] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  const seriesPerPage = 5;
+  const categoriesPerPage = 5;
 
   useEffect(() => {
-    const fetchSeries = async () => {
+    const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        // ✅ Dữ liệu mock thay cho API
-        const mockSeries = [
+        const mockData = [
           {
             id: 1,
-            name: "Asus Notebook",
-            description: null,
-            brandName: "Asus",
-            createdDate: "2024-01-10",
-            productCount: 150,
+            name: "Gaming Laptop",
+            description: "Dòng máy chơi game",
+            createdDate: "2025-07-20",
           },
           {
             id: 2,
-            name: "Dell Inspiron",
-            description: "Dòng laptop phổ thông",
-            brandName: "Dell",
-            createdDate: "2024-02-15",
-            productCount: 200,
+            name: "Ultrabook",
+            description: "Mỏng nhẹ, thời trang",
+            createdDate: "2025-07-21",
           },
         ];
-        const data = mockSeries.map((item) => ({
+        const data = mockData.map((item) => ({
           ...item,
-          brandName: item.brandName || "Unknown",
           createdDate: item.createdDate || new Date().toISOString().split("T")[0],
-          productCount: item.productCount || 0,
         }));
-        setSeries(data);
+        setCategories(data);
         setTimeout(() => setIsLoading(false), 600);
       } catch (error) {
-        toast.error("Lỗi khi tải dữ liệu dòng sản phẩm");
+        toast.error("Lỗi khi tải dữ liệu danh mục");
         setIsLoading(false);
       }
     };
-    fetchSeries();
+    fetchCategories();
   }, []);
 
-  const handleAdd = (newSeries) => {
-    setSeries([{ ...newSeries, id: Date.now() }, ...series]);
-    toast.success("Thêm dòng sản phẩm thành công!");
+  const handleAdd = (newCategory) => {
+    setCategories([{ ...newCategory, id: Date.now() }, ...categories]);
+    toast.success("Thêm danh mục thành công!");
     setShowDialog(false);
   };
 
   const handleUpdate = (updated) => {
-    setSeries(series.map((s) => (s.id === updated.id ? updated : s)));
-    toast.success("Cập nhật dòng sản phẩm thành công!");
+    setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
+    toast.success("Cập nhật danh mục thành công!");
     setShowDialog(false);
   };
 
   const confirmDelete = () => {
-    if (seriesToDelete) {
-      setSeries(series.filter((s) => s.id !== seriesToDelete.id));
-      toast.success(`Đã xóa "${seriesToDelete.name}"`);
+    if (categoryToDelete) {
+      setCategories(categories.filter((c) => c.id !== categoryToDelete.id));
+      toast.success(`Đã xóa "${categoryToDelete.name}"`);
     }
     setShowDeleteDialog(false);
   };
 
-  const filteredSeries = series.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.brandName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter(
+    (category) =>
+      category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (category.description || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const indexOfLast = currentPage * seriesPerPage;
-  const indexOfFirst = indexOfLast - seriesPerPage;
-  const currentSeries = filteredSeries.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredSeries.length / seriesPerPage);
-  const totalProducts = series.reduce((sum, s) => sum + (s.productCount || 0), 0);
+  const indexOfLast = currentPage * categoriesPerPage;
+  const indexOfFirst = indexOfLast - categoriesPerPage;
+  const currentCategories = filteredCategories.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
 
   return (
     <div className="p-6 bg-white min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Dòng sản phẩm</h1>
-      <p className="text-gray-600 mb-6">Theo dõi & kiểm soát các dòng sản phẩm</p>
+      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Danh mục</h1>
+      <p className="text-gray-600 mb-6">Theo dõi & kiểm soát các danh mục sản phẩm</p>
 
-      <SeriesStats total={series.length} totalProducts={totalProducts} />
+      <CategoryStats total={categories.length} />
 
       <div className="flex items-center justify-between bg-white border p-4 rounded-xl shadow-sm mb-6">
         <div className="relative w-96">
@@ -114,18 +106,18 @@ function Series() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Tìm kiếm dòng sản phẩm..."
+            placeholder="Tìm kiếm danh mục..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
           onClick={() => {
-            setSelectedSeries(null);
+            setSelectedCategory(null);
             setShowDialog(true);
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
-          <FaPlus /> Thêm dòng sản phẩm
+          <FaPlus /> Thêm danh mục
         </button>
       </div>
 
@@ -134,13 +126,7 @@ function Series() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dòng sản phẩm
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Thương hiệu
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Số sản phẩm
+                Danh mục
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ngày tạo
@@ -157,17 +143,17 @@ function Series() {
                   <Skeleton count={5} height={40} />
                 </td>
               </tr>
-            ) : currentSeries.length > 0 ? (
-              currentSeries.map((s) => (
-                <SeriesTableRow
-                  key={s.id}
-                  series={s}
-                  onEdit={(s) => {
-                    setSelectedSeries(s);
+            ) : currentCategories.length > 0 ? (
+              currentCategories.map((category) => (
+                <CategoryTableRow
+                  key={category.id}
+                  category={category}
+                  onEdit={(c) => {
+                    setSelectedCategory(c);
                     setShowDialog(true);
                   }}
-                  onDelete={(s) => {
-                    setSeriesToDelete(s);
+                  onDelete={(c) => {
+                    setCategoryToDelete(c);
                     setShowDeleteDialog(true);
                   }}
                 />
@@ -175,7 +161,7 @@ function Series() {
             ) : (
               <tr>
                 <td colSpan="3" className="text-center text-gray-500 py-4">
-                  Không có dòng sản phẩm nào
+                  Không có danh mục nào
                 </td>
               </tr>
             )}
@@ -193,7 +179,6 @@ function Series() {
         />
       )}
 
-       {/* Dialog - Xóa */}
       <Transition appear show={showDeleteDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDeleteDialog(false)}>
           <Transition.Child
@@ -220,10 +205,10 @@ function Series() {
               >
                 <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
                   <Dialog.Title className="text-lg font-semibold mb-4">
-                    Xác nhận xóa dòng sản phẩm
+                    Xác nhận xóa danh mục
                   </Dialog.Title>
                   <p className="text-sm text-gray-600 mb-6">
-                    Bạn có chắc chắn muốn xóa dòng sản phẩm "{seriesToDelete?.name}" không? Hành động này không thể hoàn tác.
+                    Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}" không? Hành động này không thể hoàn tác.
                   </p>
                   <div className="flex justify-end gap-3">
                     <button
@@ -246,17 +231,16 @@ function Series() {
         </Dialog>
       </Transition>
 
-      {/* Dialog - Thêm / Sửa */}
       <Transition appear show={showDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDialog(false)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
             leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black bg-opacity-30" />
           </Transition.Child>
@@ -273,11 +257,11 @@ function Series() {
               >
                 <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-xl transition-all">
                   <Dialog.Title className="text-lg font-bold mb-4">
-                    {selectedSeries ? "Chỉnh sửa dòng sản phẩm" : "Thêm dòng sản phẩm mới"}
+                    {selectedCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
                   </Dialog.Title>
-                  <SeriesForm
-                    series={selectedSeries}
-                    onSubmit={selectedSeries ? handleUpdate : handleAdd}
+                  <CategoryForm
+                    category={selectedCategory}
+                    onSubmit={selectedCategory ? handleUpdate : handleAdd}
                     onCancel={() => setShowDialog(false)}
                   />
                 </Dialog.Panel>
@@ -290,4 +274,4 @@ function Series() {
   );
 }
 
-export default Series;
+export default Category;

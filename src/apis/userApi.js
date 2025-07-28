@@ -1,7 +1,7 @@
 import { http } from "~/utils/http";
 
 const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   return {
     headers: {
       Authorization: `Bearer ${token}`,

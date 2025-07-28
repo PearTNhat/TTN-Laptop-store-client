@@ -7,6 +7,7 @@ export { default as UsersManagement } from './users';
 // Product Management
 export { default as Brand } from './brand';
 export { default as Series } from './series';
+export { default as Category} from './category';
 export { default as Products } from './products';
 
 

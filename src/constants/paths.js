@@ -23,6 +23,7 @@ const adminPaths = {
     USERS: 'users',
     BRAND: 'brand',
     SERIES: 'series',
+    CATEGORY: 'category',
     PRODUCTS: 'products',
     ORDERS: 'orders',
     ORDER_CONFIRMS: 'orders/confirms',

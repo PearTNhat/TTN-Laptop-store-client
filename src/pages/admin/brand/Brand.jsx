@@ -1,70 +1,100 @@
-import React, { useState } from "react";
-import { FaSearch, FaPlus, FaEdit, FaTrash, FaImage } from "react-icons/fa";
+// Brand.jsx
+import React, { useState, useEffect, Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import Pagination from "~/components/pagination/Pagination";
+import BrandStats from "./components/BrandStats";
+import BrandTableRow from "./components/BrandTableRow";
+import BrandForm from "./components/BrandForm";
+
+// Import icons
+import { 
+  FiLayers, 
+  FiSearch, 
+  FiPlus, 
+  FiTag, 
+  FiCalendar, 
+  FiSettings, 
+  FiInbox, 
+  FiX 
+} from "react-icons/fi";
 
 function Brand() {
+  const [brands, setBrands] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const brandsPerPage = 10;
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [brandToDelete, setBrandToDelete] = useState(null);
+  const brandsPerPage = 4;
 
-  const brands = [
-    {
-      id: 1,
-      name: "Apple",
-      description: "Công ty công nghệ từ Mỹ",
-      logo: "/images/apple-logo.png",
-      products: 45,
-      status: "Hoạt động",
-      createdDate: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Dell",
-      description: "Thương hiệu laptop và máy tính",
-      logo: "/images/dell-logo.png",
-      products: 32,
-      status: "Hoạt động",
-      createdDate: "2024-01-14",
-    },
-    {
-      id: 3,
-      name: "Asus",
-      description: "Thương hiệu gaming và công nghệ",
-      logo: "/images/asus-logo.png",
-      products: 28,
-      status: "Hoạt động",
-      createdDate: "2024-01-13",
-    },
-    {
-      id: 4,
-      name: "HP",
-      description: "Hewlett-Packard",
-      logo: "/images/hp-logo.png",
-      products: 25,
-      status: "Tạm ngừng",
-      createdDate: "2024-01-12",
-    },
-    {
-      id: 5,
-      name: "Lenovo",
-      description: "Thương hiệu laptop kinh doanh",
-      logo: "/images/lenovo-logo.png",
-      products: 22,
-      status: "Hoạt động",
-      createdDate: "2024-01-11",
-    },
-  ];
+  useEffect(() => {
+    const fetchBrands = async () => {
+      setIsLoading(true);
+      try {
+        const mockBrands = [
+          {
+            id: 1,
+            name: "Apple",
+            description: "Công ty công nghệ đa quốc gia từ Mỹ, chuyên về điện tử tiêu dùng, phần mềm và dịch vụ trực tuyến",
+            logo: "/images/apple-logo.png",
+            createdDate: "2024-01-10",
+          },
+          {
+            id: 2,
+            name: "Dell",
+            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
+            logo: "/images/dell-logo.png",
+            createdDate: "2024-02-15",
+          },
+          {
+            id: 3,
+            name: "Luật",
+            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
+            logo: "/images/dell-logo.png",
+            createdDate: "2024-02-15",
+          },
+          {
+            id: 5,
+            name: "Hello",
+            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
+            logo: "/images/dell-logo.png",
+            createdDate: "2024-02-15",
+          },
+        ];
+        setBrands(mockBrands);
+        setTimeout(() => setIsLoading(false), 800);
+      } catch (error) {
+        toast.error("Lỗi khi tải dữ liệu thương hiệu");
+        setIsLoading(false);
+      }
+    };
+    fetchBrands();
+  }, []);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Hoạt động":
-        return "bg-green-100 text-green-800";
-      case "Tạm ngừng":
-        return "bg-red-100 text-red-800";
-      case "Chờ duyệt":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleAdd = (newBrand) => {
+    setBrands([{ ...newBrand, id: Date.now() }, ...brands]);
+    toast.success("Thêm thương hiệu thành công!");
+    setShowDialog(false);
+  };
+
+  const handleUpdate = (updated) => {
+    setBrands(brands.map((b) => (b.id === updated.id ? updated : b)));
+    toast.success("Cập nhật thương hiệu thành công!");
+    setShowDialog(false);
+  };
+
+  const confirmDelete = () => {
+    if (brandToDelete) {
+      setBrands(brands.filter((b) => b.id !== brandToDelete.id));
+      toast.success(`Đã xóa "${brandToDelete.name}"`);
     }
+    setShowDeleteDialog(false);
   };
 
   const filteredBrands = brands.filter(
@@ -73,189 +103,244 @@ function Brand() {
       brand.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const indexOfLastBrand = currentPage * brandsPerPage;
-  const indexOfFirstBrand = indexOfLastBrand - brandsPerPage;
-  const currentBrands = filteredBrands.slice(
-    indexOfFirstBrand,
-    indexOfLastBrand
-  );
+  const indexOfLast = currentPage * brandsPerPage;
+  const indexOfFirst = indexOfLast - brandsPerPage;
+  const currentBrands = filteredBrands.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredBrands.length / brandsPerPage);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000}
+        toastClassName="!rounded-lg !shadow-md !border !border-gray-100"
+        progressClassName="!bg-blue-500"
+      />
+
+      {/* Header section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Quản lý thương hiệu
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          <FiLayers className="text-blue-600" />
+          Quản lý Thương hiệu
         </h1>
-        <p className="text-gray-600">
-          Quản lý thông tin các thương hiệu sản phẩm
+        <p className="text-gray-600 text-sm md:text-base max-w-3xl">
+          Theo dõi & quản lý toàn bộ thương hiệu sản phẩm trong hệ thống. Tạo mới, chỉnh sửa hoặc xóa thương hiệu khi cần thiết.
         </p>
+        {/* <BrandStats total={brands.length} /> */}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">
-                Tổng thương hiệu
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {brands.length}
-              </p>
-            </div>
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <FaImage className="text-xl text-blue-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">
-                Đang hoạt động
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {brands.filter((b) => b.status === "Hoạt động").length}
-              </p>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <FaImage className="text-xl text-green-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Tổng sản phẩm</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {brands.reduce((sum, brand) => sum + brand.products, 0)}
-              </p>
-            </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <FaImage className="text-xl text-purple-600" />
-            </div>
-          </div>
-        </div>
+      {/* Stats card */}
+      <div>
+        {/* Card tổng thương hiệu */}
+        <BrandStats total={brands.length} />
       </div>
 
-      {/* Header Actions */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm thương hiệu..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+      {/* Search and action bar */}
+      <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="relative w-full md:w-96">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FiSearch className="text-gray-400" />
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-            <FaPlus />
-            Thêm thương hiệu
-          </button>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Tìm kiếm thương hiệu..."
+            className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          />
         </div>
+        
+        <button
+          onClick={() => {
+            setSelectedBrand(null);
+            setShowDialog(true);
+          }}
+          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition-colors shadow-sm hover:shadow-md"
+        >
+          <FiPlus className="text-lg" />
+          <span>Thêm thương hiệu</span>
+        </button>
       </div>
 
-      {/* Brands Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-        {currentBrands.map((brand) => (
-          <div
-            key={brand.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-                    <FaImage className="text-gray-400 text-xl" />
+      {/* Table section */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center gap-1">
+                    <FiTag /> Thương hiệu
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {brand.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {brand.products} sản phẩm
-                    </p>
+                </th>
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center gap-1">
+                    <FiCalendar /> Ngày tạo
                   </div>
-                </div>
-                <span
-                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                    brand.status
-                  )}`}
-                >
-                  {brand.status}
-                </span>
-              </div>
-
-              <p className="text-gray-600 text-sm mb-4">{brand.description}</p>
-
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>Ngày tạo: {brand.createdDate}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                  <FaEdit />
-                  Chỉnh sửa
-                </button>
-                <button className="bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors">
-                  <FaTrash />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+                </th>
+                <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center justify-end gap-1">
+                    <FiSettings /> Hành động
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading ? (
+                <tr>
+                  <td colSpan="3" className="px-6 py-4">
+                    <div className="space-y-3">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse"></div>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ) : currentBrands.length > 0 ? (
+                currentBrands.map((brand) => (
+                  <BrandTableRow
+                    key={brand.id}
+                    brand={brand}
+                    onEdit={(b) => {
+                      setSelectedBrand(b);
+                      setShowDialog(true);
+                    }}
+                    onDelete={(b) => {
+                      setBrandToDelete(b);
+                      setShowDeleteDialog(true);
+                    }}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="text-center py-8">
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <FiInbox className="text-4xl mb-3" />
+                      <p className="text-lg">Không tìm thấy thương hiệu nào</p>
+                      {searchTerm && (
+                        <button 
+                          onClick={() => setSearchTerm('')}
+                          className="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                        >
+                          <FiX /> Xóa bộ lọc tìm kiếm
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
+      
       {/* Pagination */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 px-4 py-3 flex items-center justify-between sm:px-6">
-        <div className="flex-1 flex justify-between sm:hidden">
-          <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Trước
-          </button>
-          <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Sau
-          </button>
-        </div>
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-700">
-              Hiển thị{" "}
-              <span className="font-medium">{indexOfFirstBrand + 1}</span> đến{" "}
-              <span className="font-medium">
-                {Math.min(indexOfLastBrand, filteredBrands.length)}
-              </span>{" "}
-              trong <span className="font-medium">{filteredBrands.length}</span>{" "}
-              kết quả
-            </p>
-          </div>
-          <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+      {!isLoading && (
+        <Pagination
+          currentPage={currentPage}
+          totalPageCount={totalPages}
+          onPageChange={setCurrentPage}
+          siblingCount={1}
+          showFirstLast
+        />
+      )}
+
+      {/* Delete Dialog */}
+      <Transition appear show={showDeleteDialog} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setShowDeleteDialog(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-30" />
+          </Transition.Child>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                Trước
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentPage(
-                    Math.min(
-                      Math.ceil(filteredBrands.length / brandsPerPage),
-                      currentPage + 1
-                    )
-                  )
-                }
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                Sau
-              </button>
-            </nav>
+                <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
+                  <Dialog.Title className="text-lg font-semibold mb-4">
+                    Xác nhận xóa thương hiệu
+                  </Dialog.Title>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Bạn có chắc chắn muốn xóa thương hiệu "{brandToDelete?.name}" không? Hành động này không thể hoàn tác.
+                  </p>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setShowDeleteDialog(false)}
+                      className="px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={confirmDelete}
+                      className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
-        </div>
-      </div>
+        </Dialog>
+      </Transition>
+
+      {/* Add/Edit Dialog */}
+      <Transition appear show={showDialog} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setShowDialog(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-30" />
+          </Transition.Child>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-xl transition-all">
+                  <Dialog.Title className="text-lg font-bold mb-4">
+                    {selectedBrand ? "Chỉnh sửa thương hiệu" : "Thêm thương hiệu mới"}
+                  </Dialog.Title>
+                  <BrandForm
+                    brand={selectedBrand}
+                    onSubmit={selectedBrand ? handleUpdate : handleAdd}
+                    onCancel={() => setShowDialog(false)}
+                  />
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

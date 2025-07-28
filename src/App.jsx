@@ -22,6 +22,7 @@ import {
   UsersManagement,
   Brand,
   Series,
+  Category,
   Products,
   Vouchers,
   AdminLayout,
@@ -75,6 +76,7 @@ function App() {
           />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
+          <Route path={adminPaths.CATEGORY} element={<Category />} />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />
           <Route path={adminPaths.ORDER_CONFIRMS} element={<OrderConfirms />} />
           <Route

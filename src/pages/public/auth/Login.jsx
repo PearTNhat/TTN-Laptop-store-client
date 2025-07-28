@@ -49,9 +49,9 @@ const Login = () => {
 
       const res = await apiLogin({ body });
 
-      if (res.success && res.token) {
-        const token = res.token;
-        localStorage.setItem("token", token);
+      if (res.success && res.accessToken) {
+        const accessToken = res.accessToken;
+        localStorage.setItem("accessToken", accessToken);
 
         // Ghi nhớ mật khẩu nếu được chọn
         const remembered = JSON.parse(localStorage.getItem("rememberedUsers") || "{}");
@@ -62,12 +62,12 @@ const Login = () => {
         }
         localStorage.setItem("rememberedUsers", JSON.stringify(remembered));
 
-        const fetchRes = await apiFetchMyInfo({ token });
+        const fetchRes = await apiFetchMyInfo({ accessToken });
 
         if (fetchRes.code === 200 && fetchRes.data) {
           dispatch(
             userActions.login({
-              accessToken: token,
+              accessToken,
               userData: fetchRes.data,
             })
           );

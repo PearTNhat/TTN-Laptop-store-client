@@ -7,7 +7,7 @@ export const apiLogin = async ({ body }) => {
 
     // ✅ Kiểm tra đúng theo backend (code === 200 là thành công)
     if (res?.code === 200 && res?.data) {
-      return { success: true, token: res.data };
+      return { success: true, accessToken: res.data };
     } else {
       return {
         success: false,

@@ -20,6 +20,11 @@ const navItems = [
   },
   {
     icon: <TbCategoryFilled />,
+    name: "Danh mục",
+    path: "/admin/category",
+  },
+  {
+    icon: <BiFontSize />,
     name: "Thương hiệu",
     path: "/admin/brand",
   },
