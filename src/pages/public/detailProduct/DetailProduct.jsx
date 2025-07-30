@@ -140,9 +140,9 @@ function DetailProduct() {
     getDetailProduct(pId);
   }, [pId]);
   useEffect(() => {
+    if (!colorProduct.id) return;
     getComments(colorProduct.id);
   }, [colorProduct.id, fetchCommentAgain, accessToken]);
-  console.log(colorProduct);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [product]);

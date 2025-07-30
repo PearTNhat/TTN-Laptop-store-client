@@ -60,38 +60,6 @@ const Login = () => {
       } else {
         showToastError(res.message || "Đăng nhập thất bại.");
       }
-      // if (res.success && res.token) {
-      //   const token = res.token;
-      //   localStorage.setItem("token", token);
-
-      //   // Ghi nhớ mật khẩu nếu được chọn
-      //   const remembered = JSON.parse(
-      //     localStorage.getItem("rememberedUsers") || "{}"
-      //   );
-      //   if (rememberMe) {
-      //     remembered[formData.email] = formData.password;
-      //   } else {
-      //     delete remembered[formData.email];
-      //   }
-      //   localStorage.setItem("rememberedUsers", JSON.stringify(remembered));
-
-      //   const fetchRes = await apiFetchMyInfo({ token });
-
-      //   if (fetchRes.code === 200 && fetchRes.data) {
-      //     dispatch(
-      //       userActions.login({
-      //         accessToken: token,
-      //         userData: fetchRes.data,
-      //       })
-      //     );
-      //     showToastSuccess("Đăng nhập thành công!");
-      //     navigate("/");
-      //   } else {
-      //     alert(fetchRes.message || "Không thể lấy thông tin người dùng.");
-      //   }
-      // } else {
-      //   alert(res.message || "Đăng nhập thất bại.");
-      // }
     } catch (error) {
       console.error("Login failed:", error);
       alert("Đã có lỗi xảy ra. Vui lòng thử lại.");

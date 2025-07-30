@@ -43,4 +43,45 @@ const apiGetDetailProduct = async ({ pId }) => {
         throw new Error(error.message);
     }
 };
-export { apiGetProducts, apiGetDetailProduct };
+const apiGetListProducts = async ({ accessToken, page = 1, size = 10 }) => {
+    try {
+        page = page <= 1 ? 0 : page - 1;
+        const params = {
+            page,
+            size
+        }
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params
+        }
+        const { data } = await http.get("products", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiCreateProduct = async ({ accessToken, body }) => {
+    try {
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.get("products/create", body, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+
+export { apiGetProducts, apiGetDetailProduct, apiGetListProducts, apiCreateProduct };

@@ -15,8 +15,9 @@ const userSlice = createSlice({
             state.accessToken = action.payload.accessToken;
         },
         login: (state, action) => {
+            console.log("Login action payload:", action.payload);
             state.accessToken = action.payload.accessToken;
-            state.userData = action.payload.userData;
+            // state.userData = action.payload.userData;
             state.isLoggedIn = true;
         },
         setUserData: (state, action) => {

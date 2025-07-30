@@ -1,10 +1,10 @@
 import { http } from "~/utils/http";
 
 const getAuthHeader = () => {
-  const token = localStorage.getItem("accessToken");
+  const { accessToken } = JSON.parse(localStorage.getItem("persist:shop/user")) || {};
   return {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   };
 };
