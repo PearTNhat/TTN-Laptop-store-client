@@ -67,7 +67,7 @@ const apiGetListProducts = async ({ accessToken, page = 1, size = 10 }) => {
 };
 const apiCreateProduct = async ({ accessToken, body }) => {
     try {
-
+        console.log(JSON.stringify(body));
         const config = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
