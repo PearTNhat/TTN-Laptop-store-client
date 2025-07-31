@@ -1,8 +1,12 @@
 import { http } from "~/utils/http";
 
-const apiGetColors = async () => {
+const apiGetColors = async ({ accessToken }) => {
     try {
-        const { data } = await http.get("colors");
+        const { data } = await http.get("colors", {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

@@ -1,6 +1,5 @@
 // src/pages/ProductManagement/components/ProductCreateDialog.jsx
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,50 +13,56 @@ import {
 import {
   productCreateSchema,
   productStep1Schema,
-} from "../schema/product.schema";
-import ProductFormStep1 from "./create/ProductFormStep1";
-import ProductDetailFormStep2 from "./create/ProductDetailFormStep2";
+} from "../../schema/product.schema";
+import ProductFormStep1 from "./ProductFormStep1";
+import ProductDetailFormStep2 from "./ProductDetailFormStep2";
 import { Button } from "~/components/ui/button";
 import ConfirmModal from "~/components/modal/ConfirmModal";
 import { showToastError } from "~/utils/alert";
-// import { apiCreateProduct } from '~/apis/productApi'; // Giả sử có API này
+import { apiCreateProduct } from "~/apis/productApi";
+import { Loader2 } from "lucide-react";
+import { mapProductToFormValues } from "../../utils/data-mapper";
 
-// Component này sẽ nhận state đóng/mở và dữ liệu từ cha
+const defaultValues = {
+  description: "",
+  brandId: undefined,
+  categoryId: undefined,
+  seriesId: undefined,
+  productDetailRequest: [
+    {
+      title: "",
+      colorId: undefined,
+      originalPrice: 0,
+      slug: "",
+      thumbnail: "",
+      images: [],
+      configRequest: {
+        cpu: "",
+        ram: "",
+        hardDrive: "",
+        graphicCard: "",
+        displaySize: "",
+      },
+    },
+  ],
+};
 const ProductCreateDialog = ({
+  accessToken,
   isOpen,
   setIsOpen,
   onSuccess,
   brands,
   categories,
+  colorsOptions,
+  editingProduct,
 }) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const isEditMode = !!editingProduct;
+  const title = isEditMode ? "Chỉnh sửa sản phẩm" : "Tạo sản phẩm mới";
   const formMethods = useForm({
     resolver: zodResolver(productCreateSchema),
-    defaultValues: {
-      description: "",
-      brandId: undefined,
-      categoryId: undefined,
-      seriesId: undefined,
-      productDetailRequest: [
-        {
-          title: "",
-          colorId: undefined,
-          originalPrice: 0,
-          slug: "",
-          thumbnail: "",
-          images: [""],
-          configRequest: {
-            cpu: "",
-            ram: "",
-            hardDrive: "",
-            graphicCard: "",
-            displaySize: "",
-          },
-        },
-      ],
-    },
+    defaultValues: isEditMode ? {} : defaultValues,
   });
 
   const handleNextStep = async () => {
@@ -78,14 +83,16 @@ const ProductCreateDialog = ({
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      console.log("Submitting data:", data);
-      // await apiCreateProduct(data);
-      ConfirmModal.toast({
-        icon: "success",
-        title: "Tạo sản phẩm thành công!",
-      });
-      onSuccess(); // Gọi callback để tải lại danh sách
-      setIsOpen(false); // Đóng modal
+      if (isEditMode) {
+        console.log("Updating data:", data);
+      } else {
+        console.log("Submitting data:", data);
+        // await apiCreateProduct(data);
+        const res = await apiCreateProduct({ accessToken, body: data });
+        console.log(res);
+        onSuccess(); // Gọi callback để tải lại danh sách
+        // setIsOpen(false); // Đóng modal
+      }
     } catch (error) {
       ConfirmModal.toast({
         icon: "error",
@@ -104,6 +111,16 @@ const ProductCreateDialog = ({
     }
     setIsOpen(open);
   };
+  useEffect(() => {
+    if (isEditMode && isOpen) {
+      const formValues = mapProductToFormValues(editingProduct);
+      formMethods.reset(formValues);
+    } else if (!isOpen) {
+      // Khi đóng modal, reset về trạng thái trắng
+      formMethods.reset(defaultValues);
+      setStep(1);
+    }
+  }, [isEditMode, editingProduct, isOpen, formMethods]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnOpenChange}>
@@ -111,13 +128,13 @@ const ProductCreateDialog = ({
         <DialogHeader>
           <DialogTitle className="text-2xl">
             {step === 1
-              ? "Tạo sản phẩm mới - Thông tin chung"
-              : "Tạo sản phẩm mới - Chi tiết phiên bản"}
+              ? `${title} - Thông tin chung`
+              : `${title} - Chi tiết phiên bản`}
           </DialogTitle>
           <DialogDescription>
-            {step === 1
-              ? "Điền các thông tin cơ bản để phân loại sản phẩm."
-              : "Thêm ít nhất một phiên bản chi tiết cho sản phẩm."}
+            {isEditMode
+              ? "Cập nhật thông tin cho sản phẩm."
+              : "Điền thông tin để tạo sản phẩm mới."}
           </DialogDescription>
         </DialogHeader>
 
@@ -128,7 +145,9 @@ const ProductCreateDialog = ({
             {step === 1 && (
               <ProductFormStep1 brands={brands} categories={categories} />
             )}
-            {step === 2 && <ProductDetailFormStep2 />}
+            {step === 2 && (
+              <ProductDetailFormStep2 colorsOptions={colorsOptions} />
+            )}
           </div>
 
           <DialogFooter className="pt-4 border-t">
@@ -144,16 +163,29 @@ const ProductCreateDialog = ({
             )}
             <div className="flex-grow"></div> {/* Spacer */}
             {step === 1 ? (
-              <Button type="button" onClick={handleNextStep}>
+              <Button
+                className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-400"
+                type="button"
+                onClick={handleNextStep}
+              >
                 Tiếp tục
               </Button>
             ) : (
+              // **SỬA LỖI & LÀM ĐẸP BUTTON**
               <Button
                 type="button"
                 onClick={formMethods.handleSubmit(onSubmit)}
                 disabled={isSubmitting}
+                className="bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-400"
               >
-                {isSubmitting ? "Đang xử lý..." : "Hoàn tất và Tạo sản phẩm"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "Hoàn tất và Tạo sản phẩm"
+                )}
               </Button>
             )}
           </DialogFooter>

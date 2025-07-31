@@ -59,4 +59,19 @@ function capitalizeFirstCharacter(str) {
     if (!str) return str; // Handle empty or null strings
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter };
+
+// --- Hàm tiện ích để tạo slug ---
+const generateSlug = (text) => {
+    if (!text) return "";
+    return text
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "")
+        .replace(/--+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+};
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };

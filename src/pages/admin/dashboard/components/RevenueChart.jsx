@@ -169,7 +169,7 @@ const RevenueChart = () => {
       </div>
 
       {/* Biểu đồ so sánh thương hiệu */}
-      <div className="xl:col-span-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+      {/* <div className="xl:col-span-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-gray-900 flex items-center">
             <FaChartBar className="mr-3 text-green-600" />
@@ -216,7 +216,7 @@ const RevenueChart = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

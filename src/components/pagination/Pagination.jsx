@@ -18,7 +18,6 @@ function Pagination({
     return null;
   }
 
-  console.log("Pagination Range:", currentPage, totalPageCount);
   const onPrevious = () => {
     onPageChange(currentPage - 1);
   };

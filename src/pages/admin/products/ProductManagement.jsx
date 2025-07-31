@@ -12,30 +12,39 @@ import ProductTable from "./components/ProductTable"; // Import component bảng
 import LoadingSpinner from "~/components/loading/LoadingSpinner";
 import Pagination from "~/components/pagination/Pagination";
 import ConfirmModal from "~/components/modal/ConfirmModal";
-import ProductCreateDialog from "./components/ProductCreateDialog";
 import { showToastError } from "~/utils/alert";
 import { apiGetBrands } from "~/apis/brandApi";
 import { apiGetCategories } from "~/apis/categoryApi";
+import { apiGetColors } from "~/apis/colorApi";
+import ProductCreateDialog from "./components/create/ProductCreateDialog";
 
 const ProductManagement = () => {
   const { accessToken } = useSelector((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [colorsOptions, setColorsOptions] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-
+  const [editingProduct, setEditingProduct] = useState(null);
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),
     [searchParams]
   );
-
+  const handleOpenCreateModal = () => {
+    setEditingProduct(null); // Đảm bảo không có dữ liệu sửa
+    setIsModalOpen(true);
+  };
+  const handleOpenEditModal = (product) => {
+    setEditingProduct(product); // Đặt dữ liệu sản phẩm cần sửa
+    setIsModalOpen(true);
+  };
   useEffect(() => {
     const fetchBrands = async () => {
       try {
@@ -53,7 +62,7 @@ const ProductManagement = () => {
       try {
         const responseData = await apiGetCategories();
         if (responseData.code !== 200) {
-          throw new Error(responseData.message || "Lỗi khi tải sản phẩm");
+          throw new Error(responseData.message || "Lỗi khi tải danh mục");
         }
         const { data } = responseData;
         setCategories(data || []);
@@ -61,7 +70,25 @@ const ProductManagement = () => {
         showToastError(err.message);
       }
     };
-
+    const fetchColors = async ({ accessToken }) => {
+      try {
+        const responseData = await apiGetColors({ accessToken });
+        if (responseData.code !== 200) {
+          throw new Error(responseData.message || "Lỗi khi tải màu sắc");
+        }
+        const { data } = responseData;
+        setColorsOptions(
+          data.map((color) => ({
+            value: color.id,
+            label: color.name,
+            hex: color.hex,
+          })) || []
+        );
+      } catch (err) {
+        showToastError(err.message);
+      }
+    };
+    fetchColors({ accessToken });
     fetchBrands();
     fetchCategories();
   }, [accessToken, currentParams]);
@@ -134,11 +161,8 @@ const ProductManagement = () => {
 
   // Hàm xử lý khi nhấn nút Sửa (có thể mở modal sửa sau này)
   const handleEditProduct = (product) => {
-    console.log("Editing product:", product);
-    ConfirmModal.toast({
-      icon: "info",
-      title: "Chức năng sửa đang được phát triển!",
-    });
+    setEditingProduct(product); // Đặt dữ liệu sản phẩm cần sửa
+    setIsModalOpen(true);
   };
 
   const handleDeleteProduct = async (productId, productName) => {
@@ -197,7 +221,7 @@ const ProductManagement = () => {
             </div>
             <button
               className="inline-flex items-center justify-center rounded-lg text-sm font-semibold bg-white text-blue-600 hover:bg-blue-50 h-11 px-5 py-2 transition-colors"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => handleOpenCreateModal(true)}
             >
               <PlusCircle className="mr-2 h-5 w-5" />
               Thêm sản phẩm
@@ -228,11 +252,14 @@ const ProductManagement = () => {
         {renderContent()}
       </div>
       <ProductCreateDialog
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
         onSuccess={() => {}} // Tải lại danh sách khi tạo thành công
         brands={brands}
+        colorsOptions={colorsOptions}
         categories={categories}
+        accessToken={accessToken}
+        editingProduct={editingProduct}
       />
     </>
   );

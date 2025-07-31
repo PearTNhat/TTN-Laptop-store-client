@@ -18,17 +18,16 @@ const configSchema = z.object({
 
 const productDetailSchema = z.object({
     title: z.string().min(1, "Tên phiên bản là bắt buộc"),
-    // SỬA LỖI Ở ĐÂY: Cho phép colorId ban đầu là undefined
-    colorId: z.union([z.number().positive("Vui lòng chọn màu"), z.undefined()]).refine(val => val !== undefined, { message: "Vui lòng chọn màu" }),
+    // THÊM LẠI SLUG
+    slug: z.string().min(1, "Slug là bắt buộc"),
+    colorId: z.union([z.number().positive(), z.undefined()]).refine(val => val !== undefined, { message: "Vui lòng chọn màu" }),
     originalPrice: z.coerce.number().min(1, "Giá gốc phải lớn hơn 0"),
     discountPrice: z.coerce.number().optional(),
-    slug: z.string().min(1, "Slug là bắt buộc"),
-    thumbnail: z.string().url("Thumbnail phải là một URL hợp lệ"),
-    images: z.array(z.string().url()).min(1, "Cần ít nhất một ảnh chi tiết"),
+    // Yêu cầu có ít nhất 1 ảnh và tối đa 5 ảnh
+    images: z.array(z.string().url()).min(1, "Vui lòng tải lên ít nhất một ảnh").max(5, "Chỉ được phép tải lên tối đa 5 ảnh"),
     warrantyProd: z.string().optional(),
     configRequest: configSchema,
 });
-
 
 // --- Cập nhật chính ở đây ---
 export const productCreateSchema = z.object({

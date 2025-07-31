@@ -12,9 +12,8 @@ import { Button } from "~/components/ui/button";
 import { PlusCircle, Trash2 } from "lucide-react";
 import ProductDetailFields from "./ProductDetailFields";
 
-const ProductDetailFormStep2 = () => {
+const ProductDetailFormStep2 = ({ colorsOptions }) => {
   const { control } = useFormContext();
-
   const { fields, append, remove } = useFieldArray({
     control,
     name: "productDetailRequest",
@@ -42,10 +41,8 @@ const ProductDetailFormStep2 = () => {
       },
     });
   };
-
   return (
     <div className="space-y-4">
-      {/* STYLE MỚI: Thêm nền và bo tròn cho Accordion */}
       <div className="bg-slate-50 p-4 rounded-lg border">
         <Accordion
           type="multiple"
@@ -85,7 +82,10 @@ const ProductDetailFormStep2 = () => {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-6 border-t bg-white rounded-b-lg">
-                    <ProductDetailFields index={index} />
+                    <ProductDetailFields
+                      index={index}
+                      colorsOptions={colorsOptions}
+                    />
                   </AccordionContent>
                 </div>
               </AccordionItem>
