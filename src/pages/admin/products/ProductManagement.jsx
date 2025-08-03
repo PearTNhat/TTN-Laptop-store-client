@@ -6,13 +6,13 @@ import Swal from "sweetalert2";
 import { createRoot } from "react-dom/client";
 
 // --- Các component và API của bạn ---
-import { apiGetListProducts } from "~/apis/productApi";
+import { apiDeleteProduct, apiGetListProducts } from "~/apis/productApi";
 import ProductDetailModal from "./components/ProductDetailModal";
 import ProductTable from "./components/ProductTable"; // Import component bảng mới
 import LoadingSpinner from "~/components/loading/LoadingSpinner";
 import Pagination from "~/components/pagination/Pagination";
 import ConfirmModal from "~/components/modal/ConfirmModal";
-import { showToastError } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiGetBrands } from "~/apis/brandApi";
 import { apiGetCategories } from "~/apis/categoryApi";
 import { apiGetColors } from "~/apis/colorApi";
@@ -92,6 +92,7 @@ const ProductManagement = () => {
     fetchBrands();
     fetchCategories();
   }, [accessToken, currentParams]);
+  // fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
@@ -99,7 +100,7 @@ const ProductManagement = () => {
         const params = {
           page: currentParams.page || "1",
           size: currentParams.size || "10",
-          ...currentParams,
+          keyword: currentParams.q || null,
         };
         const responseData = await apiGetListProducts({
           accessToken,
@@ -109,6 +110,7 @@ const ProductManagement = () => {
           throw new Error(responseData.message || "Lỗi khi tải sản phẩm");
         }
         const { data } = responseData;
+        console.log("Fetched products:", data);
         setProducts(data.content || []);
         setPagination({
           currentPage: data.page.number + 1,
@@ -159,21 +161,24 @@ const ProductManagement = () => {
     });
   };
 
-  // Hàm xử lý khi nhấn nút Sửa (có thể mở modal sửa sau này)
-  const handleEditProduct = (product) => {
-    setEditingProduct(product); // Đặt dữ liệu sản phẩm cần sửa
-    setIsModalOpen(true);
-  };
-
   const handleDeleteProduct = async (productId, productName) => {
     const result = await ConfirmModal.delete({
       title: `Xác nhận xóa sản phẩm`,
       text: `Bạn có chắc muốn xóa "${productName}"? Hành động này không thể hoàn tác.`,
     });
     if (result.isConfirmed) {
-      // TODO: Gọi API xóa sản phẩm thật ở đây
-      ConfirmModal.toast({ icon: "success", title: "Đã xóa sản phẩm!" });
-      // fetchProducts();
+      const res = await apiDeleteProduct({ accessToken, id: productId });
+      if (res.code === 200) {
+        const isLastItemOnPage = products.length === 1;
+        const currentPage = pagination.currentPage;
+        if (isLastItemOnPage && currentPage > 1) {
+          handlePageChange(currentPage - 1);
+        }
+        showToastSuccess("Xóa sản phẩm thành công");
+        setProducts((prev) => prev.filter((p) => p.id !== productId));
+      } else {
+        showToastError(res.message || "Lỗi khi xóa sản phẩm");
+      }
     }
   };
 
@@ -196,7 +201,7 @@ const ProductManagement = () => {
           products={products}
           onShowDetails={handleShowDetails}
           onDelete={handleDeleteProduct}
-          onEdit={handleEditProduct}
+          onEdit={handleOpenEditModal}
         />
         <Pagination
           currentPage={pagination.currentPage}
@@ -242,19 +247,23 @@ const ProductManagement = () => {
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none transition"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <button className="flex items-center space-x-2 px-4 py-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
-              <ListFilter size={18} />
-              <span>Lọc</span>
-            </button>
-          </div>
         </div>
         {renderContent()}
       </div>
       <ProductCreateDialog
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
-        onSuccess={() => {}} // Tải lại danh sách khi tạo thành công
+        onSuccess={(newProduct) => {
+          setIsModalOpen(false); // Đóng modal sau khi tạo thành công
+          setProducts((prev) => [...prev, newProduct]);
+          setSearchParams((prev) => ({ ...prev, page: pagination.totalPages })); // Tải lại trang đầu tiên
+        }} // Tải lại danh sách khi tạo thành công
+        onUpdate={(updatedProduct) => {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+          );
+          setIsModalOpen(false);
+        }}
         brands={brands}
         colorsOptions={colorsOptions}
         categories={categories}

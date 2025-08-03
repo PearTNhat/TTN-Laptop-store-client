@@ -37,7 +37,6 @@ const BaseCombobox = ({
   renderValue,
 }) => {
   const { control } = useFormContext();
-
   const defaultRender = (option) => <span>{option?.label || ""}</span>;
   const renderOptionContent = renderOption || defaultRender;
   const renderValueContent = renderValue || defaultRender;

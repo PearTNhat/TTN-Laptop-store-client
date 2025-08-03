@@ -25,6 +25,7 @@ import {
   Products,
   Vouchers,
   AdminLayout,
+  PurchaseOrderManagement,
 } from "./pages/admin";
 import { useSelector } from "react-redux";
 import Modal from "./components/modal/Modal";
@@ -35,6 +36,8 @@ import NotFound from "./components/NotFound";
 import DetailProduct from "./pages/public/detailProduct/DetailProduct";
 import FilterProductPage from "./pages/public/filterProduct/FilterProductPage";
 import PaymentConfirmation from "./pages/payment/PaymentConfirmation";
+import DeliveryNoteManagement from "./pages/admin/deliveryNote";
+import GoodsReceiptManagement from "./pages/admin/goodsReceipt";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -48,7 +51,10 @@ function App() {
           <Route index element={<Home />} />
           <Route path={publicPaths.LOGIN} element={<Login />} />
           <Route path={publicPaths.REGISTER} element={<Register />} />
-          <Route path={publicPaths.RESET_PASSWORD} element={<ResetPassword />} />
+          <Route
+            path={publicPaths.RESET_PASSWORD}
+            element={<ResetPassword />}
+          />
           <Route path="/login/callback" element={<GoogleCallback />} />
           <Route
             path={productPaths.PRODUCT_DETAIL}
@@ -63,7 +69,7 @@ function App() {
           <Route path="voucher" element={<Voucher />} />
           <Route path="orders" element={<MyOrders />} />
           <Route path="change-password" element={<ChangePassword />} />
-          <Route path="change_email" element={<ChangeEmail/>} />
+          <Route path="change_email" element={<ChangeEmail />} />
         </Route>
         {/* router admin */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -75,6 +81,18 @@ function App() {
           />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
+          <Route
+            path={adminPaths.PURCHASE_ORDERS}
+            element={<PurchaseOrderManagement />}
+          />
+          <Route
+            path={adminPaths.DELIVERY_NOTES}
+            element={<DeliveryNoteManagement />}
+          />
+          <Route
+            path={adminPaths.GOODS_RECEIPT}
+            element={<GoodsReceiptManagement />}
+          />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />
           <Route path={adminPaths.ORDER_CONFIRMS} element={<OrderConfirms />} />
           <Route

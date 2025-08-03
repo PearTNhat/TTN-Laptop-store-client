@@ -9,7 +9,6 @@ import StyledFormField from "~/components/formFiled/StyledFormField";
 // import ColorCombobox from './ColorCombobox'; // Import component chọn màu mới
 import { generateSlug } from "~/utils/helper";
 import BaseCombobox from "~/components/formFiled/BaseCombobox";
-import { FormField } from "~/components/ui/form";
 
 const ProductDetailFields = ({ index, colorsOptions }) => {
   const { control, setValue, getValues } = useFormContext();
@@ -28,8 +27,9 @@ const ProductDetailFields = ({ index, colorsOptions }) => {
   // Hàm được gọi mỗi khi danh sách ảnh thay đổi từ ImageUploader
   const handleImagesChange = (imageUrls) => {
     setValue(`${detailPath}.images`, imageUrls, { shouldValidate: true });
-    // Tự động cập nhật trường 'thumbnail' bằng ảnh đầu tiên
-    setValue(`${detailPath}.thumbnail`, imageUrls[0] || "", {
+  };
+  const handleChageThumbnail = (imageUrls) => {
+    setValue(`${detailPath}.thumbnail`, imageUrls, {
       shouldValidate: true,
     });
   };
@@ -112,15 +112,26 @@ const ProductDetailFields = ({ index, colorsOptions }) => {
                 maxFiles={5}
                 value={field.value}
                 onChange={handleImagesChange}
+                fieldId={`images-${index}`}
               />
             )}
           />
           {/* Trường thumbnail ẩn */}
-          <FormField
-            control={control}
-            name={`${detailPath}.thumbnail`}
-            render={() => <></>}
-          />
+          <div className="mt-4">
+            <Controller
+              name={`${detailPath}.thumbnail`}
+              control={control}
+              render={({ field }) => (
+                <ImageUploader
+                  label="Ảnh phụ"
+                  maxFiles={1}
+                  value={field.value}
+                  onChange={handleChageThumbnail}
+                  fieldId={`thumbnail-${index}`}
+                />
+              )}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -136,66 +147,54 @@ const ProductDetailFields = ({ index, colorsOptions }) => {
           <StyledFormField
             control={control}
             name={`${detailPath}.configRequest.cpu`}
-            defaultValue="Intel Core i5"
             label="CPU"
           />
           <StyledFormField
             control={control}
             name={`${detailPath}.configRequest.ram`}
-            defaultValue="8GB DDR4"
             label="RAM"
           />
           <StyledFormField
             control={control}
+            name={`${detailPath}.configRequest.ramValue`}
+            label="Giá trị RAM"
+            placeholder="VD: 8GB"
+          />
+          <StyledFormField
+            control={control}
             name={`${detailPath}.configRequest.hardDrive`}
-            defaultValue="512GB SSD"
             label="Ổ cứng"
           />
           <StyledFormField
             control={control}
+            name={`${detailPath}.configRequest.hardDriveValue`}
+            label="Giá trị Ổ cứng"
+            placeholder="VD: 512GB"
+          />
+          <StyledFormField
+            control={control}
             name={`${detailPath}.configRequest.graphicCard`}
-            defaultValue="NVIDIA GeForce GTX 1650"
             label="Card đồ họa"
           />
           <StyledFormField
             control={control}
             name={`${detailPath}.configRequest.displaySize`}
-            defaultValue="15.6 inch"
             label="Màn hình"
           />
           <StyledFormField
             control={control}
             name={`${detailPath}.configRequest.weight`}
             label="Cân nặng"
-            defaultValue="1.5 kg"
             placeholder="VD: 2.1 kg"
           />
           <StyledFormField
             control={control}
             name={`${detailPath}.configRequest.madeIn`}
-            defaultValue="Việt Nam"
             label="Sản xuất tại"
           />
           <StyledFormField
             control={control}
-            name={`${detailPath}.configRequest.ramValue`}
-            label="Giá trị RAM"
-            defaultValue="8GB"
-            placeholder="VD: 8GB"
-          />
-          <StyledFormField
-            slug
-            for
-            control={control}
-            name={`${detailPath}.configRequest.hardDriveValue`}
-            label="Giá trị Ổ cứng"
-            defaultValue="512GB"
-            placeholder="VD: 512GB"
-          />
-          <StyledFormField
-            control={control}
             name={`${detailPath}.configRequest.nameConfig`}
-            defaultValue="demo"
             label="Tên cấu hình"
           />
         </CardContent>

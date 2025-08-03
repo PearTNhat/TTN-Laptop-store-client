@@ -1,40 +1,60 @@
-import { FaShoppingCart, FaUsers } from "react-icons/fa";
-import { TbCategoryFilled } from "react-icons/tb";
-import { BsTicketPerforatedFill } from "react-icons/bs";
-import { RiProductHuntLine } from "react-icons/ri";
-import { IoHome } from "react-icons/io5";
-import { IoMdColorFill } from "react-icons/io";
-import { BiFontSize } from "react-icons/bi";
+import {
+  BarChart3,
+  Users,
+  Tag,
+  Palette,
+  ShoppingBag,
+  PackageCheck,
+  UserPlus,
+  Package,
+  ShoppingCart,
+  Ticket,
+} from "lucide-react";
 import { adminPaths } from "./paths";
 
 const navItems = [
   {
-    icon: <IoHome />,
+    icon: <BarChart3 size={20} />,
     name: "Thống kê",
     path: "/admin",
   },
   {
-    icon: <FaUsers />,
+    icon: <Users size={20} />,
     name: "Người dùng",
     path: "/admin/users",
   },
   {
-    icon: <TbCategoryFilled />,
+    icon: <Tag size={20} />,
     name: "Thương hiệu",
     path: "/admin/brand",
   },
   {
-    icon: <IoMdColorFill />,
+    icon: <Palette size={20} />,
     name: "Dòng sản phẩm",
     path: "/admin/series",
   },
   {
-    icon: <RiProductHuntLine />,
+    icon: <ShoppingBag size={20} />,
+    name: "Đặt hàng nhà cung cấp",
+    path: "/admin/purchase-orders",
+  },
+  {
+    icon: <PackageCheck size={20} />,
+    name: "Nhập hàng từ nhà cung cấp",
+    path: "/admin/goods-receipt",
+  },
+  {
+    icon: <UserPlus size={20} />,
+    name: "Nhập hàng cho user",
+    path: "/admin/delivery-notes",
+  },
+  {
+    icon: <Package size={20} />,
     name: "Sản phẩm",
     path: "/admin/products",
   },
   {
-    icon: <FaShoppingCart />,
+    icon: <ShoppingCart size={20} />,
     name: "Đơn hàng",
     subItems: [
       {
@@ -42,13 +62,18 @@ const navItems = [
         path: adminPaths.ORDER_MANAGEMENT,
         pro: true,
       },
-      { name: "Chờ xác nhận", path: adminPaths.ORDER_CONFIRMS, pro: false },
+      {
+        name: "Chờ xác nhận",
+        path: adminPaths.ORDER_CONFIRMS,
+        pro: false,
+      },
     ],
   },
   {
-    icon: <BsTicketPerforatedFill />,
+    icon: <Ticket size={20} />,
     name: "Khuyến mãi",
     path: "/admin/vouchers",
   },
 ];
+
 export { navItems };

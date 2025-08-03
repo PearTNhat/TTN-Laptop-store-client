@@ -1,6 +1,8 @@
 // Dashboard
 export { default as DashBoard } from './dashboard/DashBoard';
 
+export { default as PurchaseOrderManagement } from './purchaseOrder/PurchaseOrderManagement';
+
 // User Management
 export { default as UsersManagement } from './users';
 

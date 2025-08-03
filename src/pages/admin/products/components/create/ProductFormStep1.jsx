@@ -10,7 +10,6 @@ import {
   FormControl,
   FormMessage,
 } from "~/components/ui/form";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -69,7 +68,6 @@ const ProductFormStep1 = ({ brands, categories }) => {
 
     // SỬA LỖI Ở ĐÂY: Dùng `brands` thay vì `brandsData`
     const selectedBrand = brands.find((b) => b.id === selectedBrandId);
-
     if (selectedBrand && selectedBrand.series) {
       setOptions((prev) => ({
         ...prev,
@@ -81,8 +79,8 @@ const ProductFormStep1 = ({ brands, categories }) => {
     } else {
       setOptions((prev) => ({ ...prev, series: [] }));
     }
-    setValue("seriesId", undefined, { shouldValidate: true });
-  }, [selectedBrandId, brands, setValue]); // <-- Sửa dependency array
+    // setValue("seriesId", undefined, { shouldValidate: true });
+  }, [selectedBrandId, brands, setValue]);
 
   return (
     <div className="space-y-6">

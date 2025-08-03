@@ -17,13 +17,14 @@ const configSchema = z.object({
 });
 
 const productDetailSchema = z.object({
+    id: z.number().optional().nullable(),
     title: z.string().min(1, "Tên phiên bản là bắt buộc"),
     // THÊM LẠI SLUG
     slug: z.string().min(1, "Slug là bắt buộc"),
     colorId: z.union([z.number().positive(), z.undefined()]).refine(val => val !== undefined, { message: "Vui lòng chọn màu" }),
     originalPrice: z.coerce.number().min(1, "Giá gốc phải lớn hơn 0"),
-    discountPrice: z.coerce.number().optional(),
     // Yêu cầu có ít nhất 1 ảnh và tối đa 5 ảnh
+    thumbnail: z.string().url(),
     images: z.array(z.string().url()).min(1, "Vui lòng tải lên ít nhất một ảnh").max(5, "Chỉ được phép tải lên tối đa 5 ảnh"),
     warrantyProd: z.string().optional(),
     configRequest: configSchema,
@@ -46,15 +47,7 @@ export const productCreateSchema = z.object({
 
     productDetailRequest: z.array(productDetailSchema),
 })
-    // Thêm một quy tắc refine ở cấp độ object để kiểm tra seriesId
-    .refine(data => {
-        // Nếu đã chọn brand và brand đó có series (giả định logic này ở component)
-        // thì seriesId không được là undefined.
-        // Logic này phức tạp và thường được xử lý ở component, 
-        // nhưng đây là cách để thêm validation phụ thuộc.
-        // Tạm thời chúng ta sẽ không cần nó vì component đã xử lý disabled rồi.
-        return true;
-    });
+
 
 
 // Schema cho bước 1, nó sẽ thừa hưởng các quy tắc mới

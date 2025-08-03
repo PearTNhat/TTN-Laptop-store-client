@@ -101,7 +101,7 @@ const ProductDetailModal = ({ product }) => {
           )}
 
           {/* Phần chọn phiên bản */}
-          <div>
+          <div className="">
             <h3 className="text-lg font-semibold text-gray-700 flex items-center mb-3">
               <span className="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>
               Phiên bản:
@@ -109,11 +109,11 @@ const ProductDetailModal = ({ product }) => {
                 {activeDetail.config.ramValue} | {activeDetail.config.hardDrive}
               </span>
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 ">
               {product.productDetails.map((detail) => (
                 <div
                   key={detail.id}
-                  className={`relative p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                  className={`relative w-[150px] p-3 border-2 rounded-lg cursor-pointer transition-all ${
                     detail.id === activeDetailId
                       ? "border-blue-500 bg-blue-50/50 shadow-md"
                       : "border-gray-200 bg-white hover:border-blue-400"

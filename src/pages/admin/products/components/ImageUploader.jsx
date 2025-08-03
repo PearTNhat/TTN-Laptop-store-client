@@ -4,10 +4,14 @@ import { ImagePlus, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { showToastError } from "~/utils/alert";
 import { apiGetImgString } from "~/apis/fileApi";
 
-const ImageUploader = ({ value, onChange, maxFiles = 1, label }) => {
+const ImageUploader = ({ value, onChange, maxFiles = 1, label, fieldId }) => {
   const { accessToken } = useSelector((state) => state.user);
   const [previews, setPreviews] = useState([]);
   const fileInputRef = useRef(null);
+
+  // Tạo unique ID cho mỗi ImageUploader instance
+  const uniqueId =
+    fieldId || `${label}-${Math.random().toString(36).substr(2, 9)}`;
 
   useEffect(() => {
     // Sync state từ react-hook-form với state nội bộ khi component mount
@@ -23,7 +27,7 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label }) => {
       );
       setPreviews(initialPreviews);
     }
-  }, []); // Chạy 1 lần duy nhất
+  }, [value]); // Chạy 1 lần duy nhất
 
   const getImageUrl = useCallback(
     async (file) => {
@@ -129,7 +133,7 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label }) => {
         ))}
         {previews.length < maxFiles && (
           <label
-            htmlFor={`file-upload-${label}`}
+            htmlFor={uniqueId}
             className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-slate-50 transition-colors"
           >
             <ImagePlus className="w-8 h-8 text-slate-400" />
@@ -137,7 +141,7 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label }) => {
               Thêm ảnh
             </span>
             <input
-              id={`file-upload-${label}`}
+              id={uniqueId}
               type="file"
               className="hidden"
               accept="image/*"

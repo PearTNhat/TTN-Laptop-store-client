@@ -18,8 +18,8 @@ import ProductFormStep1 from "./ProductFormStep1";
 import ProductDetailFormStep2 from "./ProductDetailFormStep2";
 import { Button } from "~/components/ui/button";
 import ConfirmModal from "~/components/modal/ConfirmModal";
-import { showToastError } from "~/utils/alert";
-import { apiCreateProduct } from "~/apis/productApi";
+import { showToastError, showToastSuccess } from "~/utils/alert";
+import { apiCreateProduct, apiUpdateProduct } from "~/apis/productApi";
 import { Loader2 } from "lucide-react";
 import { mapProductToFormValues } from "../../utils/data-mapper";
 
@@ -35,13 +35,19 @@ const defaultValues = {
       originalPrice: 0,
       slug: "",
       thumbnail: "",
+      id: undefined,
       images: [],
       configRequest: {
-        cpu: "",
-        ram: "",
-        hardDrive: "",
-        graphicCard: "",
-        displaySize: "",
+        cpu: "Intel Core i5",
+        madeIn: "Việt Nam",
+        displaySize: "15.6 inch",
+        graphicCard: "NVIDIA GeForce GTX 1650",
+        ram: "8GB DDR4",
+        ramValue: "8GB",
+        weight: "1.5 kg",
+        hardDrive: "512GB SSD",
+        hardDriveValue: "512GB",
+        nameConfig: "1080p Gaming",
       },
     },
   ],
@@ -51,6 +57,7 @@ const ProductCreateDialog = ({
   isOpen,
   setIsOpen,
   onSuccess,
+  onUpdate,
   brands,
   categories,
   colorsOptions,
@@ -64,7 +71,6 @@ const ProductCreateDialog = ({
     resolver: zodResolver(productCreateSchema),
     defaultValues: isEditMode ? {} : defaultValues,
   });
-
   const handleNextStep = async () => {
     const isValid = await formMethods.trigger(
       Object.keys(productStep1Schema.shape)
@@ -77,21 +83,41 @@ const ProductCreateDialog = ({
       );
     }
   };
-
   const handleBackStep = () => setStep(1);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       if (isEditMode) {
-        console.log("Updating data:", data);
+        const res = await apiUpdateProduct({
+          accessToken,
+          body: data,
+          id: editingProduct.id,
+        });
+        if (res.code === 200) {
+          showToastSuccess("Cập nhật sản phẩm thành công");
+          onUpdate(res.data); // Gọi callback để tải lại danh sách
+        } else {
+          if (res?.message.includes("slug")) {
+            showToastError("Slug đã tồn tại, vui lòng chọn slug khác.");
+          } else {
+            showToastError(res.message || "Lỗi khi cập nhật phẩm");
+          }
+        }
+        onUpdate({ ...data, config: data.configRequest }); // Gọi callback để cập nhật sản phẩm
       } else {
-        console.log("Submitting data:", data);
         // await apiCreateProduct(data);
         const res = await apiCreateProduct({ accessToken, body: data });
-        console.log(res);
-        onSuccess(); // Gọi callback để tải lại danh sách
-        // setIsOpen(false); // Đóng modal
+        if (res.code === 200) {
+          showToastSuccess("Tạo sản phẩm thành công");
+          onSuccess(res.data); // Gọi callback để tải lại danh sách
+        } else {
+          if (res?.message.includes("slug")) {
+            showToastError("Slug đã tồn tại, vui lòng chọn slug khác.");
+          } else {
+            showToastError(res.message || "Lỗi khi tạo sản phẩm");
+          }
+        }
       }
     } catch (error) {
       ConfirmModal.toast({
@@ -116,7 +142,6 @@ const ProductCreateDialog = ({
       const formValues = mapProductToFormValues(editingProduct);
       formMethods.reset(formValues);
     } else if (!isOpen) {
-      // Khi đóng modal, reset về trạng thái trắng
       formMethods.reset(defaultValues);
       setStep(1);
     }
