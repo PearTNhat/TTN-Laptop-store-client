@@ -5,53 +5,54 @@ import {
   FaTruck,
   FaBoxOpen,
   FaTimes,
-  FaUndo,
+  FaSpinner,
+  FaShippingFast,
 } from "react-icons/fa";
 
 const ItemStatusBadge = ({ status, onClick, editable = false }) => {
   const getStatusConfig = (status) => {
     switch (status) {
-      case "pending":
+      case "PENDING":
         return {
-          text: "Chờ xác nhận",
+          text: "Chờ xử lý",
           color: "bg-yellow-100 text-yellow-800 border-yellow-300",
           icon: <FaClock className="w-3 h-3" />,
         };
-      case "confirmed":
+      case "AWAITING":
         return {
-          text: "Đã xác nhận",
-          color: "bg-blue-100 text-blue-800 border-blue-300",
-          icon: <FaCheck className="w-3 h-3" />,
+          text: "Đang chờ",
+          color: "bg-orange-100 text-orange-800 border-orange-300",
+          icon: <FaClock className="w-3 h-3" />,
         };
-      case "processing":
+      case "PROCESSING":
         return {
           text: "Đang xử lý",
-          color: "bg-purple-100 text-purple-800 border-purple-300",
-          icon: <FaBoxOpen className="w-3 h-3" />,
+          color: "bg-blue-100 text-blue-800 border-blue-300",
+          icon: <FaSpinner className="w-3 h-3 animate-spin" />,
         };
-      case "shipping":
+      case "PARTIALLY_DELIVERED":
         return {
-          text: "Đang giao",
-          color: "bg-indigo-100 text-indigo-800 border-indigo-300",
+          text: "Giao một phần",
+          color: "bg-purple-100 text-purple-800 border-purple-300",
+          icon: <FaShippingFast className="w-3 h-3" />,
+        };
+      case "DELIVERED":
+        return {
+          text: "Đã giao hàng",
+          color: "bg-green-100 text-green-800 border-green-300",
           icon: <FaTruck className="w-3 h-3" />,
         };
-      case "delivered":
+      case "COMPLETED":
         return {
-          text: "Đã giao",
-          color: "bg-green-100 text-green-800 border-green-300",
+          text: "Hoàn thành",
+          color: "bg-emerald-100 text-emerald-800 border-emerald-300",
           icon: <FaCheck className="w-3 h-3" />,
         };
-      case "cancelled":
+      case "CANCELED":
         return {
           text: "Đã hủy",
           color: "bg-red-100 text-red-800 border-red-300",
           icon: <FaTimes className="w-3 h-3" />,
-        };
-      case "returned":
-        return {
-          text: "Đã trả",
-          color: "bg-gray-100 text-gray-800 border-gray-300",
-          icon: <FaUndo className="w-3 h-3" />,
         };
       default:
         return {

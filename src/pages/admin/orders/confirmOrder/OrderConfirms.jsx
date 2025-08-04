@@ -17,61 +17,7 @@ function OrderConfirms() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock data cho đơn hàng chờ xác nhận
-  const [pendingOrders, setPendingOrders] = useState([
-    {
-      id: "#ORD006",
-      customer: "Nguyễn Thị F",
-      email: "nguyenthif@email.com",
-      phone: "0901234572",
-      orderDate: "2024-01-16",
-      total: 52000000,
-      paymentMethod: "Chuyển khoản",
-      status: "Chờ xác nhận",
-      address: "123 Đường ABC, Quận 1, TP.HCM",
-      items: [
-        {
-          id: 1,
-          image:
-            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
-          name: 'MacBook Pro 14" M3 Pro',
-          price: 45000000,
-          quantity: 1,
-          total: 45000000,
-        },
-        {
-          id: 2,
-          image:
-            "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400",
-          name: "Apple Magic Mouse",
-          price: 3500000,
-          quantity: 2,
-          total: 7000000,
-        },
-      ],
-    },
-    {
-      id: "#ORD007",
-      customer: "Trần Văn G",
-      email: "tranvang@email.com",
-      phone: "0901234573",
-      orderDate: "2024-01-16",
-      total: 28000000,
-      paymentMethod: "Tiền mặt",
-      status: "Chờ xác nhận",
-      address: "456 Đường XYZ, Quận 3, TP.HCM",
-      items: [
-        {
-          id: 3,
-          image:
-            "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400",
-          name: "Asus ROG Strix G15",
-          price: 28000000,
-          quantity: 1,
-          total: 28000000,
-        },
-      ],
-    },
-  ]);
+  const [pendingOrders, setPendingOrders] = useState([]);
 
   const handleViewDetail = (order) => {
     setSelectedOrder(order);

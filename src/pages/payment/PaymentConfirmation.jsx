@@ -9,8 +9,8 @@ import PaymentMethod from "./components/PaymentMethod";
 import { useSelector } from "react-redux";
 // Import dữ liệu giả
 import { fakeUserData } from "~/data/fakeOrder";
-import { useLocation, useNavigate } from "react-router-dom";
-import { showToastError } from "~/utils/alert";
+import { useLocation } from "react-router-dom";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiCreateOrder } from "~/apis/orderApi";
 
 export default function PaymentConfirmation() {
@@ -58,6 +58,11 @@ export default function PaymentConfirmation() {
     if (selectedPayment === "COD") {
       body.paymentMethod = "COD";
       const res = await createOrder({ accessToken, body });
+      if (res?.code === 200) {
+        showToastSuccess("Đặt hàng thành công!");
+      } else {
+        showToastError(res?.message || "Đặt hàng thất bại");
+      }
       console.log(res);
     } else {
       body.paymentMethod = "MOMO";

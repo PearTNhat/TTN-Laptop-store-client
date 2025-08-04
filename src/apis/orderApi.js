@@ -19,13 +19,17 @@ const apiCreateOrder = async ({ accessToken, body }) => {
 
 const apiGetOrderList = async ({ accessToken, params }) => {
     try {
+        params = {
+            ...params,
+            page: params.page ? params.page - 1 : 0, // Adjust for API zero-based index
+        };
         const config = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
             params,
         }
-        const { data } = await http.get("/orders/search-by-code", config);
+        const { data } = await http.get("/orders/search", config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -34,14 +38,15 @@ const apiGetOrderList = async ({ accessToken, params }) => {
         throw new Error(error.message);
     }
 };
-const apiChangeStatusOrder = async ({ accessToken, id }) => {
+
+const apiGetOrderDetail = async ({ accessToken, id }) => {
     try {
         const config = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         }
-        const { data } = await http.put(`/orders/change-status/${id}`, config);
+        const { data } = await http.get(`/orders/${id}`, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -50,4 +55,22 @@ const apiChangeStatusOrder = async ({ accessToken, id }) => {
         throw new Error(error.message);
     }
 };
-export { apiCreateOrder };
+
+const apiChangeStatusOrder = async ({ accessToken, id, status }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+
+        }
+        const { data } = await http.put(`/orders/change-status/${id}?status=${status}`, {}, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+export { apiCreateOrder, apiGetOrderList, apiChangeStatusOrder, apiGetOrderDetail };

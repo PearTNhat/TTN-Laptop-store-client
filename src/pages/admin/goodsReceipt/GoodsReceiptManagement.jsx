@@ -25,7 +25,6 @@ function GoodsReceiptManagement() {
   });
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState(null);
 
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),

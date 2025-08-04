@@ -51,4 +51,102 @@ const apiGetPromotionId = async ({ accessToken, promotionId }) => {
         throw new Error(error.message);
     }
 }
-export { apiGetMyPromotion, apiGetProductPromotionById, apiGetPromotionId };
+
+// Admin promotion management APIs
+const apiGetPromotions = async ({ accessToken, params }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params: params, // page, size, promotionType, status, etc.
+        };
+        const { data } = await http.get("/promotions", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+const apiCreatePromotion = async ({ accessToken, promotionData }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.post("/promotions", promotionData, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+const apiUpdatePromotion = async ({ accessToken, promotionId, promotionData }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.put(`/promotions/${promotionId}`, promotionData, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+const apiDeletePromotion = async ({ accessToken, promotionId }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.delete(`/promotions/${promotionId}`, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+const apiGetProductsForPromotion = async ({ accessToken, params }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params: params, // page, size, search, categoryId, etc.
+        };
+        const { data } = await http.get("/products/promotion-selection", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+export {
+    apiGetMyPromotion,
+    apiGetProductPromotionById,
+    apiGetPromotionId,
+    apiGetPromotions,
+    apiCreatePromotion,
+    apiUpdatePromotion,
+    apiDeletePromotion,
+    apiGetProductsForPromotion
+};
