@@ -115,4 +115,27 @@ export const apiChangeEmail = async ({ newEmail, otpCode }) => {
     };
   }
 };
-export { apiFetchMyInfo }
+const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false }) => {
+  try {
+    page = page <= 1 ? 0 : page - 1;
+    const params = {
+      page,
+      size,
+      block
+    };
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params,
+    };
+    const { data } = await http.get("users/all", config);
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    throw new Error(error.message);
+  }
+};
+export { apiFetchMyInfo, apiGetAllUsers }

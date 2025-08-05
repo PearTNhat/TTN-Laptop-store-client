@@ -135,4 +135,27 @@ const apiDeleteProductDetail = async ({ accessToken, id }) => {
         throw new Error(error.message);
     }
 };
-export { apiGetProducts, apiGetDetailProduct, apiGetListProducts, apiCreateProduct, apiUpdateProduct, apiDeleteProduct, apiDeleteProductDetail };
+const apiGetAllProductDetails = async ({ accessToken, page = 1, size = 10, title }) => {
+    try {
+        page = page <= 1 ? 0 : page - 1;
+        const params = {
+            page,
+            size,
+            title
+        }
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params
+        }
+        const { data } = await http.get("product-details/search", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+}
+export { apiGetProducts, apiGetDetailProduct, apiGetListProducts, apiCreateProduct, apiUpdateProduct, apiDeleteProduct, apiDeleteProductDetail, apiGetAllProductDetails };

@@ -142,9 +142,11 @@ const Cart = ({
         quantity: item.quantity,
         discountPrice: item.discountPrice,
         originalPrice: item.originalPrice,
+        productDetailId: item.productDetailId,
       })),
       totalAmount: totalAmount,
     };
+    console.log(formattedOrder);
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {

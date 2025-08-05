@@ -55,13 +55,17 @@ const apiGetPromotionId = async ({ accessToken, promotionId }) => {
 // Admin promotion management APIs
 const apiGetPromotions = async ({ accessToken, params }) => {
     try {
+        params = {
+            ...params,
+            page: params.page ? params.page - 1 : 0, // Adjust for API zero-based index
+        };
         const config = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
             params: params, // page, size, promotionType, status, etc.
         };
-        const { data } = await http.get("/promotions", config);
+        const { data } = await http.get("/promotions/list", config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -139,6 +143,7 @@ const apiGetProductsForPromotion = async ({ accessToken, params }) => {
         throw new Error(error.message);
     }
 };
+
 
 export {
     apiGetMyPromotion,

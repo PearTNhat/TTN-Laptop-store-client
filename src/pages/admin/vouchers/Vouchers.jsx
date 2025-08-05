@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FaSearch,
   FaPlus,
@@ -6,9 +6,6 @@ import {
   FaTrash,
   FaEye,
   FaGift,
-  FaUsers,
-  FaBox,
-  FaTag,
   FaPercent,
   FaDollarSign,
   FaCalendarAlt,
@@ -21,16 +18,40 @@ import {
   apiUpdatePromotion,
   apiDeletePromotion,
 } from "~/apis/promotionApi";
+import { useSearchParams } from "react-router-dom";
 import { PromotionDetailModal, PromotionFormModal } from "./components";
+import { showToastError } from "~/utils/alert";
+import Pagination from "~/components/pagination/Pagination";
+import { formatPrice } from "~/utils/helper";
+import {
+  getPromotionStatus,
+  getPromotionTypeColor,
+  getPromotionTypeIcon,
+} from "./utils/helper";
+
+const promotionTypes = [
+  { value: "all", label: "Tất cả loại" },
+  { value: "USER_PROMOTION", label: "Khuyến mãi người dùng" },
+  { value: "PRODUCT_DISCOUNT", label: "Giảm giá sản phẩm" },
+  { value: "GIFT", label: "Quà tặng" },
+  { value: "SHOP_DISCOUNT", label: "Giảm giá cửa hàng" },
+];
 
 function Vouchers() {
   const { accessToken } = useSelector((state) => state.user);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
+  const currentParams = useMemo(
+    () => Object.fromEntries([...searchParams]),
+    [searchParams]
+  );
+
   const [totalElements, setTotalElements] = useState(0);
 
   // Modal states
@@ -44,78 +65,82 @@ function Vouchers() {
   });
   const [formLoading, setFormLoading] = useState(false);
 
-  const promotionsPerPage = 10;
-
-  const promotionTypes = [
-    { value: "", label: "Tất cả loại" },
-    { value: "USER_PROMOTION", label: "Khuyến mãi người dùng" },
-    { value: "PRODUCT_DISCOUNT", label: "Giảm giá sản phẩm" },
-    { value: "GIFT", label: "Quà tặng" },
-    { value: "SHOP_DISCOUNT", label: "Giảm giá cửa hàng" },
-  ];
-
   // Load promotions from API
-  const loadPromotions = useCallback(
-    async (page = 0, search = "", type = "") => {
-      setLoading(true);
-      try {
-        const params = {
-          page,
-          size: promotionsPerPage,
-        };
+  const loadPromotions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: currentParams.page,
+        size: 10,
+        search: currentParams?.q?.trim() || "",
+        promotionType: currentParams.promotionType,
+      };
 
-        if (search.trim()) {
-          params.search = search.trim();
-        }
+      const response = await apiGetPromotions({ accessToken, params });
 
-        if (type) {
-          params.promotionType = type;
-        }
-
-        const response = await apiGetPromotions({ accessToken, params });
-
-        if (response.success) {
-          setPromotions(response.data.content || []);
-          setTotalPages(response.data.totalPages || 0);
-          setTotalElements(response.data.totalElements || 0);
-        } else {
-          setPromotions([]);
-          Swal.fire(
-            "Lỗi",
-            response.message || "Không thể tải danh sách khuyến mãi",
-            "error"
-          );
-        }
-      } catch (error) {
-        console.error("Error loading promotions:", error);
+      if (response.code === 200) {
+        setPromotions(response.data.content || []);
+        setPagination({
+          currentPage: response.data.pageNumber + 1,
+          totalPages: response.data.totalPages,
+        });
+        setTotalElements(response.data.totalElements || 0);
+      } else {
         setPromotions([]);
-        Swal.fire("Lỗi", "Có lỗi xảy ra khi tải danh sách khuyến mãi", "error");
-      } finally {
-        setLoading(false);
+        showToastError(response.message || "Không thể tải khuyến mãi");
       }
-    },
-    [accessToken]
-  );
+    } catch (error) {
+      setPromotions([]);
+      showToastError(
+        error.message || "Có lỗi xảy ra khi tải danh sách khuyến mãi"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken, currentParams]);
 
   useEffect(() => {
-    loadPromotions(currentPage, searchTerm, selectedType);
-  }, [currentPage, searchTerm, selectedType, loadPromotions]);
+    loadPromotions();
+  }, [currentParams, loadPromotions]);
 
   // Handle search
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setCurrentPage(0);
-  };
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      setSearchParams((prev) => {
+        if (searchTerm.trim()) {
+          prev.set("q", searchTerm.trim());
+          prev.set("page", "1"); // Quay về trang 1 khi tìm kiếm
+        } else {
+          prev.delete("q");
+        }
+        return prev;
+      });
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, setSearchParams]);
 
   // Handle type filter
   const handleTypeFilter = (type) => {
-    setSelectedType(type);
-    setCurrentPage(0);
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      if (type === "all") {
+        newParams.delete("promotionType");
+      } else {
+        newParams.set("page", "1");
+        newParams.set("promotionType", type);
+      }
+      return newParams;
+    });
   };
 
   // Handle pagination
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("page", page.toString());
+      return newParams;
+    });
   };
 
   // Handle form submission
@@ -147,7 +172,7 @@ function Vouchers() {
           "success"
         );
         setFormModal({ isOpen: false, promotion: null });
-        loadPromotions(currentPage, searchTerm, selectedType);
+        loadPromotions();
       } else {
         Swal.fire("Lỗi", response.message || "Có lỗi xảy ra", "error");
       }
@@ -181,7 +206,7 @@ function Vouchers() {
 
         if (response.success) {
           Swal.fire("Đã xóa!", "Khuyến mãi đã được xóa thành công.", "success");
-          loadPromotions(currentPage, searchTerm, selectedType);
+          loadPromotions();
         } else {
           Swal.fire(
             "Lỗi",
@@ -194,14 +219,6 @@ function Vouchers() {
         Swal.fire("Lỗi", "Có lỗi xảy ra khi xóa khuyến mãi", "error");
       }
     }
-  };
-
-  // Utility functions
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
   };
 
   const formatDate = (dateString) => {
@@ -217,55 +234,11 @@ function Vouchers() {
     return typeObj ? typeObj.label : type;
   };
 
-  const getPromotionTypeIcon = (type) => {
-    switch (type) {
-      case "USER_PROMOTION":
-        return <FaUsers className="text-blue-600" />;
-      case "PRODUCT_DISCOUNT":
-        return <FaBox className="text-green-600" />;
-      case "GIFT":
-        return <FaGift className="text-purple-600" />;
-      case "SHOP_DISCOUNT":
-        return <FaTag className="text-orange-600" />;
-      default:
-        return <FaGift className="text-gray-600" />;
-    }
-  };
-
-  const getPromotionTypeColor = (type) => {
-    switch (type) {
-      case "USER_PROMOTION":
-        return "bg-blue-100 text-blue-800";
-      case "PRODUCT_DISCOUNT":
-        return "bg-green-100 text-green-800";
-      case "GIFT":
-        return "bg-purple-100 text-purple-800";
-      case "SHOP_DISCOUNT":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   const formatDiscount = (promotion) => {
     if (promotion.discountUnit === "PERCENT") {
       return `${promotion.discountValue}%`;
     } else {
       return formatPrice(promotion.discountValue);
-    }
-  };
-
-  const getPromotionStatus = (promotion) => {
-    const now = new Date();
-    const startDate = new Date(promotion.startDate);
-    const endDate = new Date(promotion.endDate);
-
-    if (now < startDate) {
-      return { text: "Chưa bắt đầu", color: "bg-blue-100 text-blue-800" };
-    } else if (now > endDate) {
-      return { text: "Đã hết hạn", color: "bg-red-100 text-red-800" };
-    } else {
-      return { text: "Đang hoạt động", color: "bg-green-100 text-green-800" };
     }
   };
 
@@ -363,13 +336,13 @@ function Vouchers() {
               type="text"
               placeholder="Tìm kiếm khuyến mãi..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="flex gap-2">
             <select
-              value={selectedType}
+              value={currentParams.promotionType || "all"}
               onChange={(e) => handleTypeFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
@@ -442,9 +415,6 @@ function Vouchers() {
                     <tr
                       key={promotion.id}
                       className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() =>
-                        setDetailModal({ isOpen: true, promotion })
-                      }
                     >
                       <td className="px-6 py-4">
                         <div>
@@ -573,67 +543,11 @@ function Vouchers() {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Hiển thị{" "}
-                  <span className="font-medium">
-                    {currentPage * promotionsPerPage + 1}
-                  </span>{" "}
-                  đến{" "}
-                  <span className="font-medium">
-                    {Math.min(
-                      (currentPage + 1) * promotionsPerPage,
-                      totalElements
-                    )}
-                  </span>{" "}
-                  trong <span className="font-medium">{totalElements}</span> kết
-                  quả
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-                  disabled={currentPage === 0}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Trước
-                </button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = currentPage - 2 + i;
-                  if (pageNum < 0 || pageNum >= totalPages) return null;
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`px-3 py-1 text-sm border rounded ${
-                        currentPage === pageNum
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      {pageNum + 1}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages - 1, currentPage + 1))
-                  }
-                  disabled={currentPage === totalPages - 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Sau
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPageCount={pagination.totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {/* Modals */}

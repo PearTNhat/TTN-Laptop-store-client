@@ -197,7 +197,6 @@ const PurchaseOrderManagement = () => {
     try {
       setIsFormModalOpen(true); // Mở modal trước khi fetch details
       const orderWithDetails = await handleFetchDetails(order.id);
-      console.log("Editing order:", { ...order, ...orderWithDetails.details });
       setEditingOrder({ ...order, ...orderWithDetails.details }); // Fallback về order gốc nếu không fetch được details
     } catch (error) {
       console.error("Error fetching order details:", error);
