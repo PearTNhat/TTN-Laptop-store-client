@@ -1,33 +1,27 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
-import { Controller, useForm } from "react-hook-form";
+import React, { useState, useEffect, useCallback } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FaTimes,
-  FaSave,
-  FaPercent,
-  FaDollarSign,
-  FaSearch,
-} from "react-icons/fa";
+import { FaTimes, FaSave } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { promotionSchema } from "../schema/promotion.schema";
 import { apiGetAllProductDetails } from "~/apis/productApi";
 import { showToastError } from "~/utils/alert";
-import { formatPrice } from "~/utils/helper";
 import SelectedItemsDisplay from "./SelectedItemsDisplay";
+import BasicInfoForm from "./BasicInfoForm";
+import DiscountSettingsForm from "./DiscountSettingsForm";
+import DateTimeForm from "./DateTimeForm";
+import ProductSelectionForm from "./ProductSelectionForm";
+import UserSelectionForm from "./UserSelectionForm";
+import RankSelectionForm from "./RankSelectionForm";
+import UserOrRankSelector from "./UserOrRankSelector";
 import { apiGetAllUsers } from "~/apis/userApi";
 import { useDebounce } from "~/hooks/useDebounce";
+import { apiListRank } from "~/apis/rankApi";
 
-const promotionTypes = [
-  { value: "USER_PROMOTION", label: "Khuyến mãi người dùng" },
-  { value: "PRODUCT_DISCOUNT", label: "Giảm giá sản phẩm" },
-  { value: "GIFT", label: "Quà tặng" },
-  { value: "SHOP_DISCOUNT", label: "Giảm giá cửa hàng" },
-];
 const PromotionFormModal = ({
   isOpen,
   onClose,
   onSubmit,
-  promotion = null,
   isLoading = false,
 }) => {
   const { accessToken } = useSelector((state) => state.user);
@@ -42,6 +36,11 @@ const PromotionFormModal = ({
   const [userSearch, setUserSearch] = useState("");
   const [userLoading, setUserLoading] = useState(false);
 
+  // Rank-related states
+  const [ranks, setRanks] = useState([]);
+  const [selectedRanks, setSelectedRanks] = useState([]);
+  const [rankLoading, setRankLoading] = useState(false);
+
   // Debounced search values
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const debouncedUserSearch = useDebounce(userSearch, 300);
@@ -51,7 +50,6 @@ const PromotionFormModal = ({
     handleSubmit,
     watch,
     setValue,
-    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(promotionSchema),
@@ -69,40 +67,12 @@ const PromotionFormModal = ({
       endDate: "",
       productDetailIds: [],
       userIds: [],
+      rankLevelIds: [],
     },
   });
 
   const watchPromotionType = watch("promotionType");
   const watchDiscountUnit = watch("discountUnit");
-
-  useEffect(() => {
-    if (promotion) {
-      reset({
-        name: promotion.name || "",
-        code: promotion.code || "",
-        description: promotion.description || "",
-        discountValue: promotion.discountValue || 0,
-        discountUnit: promotion.discountUnit || "PERCENT",
-        promotionType: promotion.promotionType || "USER_PROMOTION",
-        minOrderValue: promotion.minOrderValue || 0,
-        maxDiscountValue: promotion.maxDiscountValue || 0,
-        usageLimit: promotion.usageLimit || 0,
-        startDate: promotion.startDate
-          ? new Date(promotion.startDate).toISOString().slice(0, 16)
-          : "",
-        endDate: promotion.endDate
-          ? new Date(promotion.endDate).toISOString().slice(0, 16)
-          : "",
-        productDetailIds: promotion.productDetailIds || [],
-      });
-      setSelectedProducts(promotion.productDetailIds || []);
-      setSelectedUsers(promotion.userIds || []);
-    } else {
-      reset();
-      setSelectedProducts([]);
-      setSelectedUsers([]);
-    }
-  }, [promotion, reset]);
 
   const loadProducts = useCallback(
     async (search = "") => {
@@ -138,7 +108,8 @@ const PromotionFormModal = ({
 
   const loadUsers = useCallback(
     async (search = "") => {
-      if (watchPromotionType !== "USER_PROMOTION") return;
+      if (watchPromotionType !== "USER_PROMOTION" || selectedRanks.length > 0)
+        return;
 
       setUserLoading(true);
       try {
@@ -166,8 +137,34 @@ const PromotionFormModal = ({
         setUserLoading(false);
       }
     },
-    [accessToken, watchPromotionType]
+    [accessToken, watchPromotionType, selectedRanks.length]
   );
+
+  const loadRanks = useCallback(async () => {
+    if (
+      watchPromotionType !== "USER_PROMOTION" &&
+      watchPromotionType !== "GIFT"
+    )
+      return;
+
+    setRankLoading(true);
+    try {
+      const response = await apiListRank({ accessToken });
+
+      if (response.code === 200) {
+        setRanks(response.data || []);
+      } else {
+        throw new Error(response.message || "Failed to load ranks");
+      }
+    } catch (error) {
+      showToastError(
+        error.message || "Không thể tải danh sách hạng. Vui lòng thử lại."
+      );
+      setRanks([]);
+    } finally {
+      setRankLoading(false);
+    }
+  }, [accessToken, watchPromotionType]);
 
   // Load products when promotion type changes
   useEffect(() => {
@@ -182,14 +179,28 @@ const PromotionFormModal = ({
 
   // Load users when promotion type changes
   useEffect(() => {
-    if (watchPromotionType === "USER_PROMOTION") {
+    if (watchPromotionType === "USER_PROMOTION" && selectedRanks.length === 0) {
       loadUsers();
     } else {
       setUsers([]);
       setSelectedUsers([]);
       setValue("userIds", []);
     }
-  }, [watchPromotionType, setValue, loadUsers]);
+  }, [watchPromotionType, selectedRanks.length, setValue, loadUsers]);
+
+  // Load ranks when promotion type changes
+  useEffect(() => {
+    if (
+      watchPromotionType === "USER_PROMOTION" ||
+      watchPromotionType === "GIFT"
+    ) {
+      loadRanks();
+    } else {
+      setRanks([]);
+      setSelectedRanks([]);
+      setValue("rankLevelIds", []);
+    }
+  }, [watchPromotionType, setValue, loadRanks]);
 
   // Debounced product search
   useEffect(() => {
@@ -216,10 +227,6 @@ const PromotionFormModal = ({
     setProductSearch(e.target.value);
   };
 
-  const handleUserSearch = (e) => {
-    setUserSearch(e.target.value);
-  };
-
   // Selection handlers
   const toggleProductSelection = (productId) => {
     const isSelected = selectedProducts.some((p) => p.id === productId);
@@ -232,7 +239,7 @@ const PromotionFormModal = ({
       if (productToAdd) {
         newSelected = [...selectedProducts, productToAdd];
       } else {
-        return; // Product not found, do nothing
+        newSelected = selectedProducts;
       }
     }
 
@@ -242,6 +249,7 @@ const PromotionFormModal = ({
       newSelected.map((p) => p.id)
     );
   };
+
   const toggleUserSelection = (userId) => {
     const isSelected = selectedUsers.some((u) => u.id === userId);
     let newSelected;
@@ -253,7 +261,7 @@ const PromotionFormModal = ({
       if (userToAdd) {
         newSelected = [...selectedUsers, userToAdd];
       } else {
-        return; // User not found, do nothing
+        newSelected = selectedUsers;
       }
     }
 
@@ -262,6 +270,34 @@ const PromotionFormModal = ({
       "userIds",
       newSelected.map((u) => u.id)
     );
+  };
+
+  const toggleRankSelection = (rankId) => {
+    const isSelected = selectedRanks.some((r) => r.id === rankId);
+    let newSelected;
+
+    if (isSelected) {
+      newSelected = selectedRanks.filter((r) => r.id !== rankId);
+    } else {
+      const rankToAdd = ranks.find((r) => r.id === rankId);
+      if (rankToAdd) {
+        newSelected = [...selectedRanks, rankToAdd];
+      } else {
+        newSelected = selectedRanks;
+      }
+    }
+
+    setSelectedRanks(newSelected);
+    setValue(
+      "rankLevelIds",
+      newSelected.map((r) => r.id)
+    );
+
+    // Clear user selection when rank is selected
+    if (watchPromotionType === "USER_PROMOTION") {
+      setSelectedUsers([]);
+      setValue("userIds", []);
+    }
   };
 
   const handleFormSubmit = (data) => {
@@ -274,10 +310,15 @@ const PromotionFormModal = ({
           ? selectedProducts.map((p) => p.id)
           : [],
       userIds:
-        watchPromotionType === "USER_PROMOTION"
+        watchPromotionType === "USER_PROMOTION" && selectedRanks.length === 0
           ? selectedUsers.map((u) => u.id)
           : [],
+      rankLevelIds:
+        watchPromotionType === "USER_PROMOTION" || watchPromotionType === "GIFT"
+          ? selectedRanks.map((r) => r.id)
+          : [],
     };
+    console.log("Submitting promotion data:", formattedData);
     onSubmit(formattedData);
   };
 
@@ -285,527 +326,148 @@ const PromotionFormModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-[90%] w-full max-h-[95vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {promotion ? "Chỉnh sửa khuyến mãi" : "Tạo khuyến mãi mới"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <FaTimes className="text-gray-500" />
-          </button>
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">
+              ✨ Tạo khuyến mãi mới
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <FaTimes className="text-gray-500" />
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6">
+        <form
+          onSubmit={handleSubmit(handleFormSubmit)}
+          className="p-6 space-y-8"
+        >
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tên khuyến mãi *
-              </label>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nhập tên khuyến mãi"
-                  />
-                )}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mã khuyến mãi *
-              </label>
-              <Controller
-                name="code"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-                    placeholder="Nhập mã khuyến mãi"
-                  />
-                )}
-              />
-              {errors.code && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.code.message}
-                </p>
-              )}
-            </div>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+              📝 Thông tin cơ bản
+            </h3>
+            <BasicInfoForm control={control} errors={errors} />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mô tả *
-            </label>
-            <Controller
-              name="description"
+          {/* Discount Settings */}
+          <div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+              💰 Cài đặt giảm giá
+            </h3>
+            <DiscountSettingsForm
               control={control}
-              render={({ field }) => (
-                <textarea
-                  {...field}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Nhập mô tả khuyến mãi"
-                />
-              )}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          {/* Promotion Type */}
-
-          {/* Discount Configuration */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Đơn vị giảm giá *
-              </label>
-              <Controller
-                name="discountUnit"
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="PERCENT">Phần trăm (%)</option>
-                    <option value="AMOUNT">Số tiền (VNĐ)</option>
-                  </select>
-                )}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Giá trị giảm *
-              </label>
-              <div className="relative">
-                <Controller
-                  name="discountValue"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      {...field}
-                      type="number"
-                      min="0"
-                      step={watchDiscountUnit === "PERCENT" ? "1" : "1000"}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0"
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  )}
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  {watchDiscountUnit === "PERCENT" ? (
-                    <FaPercent className="text-gray-400" />
-                  ) : (
-                    <FaDollarSign className="text-gray-400" />
-                  )}
-                </div>
-              </div>
-              {errors.discountValue && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.discountValue.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Giảm tối đa (VNĐ) *
-              </label>
-              <Controller
-                name="maxDiscountValue"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="number"
-                    min="0"
-                    step="1000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                )}
-              />
-              {errors.maxDiscountValue && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.maxDiscountValue.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Order and Usage Configuration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Giá trị đơn hàng tối thiểu (VNĐ) *
-              </label>
-              <Controller
-                name="minOrderValue"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="number"
-                    min="0"
-                    step="1000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                )}
-              />
-              {errors.minOrderValue && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.minOrderValue.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Giới hạn sử dụng *
-              </label>
-              <Controller
-                name="usageLimit"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="number"
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0 = Không giới hạn"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                )}
-              />
-              {errors.usageLimit && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.usageLimit.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Date Configuration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngày bắt đầu *
-              </label>
-              <Controller
-                name="startDate"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="datetime-local"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                )}
-              />
-              {errors.startDate && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.startDate.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngày kết thúc *
-              </label>
-              <Controller
-                name="endDate"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    {...field}
-                    type="datetime-local"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                )}
-              />
-              {errors.endDate && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.endDate.message}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Loại khuyến mãi *
-            </label>
-            <Controller
-              name="promotionType"
-              control={control}
-              render={({ field }) => (
-                <select
-                  {...field}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {promotionTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              )}
+              errors={errors}
+              watchDiscountUnit={watchDiscountUnit}
             />
           </div>
 
-          {/* Product Selection for PRODUCT_DISCOUNT */}
+          {/* Date Time Settings */}
+          <div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+              ⏰ Thời gian áp dụng
+            </h3>
+            <DateTimeForm control={control} errors={errors} />
+          </div>
+
+          {/* Product Selection */}
           {watchPromotionType === "PRODUCT_DISCOUNT" && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Chọn sản phẩm áp dụng
-              </label>
-              <div className="relative mb-4">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={productSearch}
-                  onChange={handleProductSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Tìm kiếm sản phẩm..."
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2 border border-gray-300 rounded-lg max-h-[400px] overflow-y-auto">
-                {productLoading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Đang tải sản phẩm...
-                  </div>
-                ) : products.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Không có sản phẩm nào
-                  </div>
-                ) : (
-                  products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center p-3 border-b border-gray-200 hover:bg-gray-50"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.some(
-                          (p) => p.id === product.id
-                        )}
-                        onChange={() => toggleProductSelection(product.id)}
-                        className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div
-                        key={product.id}
-                        className="flex items-center justify-between bg-white rounded-lg p-2 border border-gray-200"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="flex-shrink-0">
-                            {product.thumbnail ? (
-                              <img
-                                src={product.thumbnail}
-                                alt={product.name}
-                                className="w-10 h-10 rounded-lg object-cover"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                <FaBox className="text-green-600 text-sm" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {product.name}
-                            </p>
-                            <div className="flex items-center space-x-2 text-xs text-gray-500">
-                              <span>ID: {product.id}</span>
-                              {product.hex && (
-                                <div className="flex items-center space-x-1">
-                                  <span>•</span>
-                                  <div
-                                    className="w-3 h-3 rounded-full border border-gray-300"
-                                    style={{ backgroundColor: product.hex }}
-                                  ></div>
-                                </div>
-                              )}
-                            </div>
-                            {product.title && (
-                              <p className="text-xs text-gray-400 truncate">
-                                {product.title}
-                              </p>
-                            )}
-                            <div className="flex items-center space-x-2 text-xs">
-                              {product.discountPrice &&
-                              product.discountPrice !==
-                                product.originalPrice ? (
-                                <>
-                                  <span className="text-red-600 font-medium">
-                                    {formatPrice(product.discountPrice)}
-                                  </span>
-                                  <span className="text-gray-400 line-through">
-                                    {formatPrice(product.originalPrice)}
-                                  </span>
-                                </>
-                              ) : (
-                                <span className="text-gray-900 font-medium">
-                                  {formatPrice(product.originalPrice)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {selectedProducts.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">
-                    Đã chọn: {selectedProducts.length} sản phẩm
-                  </p>
-                </div>
-              )}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                📦 Chọn sản phẩm
+              </h3>
+              <ProductSelectionForm
+                products={products}
+                selectedProducts={selectedProducts}
+                productSearch={productSearch}
+                productLoading={productLoading}
+                onProductSearch={handleProductSearch}
+                onToggleProductSelection={toggleProductSelection}
+              />
             </div>
           )}
-
-          {/* User Selection for USER_PROMOTION */}
-          {watchPromotionType === "USER_PROMOTION" && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Chọn khách hàng áp dụng
-              </label>
-              <div className="relative mb-4">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={userSearch}
-                  onChange={handleUserSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Tìm kiếm khách hàng theo tên hoặc email..."
-                />
-              </div>
-
-              <div className="border border-gray-300 rounded-lg max-h-[400px] overflow-y-auto">
-                {userLoading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Đang tải danh sách khách hàng...
-                  </div>
-                ) : users.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Không có khách hàng nào
-                  </div>
-                ) : (
-                  users.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center p-3 border-b border-gray-200 hover:bg-gray-50"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.some((u) => u.id === user.id)}
-                        onChange={() => toggleUserSelection(user.id)}
-                        className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div className="flex items-center flex-1">
-                        <div className="w-10 h-10 rounded-full overflow-hidden mr-3 bg-gray-200 flex items-center justify-center">
-                          {user.avatar ? (
-                            <img
-                              src={user.avatar}
-                              alt={user.fullName}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-sm font-medium text-gray-600">
-                              {user.fullName?.charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900">
-                            {user.fullName}
-                          </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {selectedUsers.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">
-                    Đã chọn: {selectedUsers.length} khách hàng
-                  </p>
-                </div>
-              )}
+          {/* Rank Selection for GIFT */}
+          {watchPromotionType === "GIFT" && (
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                🏆 Chọn hạng khách hàng
+              </h3>
+              <RankSelectionForm
+                ranks={ranks}
+                selectedRanks={selectedRanks}
+                rankLoading={rankLoading}
+                onToggleRankSelection={toggleRankSelection}
+                type={watchPromotionType}
+              />
             </div>
           )}
 
           {/* Selected Items Display */}
-          {(selectedProducts.length > 0 || selectedUsers.length > 0) && (
-            <div className="mb-6">
+          {(selectedProducts.length > 0 ||
+            selectedUsers.length > 0 ||
+            selectedRanks.length > 0) && (
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+                ✅ Đã chọn
+              </h3>
               <SelectedItemsDisplay
                 type={watchPromotionType}
                 selectedProducts={selectedProducts}
                 selectedUsers={selectedUsers}
-                onRemoveProduct={(productId) =>
-                  toggleProductSelection(productId)
-                }
-                onRemoveUser={(userId) => toggleUserSelection(userId)}
+                selectedRanks={selectedRanks}
+                onRemoveProduct={toggleProductSelection}
+                onRemoveUser={toggleUserSelection}
+                onRemoveRank={toggleRankSelection}
+                onClearAll={() => {
+                  if (watchPromotionType === "PRODUCT_DISCOUNT") {
+                    setSelectedProducts([]);
+                    setValue("productDetailIds", []);
+                  } else if (watchPromotionType === "USER_PROMOTION") {
+                    setSelectedUsers([]);
+                    setSelectedRanks([]);
+                    setValue("userIds", []);
+                    setValue("rankLevelIds", []);
+                  } else if (watchPromotionType === "GIFT") {
+                    setSelectedRanks([]);
+                    setValue("rankLevelIds", []);
+                  }
+                }}
               />
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                "Đang xử lý..."
-              ) : (
-                <>
-                  <FaSave />
-                  {promotion ? "Cập nhật" : "Tạo mới"}
-                </>
-              )}
-            </button>
+          {/* Form Actions */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 -mx-6 px-6 py-4">
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 font-medium"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <FaSave />
+                    Tạo mới
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>

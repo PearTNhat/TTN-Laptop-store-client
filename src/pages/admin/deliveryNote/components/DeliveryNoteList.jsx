@@ -18,21 +18,13 @@ const STATUS_STYLES = {
   CANCELLED: { text: "Đã hủy", color: "text-red-600 bg-red-100" },
 };
 
-const DeliveryNoteList = ({
-  deliveryNotes,
-  onFetchDetails,
-  onEdit,
-  onDelete,
-}) => {
-  // Hàm này được gọi mỗi khi người dùng mở hoặc đóng một AccordionItem
+const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
   const handleAccordionChange = (openItemValues) => {
-    // Lấy ID của item cuối cùng được mở để fetch details
     const lastOpenedId = openItemValues[openItemValues.length - 1];
     if (lastOpenedId) {
       onFetchDetails(parseInt(lastOpenedId, 10));
     }
   };
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
       <div className="p-6 border-b border-gray-200">
@@ -125,11 +117,7 @@ const DeliveryNoteList = ({
 
                   {/* Actions */}
                   <div className="ml-6 flex-shrink-0">
-                    <OrderActions
-                      order={note}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                    />
+                    <OrderActions order={note} onDelete={onDelete} />
                   </div>
                 </div>
 

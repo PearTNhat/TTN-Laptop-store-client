@@ -14,7 +14,7 @@ const apiGetDeliveryNotes = async ({ accessToken, page = 1, size = 10, status, o
             },
             params
         }
-        const { data } = await http.get("delivery-notes/search?", config);
+        const { data } = await http.get("delivery-notes/search", config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

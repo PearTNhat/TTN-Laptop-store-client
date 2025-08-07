@@ -12,6 +12,8 @@ export const promotionSchema = z.object({
         "PRODUCT_DISCOUNT",
         "GIFT",
         "SHOP_DISCOUNT",
+        "ALL_USER",
+        "ALL_PRODUCT",
     ]),
     minOrderValue: z
         .number()
@@ -23,5 +25,18 @@ export const promotionSchema = z.object({
     startDate: z.string().min(1, "Ngày bắt đầu không được để trống"),
     endDate: z.string().min(1, "Ngày kết thúc không được để trống"),
     productDetailIds: z.array(z.number()).optional(),
-});
+    userIds: z.array(z.string()).optional(),
+    rankLevelIds: z.array(z.number()).optional(),
+}).refine(
+    (data) => {
+        if (data.discountUnit === "PERCENT") {
+            return data.discountValue <= 100;
+        }
+        return true; // Nếu không phải PERCENT thì không cần kiểm tra, luôn hợp lệ
+    },
+    {
+        message: "Giá trị giảm không được vượt quá 100%",
+        path: ["discountValue"], // Gán lỗi này cho trường 'discountValue'
+    }
+);
 

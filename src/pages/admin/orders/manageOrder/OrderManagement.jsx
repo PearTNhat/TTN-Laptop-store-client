@@ -159,25 +159,13 @@ const OrderManagement = () => {
       newParams.set("page", page.toString());
       return newParams;
     });
-
-  const handleConfirmOrder = (order) =>
+  const handleProcessingOrder = (order) =>
     setConfirmModal({
       isOpen: true,
       title: "Xác nhận đơn hàng",
       message: `Bạn có chắc chắn muốn xác nhận đơn hàng ${order.code}?`,
       onConfirm: () => {
-        changeOrderStatus(order.id, "COMPLETED");
-        setConfirmModal({ ...confirmModal, isOpen: false });
-      },
-    });
-
-  const handleMarkAsDelivered = (order) =>
-    setConfirmModal({
-      isOpen: true,
-      title: "Xác nhận giao hàng",
-      message: `Xác nhận đơn hàng ${order.code} đã được giao thành công?`,
-      onConfirm: () => {
-        changeOrderStatus(order.id, "DELIVERED");
+        changeOrderStatus(order.id, "PROCESSING");
         setConfirmModal({ ...confirmModal, isOpen: false });
       },
     });
@@ -354,11 +342,10 @@ const OrderManagement = () => {
                           >
                             <FaEye className="w-4 h-4" />
                           </button>
-                          {(order.status === "PENDING" ||
-                            order.status === "AWAITING") && (
+                          {order.status === "AWAITING" && (
                             <>
                               <button
-                                onClick={() => handleConfirmOrder(order)}
+                                onClick={() => handleProcessingOrder(order)}
                                 className="text-green-600 hover:text-green-800 p-2 rounded-full hover:bg-green-50"
                                 title="Xác nhận & Xử lý đơn hàng"
                               >
@@ -373,8 +360,7 @@ const OrderManagement = () => {
                               </button>
                             </>
                           )}
-                          {(order.status === "PROCESSING" ||
-                            order.status === "PARTIALLY_DELIVERED") && (
+                          {order.status === "PARTIALLY_DELIVERED" && (
                             <>
                               <button
                                 onClick={() => handleMarkAsCompleted(order)}

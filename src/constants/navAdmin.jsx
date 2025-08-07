@@ -74,6 +74,11 @@ const navItems = [
     name: "Khuyến mãi",
     path: "/admin/vouchers",
   },
+  {
+    icon: <Ticket size={20} />,
+    name: "Xếp hạng",
+    path: "/admin/rank-level",
+  },
 ];
 
 export { navItems };

@@ -6,7 +6,9 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice,
     brandId,
     seriesId,
     sortBy,
-    sortDirection }) => {
+    sortDirection,
+    keyword = ""
+}) => {
     try {
         page = page <= 1 ? 0 : page - 1;
         const params = {
@@ -18,7 +20,8 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice,
             brandId,
             seriesId,
             sortBy,
-            sortDirection
+            sortDirection,
+            keyword
         }
         const config = {
             params

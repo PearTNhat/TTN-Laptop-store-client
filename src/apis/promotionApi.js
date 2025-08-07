@@ -26,7 +26,7 @@ const apiGetProductPromotionById = async ({ accessToken, pId, type }) => {
                 promotionStatus: type,
             },
         }
-        const { data } = await http.get("/promotions/product/" + pId, config);
+        const { data } = await http.get("/promotions/product-detail/" + pId, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -74,7 +74,27 @@ const apiGetPromotions = async ({ accessToken, params }) => {
         throw new Error(error.message);
     }
 };
-
+const apiGetPromotionDetail = async ({ accessToken, params, promotionId }) => {
+    try {
+        params = {
+            ...params,
+            page: params.page ? params.page - 1 : 0, // Adjust for API zero-based index
+        };
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params
+        };
+        const { data } = await http.get("/promotions/details/" + promotionId, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
 const apiCreatePromotion = async ({ accessToken, promotionData }) => {
     try {
         const config = {
@@ -82,7 +102,7 @@ const apiCreatePromotion = async ({ accessToken, promotionData }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         };
-        const { data } = await http.post("/promotions", promotionData, config);
+        const { data } = await http.post("promotions/create", promotionData, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -116,7 +136,7 @@ const apiDeletePromotion = async ({ accessToken, promotionId }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         };
-        const { data } = await http.delete(`/promotions/${promotionId}`, config);
+        const { data } = await http.delete(`/promotions/delete/${promotionId}`, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -150,8 +170,9 @@ export {
     apiGetProductPromotionById,
     apiGetPromotionId,
     apiGetPromotions,
+    apiGetPromotionDetail,
     apiCreatePromotion,
     apiUpdatePromotion,
     apiDeletePromotion,
-    apiGetProductsForPromotion
+    apiGetProductsForPromotion,
 };

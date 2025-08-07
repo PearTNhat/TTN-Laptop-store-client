@@ -3,7 +3,6 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import {
   FormField,
@@ -12,11 +11,18 @@ import {
   FormControl,
   FormMessage,
 } from "~/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { FileText, Package } from "lucide-react";
+import OrderSelector from "./OrderSelector";
 
-const DeliveryNoteInfoForm = () => {
+const DeliveryNoteInfoForm = ({ onOrderSelect }) => {
   const { control } = useFormContext();
-
   return (
     <Card className="shadow-sm border-gray-200">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
@@ -27,24 +33,34 @@ const DeliveryNoteInfoForm = () => {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Trường Mã Đơn Hàng Gốc */}
+          {/* Chọn Đơn Hàng */}
+          <OrderSelector onOrderSelect={onOrderSelect} />
+
+          {/* Trạng thái */}
           <FormField
             control={control}
-            name="orderCode"
+            name="status"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Package className="h-4 w-4 text-green-600" />
-                  Mã Đơn Hàng Gốc
+                  <Package className="h-4 w-4 text-purple-600" />
+                  Trạng thái
                   <span className="text-red-500">*</span>
                 </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Ví dụ: SO-2024-001"
-                    {...field}
-                    className="border-gray-300 focus:border-green-500 focus:ring-green-500"
-                  />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="border-gray-300 focus:border-green-500 focus:ring-green-500">
+                      <SelectValue placeholder="Chọn trạng thái" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Bản nháp</SelectItem>
+                    <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage className="text-red-500 text-xs" />
               </FormItem>
             )}

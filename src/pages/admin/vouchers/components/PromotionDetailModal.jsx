@@ -15,6 +15,7 @@ import {
   getPromotionTypeIcon,
   getPromotionTypeText,
 } from "../utils/helper";
+import PromotionDetailList from "./PromotionDetailList";
 
 const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
   if (!isOpen || !promotion) return null;
@@ -259,6 +260,33 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
                 </div>
               </div>
             )}
+
+          {/* Detail Data Section */}
+          {promotion.detailData && promotion.detailData.length > 0 ? (
+            <div className="mb-6">
+              <PromotionDetailList
+                detailData={promotion.detailData}
+                type={promotion.detailData[0]?.userId ? "user" : "product"}
+              />
+            </div>
+          ) : (
+            promotion.productDetailIds &&
+            promotion.productDetailIds.length > 0 && (
+              <div className="mb-6">
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="animate-pulse w-4 h-4 bg-blue-400 rounded-full"></div>
+                    <p className="text-blue-800 font-medium">
+                      Đang tải thông tin chi tiết...
+                    </p>
+                  </div>
+                  <p className="text-sm text-blue-700">
+                    Áp dụng cho {promotion.productDetailIds.length} mục
+                  </p>
+                </div>
+              </div>
+            )
+          )}
         </div>
 
         {/* Footer */}

@@ -30,7 +30,6 @@ const DeliveryNoteManagement = () => {
   });
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [editingNote, setEditingNote] = useState(null);
 
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),
@@ -85,7 +84,6 @@ const DeliveryNoteManagement = () => {
     setSearchParams((prev) => ({ ...Object.fromEntries(prev), page }));
 
   const handleOpenCreateModal = () => {
-    setEditingNote(null);
     setIsFormModalOpen(true);
   };
 
@@ -125,14 +123,6 @@ const DeliveryNoteManagement = () => {
     },
     [accessToken, deliveryNotes]
   );
-
-  const handleOpenEditModal = async (note) => {
-    const noteWithDetails = await handleFetchDetails(note.id);
-    if (noteWithDetails) {
-      setEditingNote(noteWithDetails);
-      setIsFormModalOpen(true);
-    }
-  };
 
   const handleSuccess = () => {
     fetchDeliveryNotes();
@@ -202,7 +192,6 @@ const DeliveryNoteManagement = () => {
         <DeliveryNoteList
           deliveryNotes={deliveryNotes}
           onFetchDetails={handleFetchDetails}
-          onEdit={handleOpenEditModal}
           onDelete={handleDeleteNote}
         />
         <Pagination
@@ -266,7 +255,6 @@ const DeliveryNoteManagement = () => {
       <DeliveryNoteFormDialog
         isOpen={isFormModalOpen}
         setIsOpen={setIsFormModalOpen}
-        editingNote={editingNote}
         onSuccess={handleSuccess}
       />
     </>

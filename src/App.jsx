@@ -38,6 +38,7 @@ import FilterProductPage from "./pages/public/filterProduct/FilterProductPage";
 import PaymentConfirmation from "./pages/payment/PaymentConfirmation";
 import DeliveryNoteManagement from "./pages/admin/deliveryNote";
 import GoodsReceiptManagement from "./pages/admin/goodsReceipt";
+import RankLevelMangement from "./pages/admin/rankLevel/RankLevelMangement";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -100,6 +101,10 @@ function App() {
             element={<OrderManagement />}
           />
           <Route path={adminPaths.VOUCHERS} element={<Vouchers />} />
+          <Route
+            path={adminPaths.RANK_LEVEL}
+            element={<RankLevelMangement />}
+          />
         </Route>
 
         {/*Not found */}

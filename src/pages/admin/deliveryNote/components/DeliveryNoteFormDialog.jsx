@@ -4,10 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
 import { deliveryNoteSchema } from "../schema/deliveryNote.schema";
-import {
-  apiCreateDeliveryNote,
-  apiUpdateDeliveryNote,
-} from "~/apis/deliveryNoteApi";
+import { apiCreateDeliveryNote } from "~/apis/deliveryNoteApi";
 import { showToastError, showToastSuccess } from "~/utils/alert";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
@@ -16,78 +13,57 @@ import DeliveryNoteInfoForm from "./DeliveryNoteInfoForm";
 import DeliveryNoteDetailForm from "./DeliveryNoteDetailForm";
 import Button from "~/components/Button";
 
-const DeliveryNoteFormDialog = ({
-  isOpen,
-  setIsOpen,
-  editingNote,
-  onSuccess,
-}) => {
+const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
   const { accessToken } = useSelector((state) => state.user);
-  const isEditMode = !!editingNote;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const methods = useForm({
     resolver: zodResolver(deliveryNoteSchema),
     defaultValues: {
       orderCode: "",
+      status: "DRAFT",
       note: "",
       details: [],
     },
   });
 
   useEffect(() => {
-    if (isEditMode && editingNote) {
-      // Chuẩn bị dữ liệu cho form edit
-      const formData = {
-        orderCode: editingNote.orderCode || "",
-        note: editingNote.note || "",
-        details: editingNote.deliveryNoteDetails
-          ? editingNote.deliveryNoteDetails.map((detail) => ({
-              productDetailId: detail.productDetailId,
-              quantity: detail.quantity,
-              serialNumbers: detail.serialNumber ? [detail.serialNumber] : [],
-            }))
-          : [],
-      };
-      methods.reset(formData);
-    } else {
+    if (!isOpen) {
       methods.reset({
         orderCode: "",
+        status: "DRAFT",
         note: "",
         details: [],
       });
+      setSelectedOrder(null);
     }
-  }, [isOpen, editingNote, methods, isEditMode]);
+  }, [isOpen, methods]);
+
+  const handleOrderSelect = (order) => {
+    setSelectedOrder(order);
+    // Reset details khi chọn order mới
+    methods.setValue("details", []);
+  };
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      let response;
-      if (isEditMode) {
-        response = await apiUpdateDeliveryNote({
-          accessToken,
-          id: editingNote.id,
-          data: formData,
-        });
-        if (response.code === 200) {
-          showToastSuccess("Cập nhật phiếu giao thành công!");
-        } else {
-          throw new Error(response.message || "Lỗi khi cập nhật phiếu giao");
-        }
+      console.log("Submitting delivery note:", formData);
+
+      const response = await apiCreateDeliveryNote({
+        accessToken,
+        body: formData,
+      });
+      if (response.code === 200) {
+        showToastSuccess("Tạo phiếu giao thành công!");
+        onSuccess();
+        setIsOpen(false);
       } else {
-        response = await apiCreateDeliveryNote({
-          accessToken,
-          body: formData,
-        });
-        if (response.code === 201 || response.code === 200) {
-          showToastSuccess("Tạo phiếu giao thành công!");
-        } else {
-          throw new Error(response.message || "Lỗi khi tạo phiếu giao");
-        }
+        throw new Error(response.message || "Lỗi khi tạo phiếu giao");
       }
-      onSuccess();
-      setIsOpen(false);
     } catch (error) {
+      console.error("Submit error:", error);
       showToastError(error.message || "Có lỗi xảy ra");
     } finally {
       setIsSubmitting(false);
@@ -137,9 +113,7 @@ const DeliveryNoteFormDialog = ({
                         as="h3"
                         className="text-xl font-semibold text-white"
                       >
-                        {isEditMode
-                          ? "Chỉnh sửa Phiếu Giao"
-                          : "Tạo Phiếu Giao Mới"}
+                        Tạo Phiếu Giao Mới
                       </Dialog.Title>
                     </div>
                     <button
@@ -159,8 +133,47 @@ const DeliveryNoteFormDialog = ({
                       onSubmit={methods.handleSubmit(onSubmit)}
                       className="p-6 space-y-6"
                     >
-                      <DeliveryNoteInfoForm />
-                      <DeliveryNoteDetailForm />
+                      <DeliveryNoteInfoForm onOrderSelect={handleOrderSelect} />
+                      <DeliveryNoteDetailForm selectedOrder={selectedOrder} />
+
+                      {/* Hiển thị lỗi validation */}
+                      {Object.keys(methods.formState.errors).length > 0 && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <h4 className="text-red-800 font-medium mb-2">
+                            Lỗi validation:
+                          </h4>
+                          <ul className="text-red-700 text-sm space-y-1">
+                            {Object.entries(methods.formState.errors).map(
+                              ([key, error]) => (
+                                <li key={key}>
+                                  {key === "orderCode" && "Đơn hàng: "}
+                                  {key === "details" && "Chi tiết: "}
+                                  {error.message}
+                                </li>
+                              )
+                            )}
+                            {methods.formState.errors.details?.length > 0 &&
+                              methods.formState.errors.details.map(
+                                (detail, index) =>
+                                  Object.entries(detail || {}).map(
+                                    ([field, error]) => (
+                                      <li key={`${index}-${field}`}>
+                                        Dòng {index + 1} -{" "}
+                                        {field === "productDetailId"
+                                          ? "Sản phẩm"
+                                          : field === "quantity"
+                                          ? "Số lượng"
+                                          : field === "serials"
+                                          ? "Serial"
+                                          : field}
+                                        : {error?.message}
+                                      </li>
+                                    )
+                                  )
+                              )}
+                          </ul>
+                        </div>
+                      )}
 
                       {/* Actions */}
                       <div className="flex justify-end gap-3 pt-6 border-t">
@@ -180,12 +193,12 @@ const DeliveryNoteFormDialog = ({
                           {isSubmitting ? (
                             <>
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              {isEditMode ? "Đang cập nhật..." : "Đang tạo..."}
+                              Đang tạo...
                             </>
                           ) : (
                             <>
                               <Save className="h-4 w-4" />
-                              {isEditMode ? "Cập nhật" : "Tạo phiếu"}
+                              Tạo phiếu
                             </>
                           )}
                         </Button>

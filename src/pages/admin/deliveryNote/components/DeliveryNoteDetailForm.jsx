@@ -1,7 +1,8 @@
 // src/pages/DeliveryNoteManagement/components/DeliveryNoteDetailForm.jsx
 
-import React, { useEffect } from "react";
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import React, { useEffect, useState, useCallback, use } from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { useSelector } from "react-redux";
 import {
   Card,
   CardContent,
@@ -17,6 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { PlusCircle, Trash2, Package2, Hash } from "lucide-react";
@@ -26,63 +34,113 @@ import {
   FormControl,
   FormMessage,
 } from "~/components/ui/form";
+import { apiGetOrderDetail } from "~/apis/orderApi";
+import { apiGetSeriesNumberByPid } from "~/apis/inventoryApi";
+import { showToastError } from "~/utils/alert";
 
-// Component con cho mỗi dòng sản phẩm trong form
-const ProductRow = ({ index, remove }) => {
-  const { control, setValue, getValues } = useFormContext();
-  const quantity = useWatch({ control, name: `details.${index}.quantity` });
-  const productDetailId = useWatch({
-    control,
-    name: `details.${index}.productDetailId`,
-  });
+// Component con cho mỗi dòng sản phẩm
+const ProductRow = ({ index, remove, orderProducts }) => {
+  const { control, setValue, watch } = useFormContext();
+  const { accessToken } = useSelector((state) => state.user);
+  const [serialOptions, setSerialOptions] = useState([]);
+  const [loadingSerials, setLoadingSerials] = useState(false);
+  const productDetailId = watch(`details.${index}.productDetailId`);
+  const quantity = watch(`details.${index}.quantity`);
+  const selectedSerials = watch(`details.${index}.serialProductItemId`) || [];
+  // Tìm sản phẩm đã chọn từ danh sách order
+  const selectedProduct = orderProducts.find(
+    (p) => p.productDetailId == productDetailId
+  );
+  const maxQuantity = selectedProduct ? selectedProduct.quantity : 0;
+  // Load serial numbers khi chọn sản phẩm
+  const loadSerialNumbers = useCallback(
+    async (pid) => {
+      if (!pid) return;
 
-  // Hàm tạo serial number tự động
-  const generateSerialNumber = (productId, index) => {
-    const timestamp = Date.now().toString().slice(-6); // 6 số cuối của timestamp
-    const productPrefix = productId ? `P${productId}` : "P000";
-    return `${productPrefix}-${timestamp}-${(index + 1)
-      .toString()
-      .padStart(3, "0")}`;
-  };
-
-  // Tự động tạo serial number khi số lượng thay đổi
-  useEffect(() => {
-    const currentSerials = getValues(`details.${index}.serialNumbers`) || [];
-    const newQuantity = parseInt(quantity, 10) || 0;
-
-    if (newQuantity > 0 && currentSerials.length !== newQuantity) {
-      const newSerialsArray = Array(newQuantity)
-        .fill("")
-        .map((_, i) => {
-          // Nếu đã có serial number thì giữ nguyên, nếu không thì tạo mới
-          return currentSerials[i] || generateSerialNumber(productDetailId, i);
+      setLoadingSerials(true);
+      try {
+        const response = await apiGetSeriesNumberByPid({
+          accessToken,
+          pId: pid,
         });
-      setValue(`details.${index}.serialNumbers`, newSerialsArray);
-    } else if (newQuantity === 0) {
-      setValue(`details.${index}.serialNumbers`, []);
-    }
-  }, [quantity, productDetailId, index, setValue, getValues]);
+        if (response.code === 200) {
+          setSerialOptions(response.data || []);
+        } else {
+          showToastError(response.message || "Lỗi khi tải serial numbers");
+          setSerialOptions([]);
+        }
+      } catch (error) {
+        showToastError(error.message || "Lỗi khi tải serial numbers");
+        setSerialOptions([]);
+      } finally {
+        setLoadingSerials(false);
+      }
+    },
+    [accessToken]
+  );
 
-  const serialNumbers =
-    useWatch({ control, name: `details.${index}.serialNumbers` }) || [];
+  useEffect(() => {
+    if (productDetailId) {
+      loadSerialNumbers(productDetailId);
+      setValue(`details.${index}.quantity`, 1);
+      setValue(`details.${index}.serialProductItemId`, []);
+    }
+  }, [productDetailId, loadSerialNumbers, setValue, index]);
+
+  // Tự động điều chỉnh serial khi thay đổi số lượng
+  useEffect(() => {
+    const currentSelectedSerials =
+      watch(`details.${index}.serialProductItemId`) || [];
+    if (quantity && currentSelectedSerials.length !== quantity) {
+      const newSerials = currentSelectedSerials.slice(0, quantity);
+      setValue(`details.${index}.serialProductItemId`, newSerials);
+    }
+  }, [quantity, setValue, index, watch]);
+
+  // Xử lý thay đổi serial number
+  const handleSerialChange = (serialIndex, serialValue) => {
+    const newSerials = [...selectedSerials];
+    newSerials[serialIndex] = serialValue;
+    setValue(`details.${index}.serialProductItemId`, newSerials);
+  };
 
   return (
     <TableRow className="hover:bg-gray-50">
-      {/* Nhập ID sản phẩm */}
-      <TableCell style={{ minWidth: "200px" }}>
+      {/* Chọn sản phẩm từ order */}
+      <TableCell style={{ minWidth: "300px" }}>
         <FormField
           control={control}
           name={`details.${index}.productDetailId`}
           render={({ field }) => (
             <FormItem>
-              <FormControl>
-                <Input
-                  placeholder="Nhập ID sản phẩm..."
-                  type="number"
-                  {...field}
-                  className="border-gray-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value?.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger className="border-gray-300 focus:border-green-500 focus:ring-green-500">
+                    <SelectValue placeholder="Chọn sản phẩm..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {orderProducts.map((product) => (
+                    <SelectItem
+                      key={product.productDetailId}
+                      value={product.productDetailId.toString()}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {product.productTitle}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ID: {product.productDetailId} | Có thể giao:{" "}
+                          {product.quantity}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage className="text-red-500 text-xs" />
             </FormItem>
           )}
@@ -100,49 +158,76 @@ const ProductRow = ({ index, remove }) => {
                 <Input
                   type="number"
                   min="1"
+                  max={maxQuantity}
                   {...field}
                   className="w-24 text-center border-gray-300 focus:border-green-500 focus:ring-green-500"
                 />
               </FormControl>
+              <p className="text-xs text-gray-500 mt-1">
+                Tối đa: {maxQuantity}
+              </p>
               <FormMessage className="text-red-500 text-xs" />
             </FormItem>
           )}
         />
       </TableCell>
 
-      {/* Hiển thị Serial Numbers tự động */}
-      <TableCell style={{ minWidth: "320px" }}>
+      {/* Chọn Serial Numbers */}
+      <TableCell style={{ minWidth: "400px" }}>
         <div className="space-y-2">
-          {serialNumbers.length > 0 ? (
-            <>
-              {serialNumbers.map((serialValue, snIndex) => (
-                <div key={snIndex} className="flex items-center gap-2">
+          {loadingSerials ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+              <span className="ml-2 text-sm text-gray-600">
+                Đang tải serials...
+              </span>
+            </div>
+          ) : quantity > 0 && serialOptions.length > 0 ? (
+            Array.from(
+              { length: parseInt(quantity, 10) || 0 },
+              (_, serialIndex) => (
+                <div key={serialIndex} className="flex items-center gap-2">
                   <Hash className="h-4 w-4 text-green-500" />
-                  <div className="flex-1 p-2 bg-gray-50 border border-gray-200 rounded text-sm font-mono text-gray-700">
-                    {serialValue}
-                  </div>
-                  <span className="text-xs text-gray-500">#{snIndex + 1}</span>
+                  <Select
+                    value={selectedSerials[serialIndex] || ""}
+                    onValueChange={(value) =>
+                      handleSerialChange(serialIndex, value)
+                    }
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue
+                        placeholder={`Chọn serial ${serialIndex + 1}...`}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {serialOptions.map((serial) => {
+                        return (
+                          <SelectItem key={serial} value={serial}>
+                            <div className="flex flex-col">
+                              <span className="font-mono">{serial}</span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-xs text-gray-500">
+                    #{serialIndex + 1}
+                  </span>
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newSerials = Array(serialNumbers.length)
-                    .fill("")
-                    .map((_, i) => generateSerialNumber(productDetailId, i));
-                  setValue(`details.${index}.serialNumbers`, newSerials);
-                }}
-                className="text-xs text-blue-600 hover:text-blue-700"
-              >
-                🔄 Tái tạo Serial
-              </Button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
+              )
+            )
+          ) : productDetailId &&
+            serialOptions.length === 0 &&
+            !loadingSerials ? (
+            <div className="flex items-center gap-2 text-gray-500 text-sm py-4">
               <Hash className="h-4 w-4" />
-              <p>Nhập số lượng để tự động tạo serial</p>
+              <p>Không có serial number khả dụng</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-500 text-sm py-4">
+              <Hash className="h-4 w-4" />
+              <p>Chọn sản phẩm và nhập số lượng để chọn serial</p>
             </div>
           )}
         </div>
@@ -164,21 +249,58 @@ const ProductRow = ({ index, remove }) => {
 };
 
 // Component chính quản lý bảng chi tiết
-const DeliveryNoteDetailForm = () => {
+const DeliveryNoteDetailForm = ({ selectedOrder }) => {
   const { control } = useFormContext();
+  const { accessToken } = useSelector((state) => state.user);
+  const [orderProducts, setOrderProducts] = useState([]);
+  const [loadingOrderDetail, setLoadingOrderDetail] = useState(false);
   const { fields, append, remove } = useFieldArray({
     control,
     name: "details",
   });
 
+  // Load chi tiết đơn hàng khi chọn order
+  const loadOrderDetail = useCallback(
+    async (orderId) => {
+      setLoadingOrderDetail(true);
+      try {
+        const response = await apiGetOrderDetail({
+          accessToken,
+          id: orderId,
+        });
+
+        if (response.code === 200) {
+          setOrderProducts(response.data.orderDetails || []);
+        } else {
+          showToastError(response.message || "Lỗi khi tải chi tiết đơn hàng");
+          setOrderProducts([]);
+        }
+      } catch (error) {
+        showToastError(error.message || "Lỗi khi tải chi tiết đơn hàng");
+        setOrderProducts([]);
+      } finally {
+        setLoadingOrderDetail(false);
+      }
+    },
+    [accessToken]
+  );
+
+  useEffect(() => {
+    if (selectedOrder?.id) {
+      loadOrderDetail(selectedOrder.id);
+    } else {
+      setOrderProducts([]);
+    }
+  }, [selectedOrder, loadOrderDetail]);
+
   const addProduct = () => {
     append({
-      productDetailId: undefined,
+      productDetailId: "",
       quantity: 1,
-      serialNumbers: [], // Sẽ được tự động tạo khi có quantity
+      serials: [],
     });
   };
-
+  const canAddMoreProducts = fields.length < orderProducts.length;
   return (
     <Card className="shadow-sm border-gray-200">
       <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200">
@@ -188,7 +310,32 @@ const DeliveryNoteDetailForm = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
-        {fields.length === 0 ? (
+        {!selectedOrder ? (
+          <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+            <Package2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Chưa chọn đơn hàng
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Vui lòng chọn đơn hàng trước khi thêm sản phẩm
+            </p>
+          </div>
+        ) : loadingOrderDetail ? (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Đang tải chi tiết đơn hàng...</p>
+          </div>
+        ) : orderProducts.length === 0 ? (
+          <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+            <Package2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Đơn hàng trống
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Đơn hàng này không có sản phẩm nào
+            </p>
+          </div>
+        ) : fields.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
             <Package2 className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -212,7 +359,7 @@ const DeliveryNoteDetailForm = () => {
               <TableHeader>
                 <TableRow className="bg-gray-50">
                   <TableHead className="font-semibold text-gray-700">
-                    ID Sản phẩm
+                    Sản phẩm
                     <span className="text-red-500 ml-1">*</span>
                   </TableHead>
                   <TableHead className="font-semibold text-gray-700">
@@ -220,7 +367,8 @@ const DeliveryNoteDetailForm = () => {
                     <span className="text-red-500 ml-1">*</span>
                   </TableHead>
                   <TableHead className="font-semibold text-gray-700">
-                    Serial Numbers (Tự động tạo)
+                    Serial Numbers
+                    <span className="text-red-500 ml-1">*</span>
                   </TableHead>
                   <TableHead className="text-right font-semibold text-gray-700">
                     Thao tác
@@ -229,24 +377,35 @@ const DeliveryNoteDetailForm = () => {
               </TableHeader>
               <TableBody>
                 {fields.map((field, index) => (
-                  <ProductRow key={field.id} index={index} remove={remove} />
+                  <ProductRow
+                    key={field.id}
+                    index={index}
+                    remove={remove}
+                    orderProducts={orderProducts}
+                  />
                 ))}
               </TableBody>
             </Table>
           </div>
         )}
       </CardContent>
-      {fields.length > 0 && (
+      {selectedOrder && orderProducts.length > 0 && fields.length > 0 && (
         <CardFooter className="justify-start border-t pt-4 bg-gray-50">
           <Button
             type="button"
             variant="outline"
             onClick={addProduct}
-            className="border-green-300 text-green-700 hover:bg-green-50"
+            disabled={!canAddMoreProducts} // Vô hiệu hóa nút khi không thể thêm
+            className="border-green-300 text-green-700 hover:bg-green-50 disabled:bg-gray-200 disabled:cursor-not-allowed"
           >
             <PlusCircle className="mr-2 h-4 w-4" />
             Thêm sản phẩm khác
           </Button>
+          {!canAddMoreProducts && (
+            <p className="text-sm text-gray-500 ml-4">
+              Đã thêm tất cả sản phẩm trong đơn hàng.
+            </p>
+          )}
         </CardFooter>
       )}
     </Card>

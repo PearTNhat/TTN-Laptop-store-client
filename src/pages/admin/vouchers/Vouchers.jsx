@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FaSearch,
   FaPlus,
-  FaEdit,
   FaTrash,
   FaEye,
   FaGift,
@@ -15,12 +14,12 @@ import Swal from "sweetalert2";
 import {
   apiGetPromotions,
   apiCreatePromotion,
-  apiUpdatePromotion,
   apiDeletePromotion,
+  apiGetPromotionDetail,
 } from "~/apis/promotionApi";
 import { useSearchParams } from "react-router-dom";
 import { PromotionDetailModal, PromotionFormModal } from "./components";
-import { showToastError } from "~/utils/alert";
+import { showToastError, showToastSuccess } from "~/utils/alert";
 import Pagination from "~/components/pagination/Pagination";
 import { formatPrice } from "~/utils/helper";
 import {
@@ -72,8 +71,9 @@ function Vouchers() {
       const params = {
         page: currentParams.page,
         size: 10,
-        search: currentParams?.q?.trim() || "",
+        code: currentParams?.q?.trim() || "",
         promotionType: currentParams.promotionType,
+        status: currentParams.status || "ACTIVE",
       };
 
       const response = await apiGetPromotions({ accessToken, params });
@@ -147,34 +147,21 @@ function Vouchers() {
   const handleFormSubmit = async (formData) => {
     setFormLoading(true);
     try {
-      let response;
-      if (formModal.promotion) {
-        // Update existing promotion
-        response = await apiUpdatePromotion({
-          accessToken,
-          promotionId: formModal.promotion.id,
-          promotionData: formData,
-        });
-      } else {
-        // Create new promotion
-        response = await apiCreatePromotion({
-          accessToken,
-          promotionData: formData,
-        });
-      }
+      const response = await apiCreatePromotion({
+        accessToken,
+        promotionData: formData,
+      });
 
-      if (response.success) {
-        Swal.fire(
-          "Thành công",
-          formModal.promotion
-            ? "Cập nhật khuyến mãi thành công"
-            : "Tạo khuyến mãi thành công",
-          "success"
-        );
+      if (response.code === 200) {
         setFormModal({ isOpen: false, promotion: null });
         loadPromotions();
+        showToastSuccess("Khuyến mãi đã được tạo thành công");
       } else {
-        Swal.fire("Lỗi", response.message || "Có lỗi xảy ra", "error");
+        if (response.message.includes("unique_code")) {
+          Swal.fire("Lỗi", "Mã khuyến mãi đã tồn tại", "error");
+        } else {
+          Swal.fire("Lỗi", response.message || "Có lỗi xảy ra", "error");
+        }
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -220,7 +207,27 @@ function Vouchers() {
       }
     }
   };
+  const fetchPromotionDetail = async (promotionId) => {
+    try {
+      const response = await apiGetPromotionDetail({
+        accessToken,
+        promotionId,
+        params: {},
+      });
 
+      if (response.code === 200) {
+        setDetailModal((prev) => ({
+          ...prev,
+          promotion: {
+            ...prev.promotion,
+            detailData: response.data.content,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching promotion detail:", error);
+    }
+  };
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
@@ -503,24 +510,15 @@ function Vouchers() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
                               setDetailModal({ isOpen: true, promotion });
+                              await fetchPromotionDetail(promotion.id);
                             }}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Xem chi tiết"
                           >
                             <FaEye />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFormModal({ isOpen: true, promotion });
-                            }}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                            title="Chỉnh sửa"
-                          >
-                            <FaEdit />
                           </button>
                           <button
                             onClick={(e) => {
@@ -561,7 +559,6 @@ function Vouchers() {
         isOpen={formModal.isOpen}
         onClose={() => setFormModal({ isOpen: false, promotion: null })}
         onSubmit={handleFormSubmit}
-        promotion={formModal.promotion}
         isLoading={formLoading}
       />
     </div>

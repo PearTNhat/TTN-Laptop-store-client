@@ -138,4 +138,6 @@ const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false 
     throw new Error(error.message);
   }
 };
+
+
 export { apiFetchMyInfo, apiGetAllUsers }
