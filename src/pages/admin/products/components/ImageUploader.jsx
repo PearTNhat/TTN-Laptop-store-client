@@ -16,7 +16,6 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label, fieldId }) => {
   useEffect(() => {
     // Sync state từ react-hook-form với state nội bộ khi component mount
     if (value && value.length > 0) {
-      console.log("value", value);
       const initialPreviews = (Array.isArray(value) ? value : [value]).map(
         (url) => ({
           id: url,
@@ -58,33 +57,52 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label, fieldId }) => {
     if (files.length === 0) return;
 
     const newUploads = files.map((file) => {
-      const id = `${file.name}-${Date.now()}`;
+      const id = `${file.name}-${Date.now()}-${Math.random()}`;
       const previewUrl = URL.createObjectURL(file);
+      return { id, status: "uploading", previewUrl, serverUrl: null, file };
+    });
 
-      (async () => {
-        const result = await getImageUrl(file);
+    // Thêm các uploads mới vào previews
+    setPreviews((prev) => [...prev, ...newUploads]);
+
+    // Upload từng file một cách bất đồng bộ
+    newUploads.forEach(async (upload) => {
+      try {
+        const result = await getImageUrl(upload.file);
+
         setPreviews((prev) => {
           const updated = prev.map((p) => {
-            if (p.id === id) {
+            if (p.id === upload.id) {
               return result.success
                 ? { ...p, status: "uploaded", serverUrl: result.url }
                 : { ...p, status: "error", error: result.error };
             }
             return p;
           });
-          // Sau khi update trạng thái, gọi onChange để cập nhật react-hook-form
+
+          // Cập nhật form values sau khi upload xong
           const serverUrls = updated
             .filter((p) => p.status === "uploaded")
             .map((p) => p.serverUrl);
           onChange(maxFiles === 1 ? serverUrls[0] || "" : serverUrls);
+
           return updated;
         });
-      })();
-
-      return { id, status: "uploading", previewUrl, serverUrl: null };
+      } catch (error) {
+        // Handle error cho từng file riêng biệt
+        setPreviews((prev) => {
+          const updated = prev.map((p) => {
+            if (p.id === upload.id) {
+              return { ...p, status: "error", error: error.message };
+            }
+            return p;
+          });
+          return updated;
+        });
+      }
     });
 
-    setPreviews((prev) => [...prev, ...newUploads]);
+    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
   const removeImage = (idToRemove) => {
@@ -98,9 +116,61 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label, fieldId }) => {
     });
   };
 
+  const retryUpload = async (imageId) => {
+    const imageToRetry = previews.find((p) => p.id === imageId);
+    if (!imageToRetry || !imageToRetry.file) return;
+
+    // Đặt lại trạng thái uploading
+    setPreviews((prev) =>
+      prev.map((p) =>
+        p.id === imageId ? { ...p, status: "uploading", error: null } : p
+      )
+    );
+
+    try {
+      const result = await getImageUrl(imageToRetry.file);
+
+      setPreviews((prev) => {
+        const updated = prev.map((p) => {
+          if (p.id === imageId) {
+            return result.success
+              ? { ...p, status: "uploaded", serverUrl: result.url }
+              : { ...p, status: "error", error: result.error };
+          }
+          return p;
+        });
+
+        // Cập nhật form values
+        const serverUrls = updated
+          .filter((p) => p.status === "uploaded")
+          .map((p) => p.serverUrl);
+        onChange(maxFiles === 1 ? serverUrls[0] || "" : serverUrls);
+
+        return updated;
+      });
+    } catch (error) {
+      setPreviews((prev) =>
+        prev.map((p) =>
+          p.id === imageId ? { ...p, status: "error", error: error.message } : p
+        )
+      );
+    }
+  };
+
   return (
     <div>
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-semibold text-slate-700">{label}</span>
+        {previews.some((p) => p.status === "uploading") && (
+          <div className="flex items-center gap-2 text-xs text-blue-600">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>
+              Đang upload{" "}
+              {previews.filter((p) => p.status === "uploading").length} ảnh...
+            </span>
+          </div>
+        )}
+      </div>
       <div className="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
         {previews.map((image) => (
           <div key={image.id} className="relative aspect-square">
@@ -115,11 +185,16 @@ const ImageUploader = ({ value, onChange, maxFiles = 1, label, fieldId }) => {
               </div>
             )}
             {image.status === "error" && (
-              <div
-                title={image.error}
-                className="absolute inset-0 bg-red-600/70 flex items-center justify-center rounded-lg"
-              >
-                <AlertTriangle className="w-6 h-6 text-white" />
+              <div className="absolute inset-0 bg-red-600/70 flex flex-col items-center justify-center rounded-lg">
+                <AlertTriangle className="w-4 h-4 text-white mb-1" />
+                <button
+                  type="button"
+                  onClick={() => retryUpload(image.id)}
+                  className="text-white text-xs underline hover:no-underline"
+                  title={image.error}
+                >
+                  Thử lại
+                </button>
               </div>
             )}
             <button

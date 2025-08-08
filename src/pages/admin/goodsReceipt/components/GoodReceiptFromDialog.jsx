@@ -58,7 +58,6 @@ function GoodReceiptFromDialog({ isOpen, setIsOpen, onSuccess }) {
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
-    console.log("formData", formData);
     try {
       const response = await apiCreateGoodsReceiptNote({
         accessToken,

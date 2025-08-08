@@ -41,7 +41,7 @@ const apiUpdateRank = async ({ accessToken, rankId, rankData }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         }
-        const { data } = await http.put(`rank-levels/${rankId}`, rankData, config);
+        const { data } = await http.put(`rank-levels/update/${rankId}`, rankData, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

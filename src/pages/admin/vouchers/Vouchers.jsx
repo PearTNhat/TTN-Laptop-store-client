@@ -71,9 +71,9 @@ function Vouchers() {
       const params = {
         page: currentParams.page,
         size: 10,
-        code: currentParams?.q?.trim() || "",
+        code: currentParams?.q?.trim(),
         promotionType: currentParams.promotionType,
-        status: currentParams.status || "ACTIVE",
+        status: currentParams.status,
       };
 
       const response = await apiGetPromotions({ accessToken, params });
@@ -191,19 +191,14 @@ function Vouchers() {
           promotionId: promotion.id,
         });
 
-        if (response.success) {
-          Swal.fire("Đã xóa!", "Khuyến mãi đã được xóa thành công.", "success");
+        if (response.code === 200) {
+          showToastSuccess("Khuyến mãi đã được xóa thành công.");
           loadPromotions();
         } else {
-          Swal.fire(
-            "Lỗi",
-            response.message || "Không thể xóa khuyến mãi",
-            "error"
-          );
+          showToastError(response.message || "Không thể xóa khuyến mãi");
         }
       } catch (error) {
-        console.error("Error deleting promotion:", error);
-        Swal.fire("Lỗi", "Có lỗi xảy ra khi xóa khuyến mãi", "error");
+        showToastError(error.message || "Có lỗi xảy ra khi xóa khuyến mãi");
       }
     }
   };
@@ -249,22 +244,6 @@ function Vouchers() {
     }
   };
 
-  // Statistics
-  const activePromotions = promotions.filter((p) => {
-    const now = new Date();
-    const startDate = new Date(p.startDate);
-    const endDate = new Date(p.endDate);
-    return now >= startDate && now <= endDate;
-  }).length;
-
-  const totalUsage = promotions.reduce(
-    (sum, p) => sum + (p.usageCount || 0),
-    0
-  );
-  const expiredPromotions = promotions.filter(
-    (p) => new Date() > new Date(p.endDate)
-  ).length;
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="mb-8">
@@ -275,65 +254,6 @@ function Vouchers() {
           Quản lý các mã giảm giá và chương trình khuyến mãi
         </p>
       </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">
-                Tổng khuyến mãi
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {totalElements}
-              </p>
-            </div>
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <FaGift className="text-xl text-blue-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">
-                Đang hoạt động
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {activePromotions}
-              </p>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
-              <FaGift className="text-xl text-green-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Lượt sử dụng</p>
-              <p className="text-2xl font-bold text-gray-900">{totalUsage}</p>
-            </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <FaGift className="text-xl text-purple-600" />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600">Đã hết hạn</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {expiredPromotions}
-              </p>
-            </div>
-            <div className="bg-red-50 p-3 rounded-lg">
-              <FaGift className="text-xl text-red-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Filter and Search */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -464,15 +384,15 @@ function Vouchers() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-gray-900">
-                            {promotion.usageCount || 0}/
-                            {promotion.usageLimit === 0
-                              ? "∞"
+                        <div className="space-y-1 text-center">
+                          <p className="text-sm text-center font-medium text-gray-900">
+                            {promotion.usageCount || 0}
+                            {promotion?.usageLimit
+                              ? `/${promotion.usageLimit}`
                               : promotion.usageLimit}
                           </p>
                           {promotion.usageLimit > 0 && (
-                            <div className="w-20 bg-gray-200 rounded-full h-1.5">
+                            <div className="w-full   bg-gray-200 rounded-full h-1.5">
                               <div
                                 className="bg-blue-600 h-1.5 rounded-full"
                                 style={{

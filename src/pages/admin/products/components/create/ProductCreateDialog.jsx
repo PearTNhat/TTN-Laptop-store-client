@@ -75,6 +75,12 @@ const ProductCreateDialog = ({
     const isValid = await formMethods.trigger(
       Object.keys(productStep1Schema.shape)
     );
+
+    // DEBUG: In ra lỗi validation trong console
+    if (Object.keys(formMethods.formState.errors).length > 0) {
+      console.log("🚨 Validation Errors:", formMethods.formState.errors);
+    }
+
     if (isValid) {
       setStep(2);
     } else {
@@ -86,6 +92,18 @@ const ProductCreateDialog = ({
   const handleBackStep = () => setStep(1);
 
   const onSubmit = async (data) => {
+    // DEBUG: In ra lỗi validation trước khi submit
+    if (Object.keys(formMethods.formState.errors).length > 0) {
+      console.log(
+        "🚨 Validation Errors before submit:",
+        formMethods.formState.errors
+      );
+      showToastError(
+        "Vui lòng kiểm tra lại thông tin, có lỗi validation chưa được xử lý!"
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (isEditMode) {
@@ -96,13 +114,14 @@ const ProductCreateDialog = ({
         });
         if (res.code === 200) {
           showToastSuccess("Cập nhật sản phẩm thành công");
-          onUpdate(res.data); // Gọi callback để tải lại danh sách
+          onUpdate(data); // Gọi callback để tải lại danh sách
         } else {
           if (res?.message.includes("slug")) {
             showToastError("Slug đã tồn tại, vui lòng chọn slug khác.");
           } else {
             showToastError(res.message || "Lỗi khi cập nhật phẩm");
           }
+          return;
         }
         onUpdate({ ...data, config: data.configRequest }); // Gọi callback để cập nhật sản phẩm
       } else {
@@ -176,6 +195,23 @@ const ProductCreateDialog = ({
           </div>
 
           <DialogFooter className="pt-4 border-t">
+            {/* DEBUG BUTTON - Xóa sau khi debug xong */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await formMethods.trigger();
+                console.log(
+                  "🔍 Debug - All validation errors:",
+                  formMethods.formState.errors
+                );
+                console.log("🔍 Debug - Form values:", formMethods.getValues());
+              }}
+              className="mr-2"
+            >
+              🔍
+            </Button>
             {step === 2 && (
               <Button
                 type="button"

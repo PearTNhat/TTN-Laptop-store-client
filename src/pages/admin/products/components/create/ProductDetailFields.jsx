@@ -106,14 +106,22 @@ const ProductDetailFields = ({ index, colorsOptions }) => {
           <Controller
             name={`${detailPath}.images`}
             control={control}
-            render={({ field }) => (
-              <ImageUploader
-                label="Tải lên tối đa 5 ảnh (ảnh đầu tiên sẽ là ảnh đại diện)"
-                maxFiles={5}
-                value={field.value}
-                onChange={handleImagesChange}
-                fieldId={`images-${index}`}
-              />
+            render={({ field, fieldState }) => (
+              <div>
+                <ImageUploader
+                  label="Tải lên tối đa 10 ảnh (ảnh đầu tiên sẽ là ảnh đại diện)"
+                  maxFiles={10}
+                  value={field.value}
+                  onChange={handleImagesChange}
+                  fieldId={`images-${index}`}
+                />
+                {fieldState.error && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </div>
             )}
           />
           {/* Trường thumbnail ẩn */}
@@ -121,14 +129,22 @@ const ProductDetailFields = ({ index, colorsOptions }) => {
             <Controller
               name={`${detailPath}.thumbnail`}
               control={control}
-              render={({ field }) => (
-                <ImageUploader
-                  label="Ảnh phụ"
-                  maxFiles={1}
-                  value={field.value}
-                  onChange={handleChageThumbnail}
-                  fieldId={`thumbnail-${index}`}
-                />
+              render={({ field, fieldState }) => (
+                <div>
+                  <ImageUploader
+                    label="Ảnh phụ"
+                    maxFiles={1}
+                    value={field.value}
+                    onChange={handleChageThumbnail}
+                    fieldId={`thumbnail-${index}`}
+                  />
+                  {fieldState.error && (
+                    <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                      <span className="text-red-500">⚠️</span>
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
           </div>

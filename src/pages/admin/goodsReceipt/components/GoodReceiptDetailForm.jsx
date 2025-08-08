@@ -29,7 +29,7 @@ import {
 
 // Component con cho mỗi dòng sản phẩm trong form
 const ProductRow = ({ index, remove }) => {
-  const { control, setValue, getValues } = useFormContext();
+  const { control, setValue, getValues, watch } = useFormContext();
   const quantity = useWatch({
     control,
     name: `detailRequestList.${index}.quantity`,
@@ -38,6 +38,10 @@ const ProductRow = ({ index, remove }) => {
     control,
     name: `detailRequestList.${index}.productDetailId`,
   });
+
+  // Watch thông tin sản phẩm từ purchase order
+  const productTitle = watch(`detailRequestList.${index}.title`);
+  const productThumbnail = watch(`detailRequestList.${index}.thumbnail`);
 
   // Hàm tạo serial number tự động
   const generateSerialNumber = (productId, index) => {
@@ -73,9 +77,29 @@ const ProductRow = ({ index, remove }) => {
 
   return (
     <TableRow className="hover:bg-gray-50">
-      {/* Nhập ID sản phẩm */}
-      <TableCell style={{ minWidth: "200px" }}>
+      {/* Thông tin sản phẩm */}
+      <TableCell style={{ minWidth: "300px" }}>
         <div className="space-y-2">
+          {/* Hiển thị thông tin sản phẩm nếu có từ purchase order */}
+          {productTitle && (
+            <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg border border-green-200">
+              {productThumbnail && (
+                <img
+                  src={productThumbnail}
+                  alt={productTitle}
+                  className="w-12 h-12 object-cover rounded"
+                />
+              )}
+              <div className="flex-1">
+                <p className="font-medium text-sm text-green-800">
+                  {productTitle}
+                </p>
+                <p className="text-xs text-green-600">ID: {productDetailId}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Form fields */}
           <FormField
             control={control}
             name={`detailRequestList.${index}.productDetailId`}
@@ -83,10 +107,11 @@ const ProductRow = ({ index, remove }) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Nhập ID sản phẩm..."
+                    placeholder="ID sản phẩm (tự động điền khi chọn đơn hàng)..."
                     type="number"
                     {...field}
                     className="border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    readOnly={!!productTitle} // Chỉ đọc nếu đã có thông tin từ purchase order
                   />
                 </FormControl>
                 <FormMessage className="text-red-500 text-xs" />
@@ -100,9 +125,11 @@ const ProductRow = ({ index, remove }) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="ID Chi tiết ĐH Mua..."
+                    placeholder="ID Chi tiết ĐH Mua (tự động)..."
                     type="number"
                     {...field}
+                    className="text-xs"
+                    readOnly
                   />
                 </FormControl>
                 <FormMessage />
@@ -211,7 +238,7 @@ const GoodReceiptDetailForm = () => {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "details",
+    name: "detailRequestList", // Sửa từ "details" thành "detailRequestList"
   });
 
   const addProduct = () => {
@@ -223,15 +250,6 @@ const GoodReceiptDetailForm = () => {
       serialNumber: [], // Sửa tên field cho đúng
     });
   };
-  useEffect(() => {
-    append({
-      productDetailId: "",
-      purchaseOrderDetailId: "",
-      quantity: 1,
-      unitPrice: 0,
-      serialNumber: [],
-    });
-  }, [append]);
   return (
     <Card className="shadow-sm border-gray-200">
       <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200">
@@ -246,7 +264,7 @@ const GoodReceiptDetailForm = () => {
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="font-semibold text-gray-700">
-                  ID Sản phẩm
+                  Thông tin Sản phẩm
                   <span className="text-red-500 ml-1">*</span>
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700">

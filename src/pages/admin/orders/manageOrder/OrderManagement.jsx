@@ -23,6 +23,24 @@ import SimpleConfirmModal from "./components/SimpleConfirmModal";
 import OrderDetailModal from "./components/OrderDetailModal";
 import { getStatusInfo } from "../utils/helper";
 import { formatDate } from "date-fns";
+import { vi } from "date-fns/locale";
+
+// Helper function để format date đẹp hơn
+const formatOrderDate = (dateString) => {
+  if (!dateString) return "N/A";
+
+  try {
+    const date = new Date(dateString);
+    return {
+      date: formatDate(date, "dd/MM/yyyy", { locale: vi }),
+      time: formatDate(date, "HH:mm:ss", { locale: vi }),
+      full: formatDate(date, "dd/MM/yyyy 'lúc' HH:mm", { locale: vi }),
+    };
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return { date: "N/A", time: "", full: "N/A" };
+  }
+};
 
 const OrderManagement = () => {
   const { accessToken } = useSelector((state) => state.user);
@@ -60,7 +78,7 @@ const OrderManagement = () => {
           currentStatusFilter !== "all"
             ? currentStatusFilter.toUpperCase()
             : undefined,
-        search: currentParams.q || undefined,
+        code: currentParams.q || undefined,
       };
       const cleanParams = Object.fromEntries(
         Object.entries(params).filter(([_, v]) => v != null)
@@ -316,12 +334,20 @@ const OrderManagement = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          {order?.createdAt
+                          {order?.createdDate
                             ? formatDate(
-                                new Date(order.createdAt),
-                                "dd/MM/yyyy HH:mm"
+                                new Date(order.createdDate),
+                                "dd/MM/yyyy"
                               )
                             : "N/A"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {order?.createdDate
+                            ? formatDate(
+                                new Date(order.createdDate),
+                                "HH:mm:ss"
+                              )
+                            : ""}
                         </div>
                       </td>
                       <td className="px-6 py-4">

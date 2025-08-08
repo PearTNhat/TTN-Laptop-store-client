@@ -93,36 +93,36 @@ const ProductManagement = () => {
     fetchCategories();
   }, [accessToken, currentParams]);
   // fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const params = {
-          page: currentParams.page || "1",
-          size: currentParams.size || "10",
-          keyword: currentParams.q || null,
-        };
-        const responseData = await apiGetListProducts({
-          accessToken,
-          ...params,
-        });
-        if (responseData.code !== 0 && responseData.code !== 200) {
-          throw new Error(responseData.message || "Lỗi khi tải sản phẩm");
-        }
-        const { data } = responseData;
-        console.log("Fetched products:", data);
-        setProducts(data.content || []);
-        setPagination({
-          currentPage: data.page.number + 1,
-          totalPages: data.page.totalPages,
-        });
-      } catch (err) {
-        showToastError(err.message);
-        setProducts([]);
-      } finally {
-        setIsLoading(false);
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const params = {
+        page: currentParams.page || "1",
+        size: currentParams.size || "10",
+        keyword: currentParams.q || null,
+      };
+      const responseData = await apiGetListProducts({
+        accessToken,
+        ...params,
+      });
+      if (responseData.code !== 0 && responseData.code !== 200) {
+        throw new Error(responseData.message || "Lỗi khi tải sản phẩm");
       }
-    };
+      const { data } = responseData;
+      console.log("Fetched products:", data);
+      setProducts(data.content || []);
+      setPagination({
+        currentPage: data.page.number + 1,
+        totalPages: data.page.totalPages,
+      });
+    } catch (err) {
+      showToastError(err.message);
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchProducts();
   }, [currentParams]);
   useEffect(() => {
@@ -258,10 +258,8 @@ const ProductManagement = () => {
           setProducts((prev) => [...prev, newProduct]);
           setSearchParams((prev) => ({ ...prev, page: pagination.totalPages })); // Tải lại trang đầu tiên
         }} // Tải lại danh sách khi tạo thành công
-        onUpdate={(updatedProduct) => {
-          setProducts((prev) =>
-            prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-          );
+        onUpdate={() => {
+          fetchProducts();
           setIsModalOpen(false);
         }}
         brands={brands}

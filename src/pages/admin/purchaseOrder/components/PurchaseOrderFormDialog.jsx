@@ -88,9 +88,7 @@ const PurchaseOrderFormDialog = ({
   // --- 3. Logic Submit đa năng ---
   const onSubmit = async (formData) => {
     try {
-      console.log("Submitting form data:", formData);
       if (isEditMode) {
-        console.log("Updating order with data:", formData);
         const response = await apiUpdatePurchaseOrder({
           accessToken,
           id: editingOrder.id,
@@ -100,7 +98,6 @@ const PurchaseOrderFormDialog = ({
         onUpdateSuccess(response.data); // Gọi callback cho cha
       } else {
         // Chế độ CREATE: Gọi API Create
-        console.log("Submitting form data:", formData);
         const response = await apiCreatePurchaseOrder({
           accessToken,
           body: formData,

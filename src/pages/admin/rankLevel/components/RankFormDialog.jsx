@@ -51,7 +51,9 @@ const RankFormDialog = ({ isOpen, setIsOpen, editingRank, onSuccess }) => {
         params: {
           page: 1,
           size: 100,
-          // Không filter theo promotionType để hiển thị tất cả
+          code: "",
+          promotionType: "GIFT",
+          status: "ACTIVE",
         },
       });
       if (response.code === 200) {
@@ -140,10 +142,18 @@ const RankFormDialog = ({ isOpen, setIsOpen, editingRank, onSuccess }) => {
         resetForm();
         onSuccess();
       } else {
-        showToastError(
-          response.message ||
-            (isEditing ? "Lỗi khi cập nhật rank" : "Lỗi khi tạo rank")
-        );
+        if (response.message.includes("uq_rank_active_priority")) {
+          showToastError(
+            "Độ ưu tiên của rank đang hoạt động không được trùng lặp"
+          );
+        } else if (response.message.includes("already exists")) {
+          showToastError("Promotion id đã được sử dụng ở rank khác");
+        } else {
+          showToastError(
+            response.message ||
+              (isEditing ? "Lỗi khi cập nhật rank" : "Lỗi khi tạo rank")
+          );
+        }
       }
     } catch (error) {
       showToastError(error.message || "Có lỗi xảy ra");
