@@ -48,7 +48,7 @@ function GoodsReceiptManagement() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, setSearchParams]);
 
-  const fetchGoodsReceiptNotes = async () => {
+  const fetchGoodsReceiptNotes = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = {
@@ -72,10 +72,11 @@ function GoodsReceiptManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [accessToken, currentParams]);
+
   useEffect(() => {
     fetchGoodsReceiptNotes();
-  }, [accessToken, currentParams]);
+  }, [fetchGoodsReceiptNotes]);
 
   const handlePageChange = (page) =>
     setSearchParams((prev) => ({ ...Object.fromEntries(prev), page }));
@@ -86,7 +87,7 @@ function GoodsReceiptManagement() {
   const handleFetchDetails = useCallback(
     async (noteId) => {
       const note = goodsReceiptNote.find((dn) => dn.id === noteId);
-      if (!note || note.grnDetail) return note;
+      if (!note || note.grnDetails) return note; // Sửa từ grnDetail thành grnDetails
       setGoodsReceiptNote((prev) =>
         prev.map((dn) =>
           dn.id === noteId ? { ...dn, isLoadingDetails: true } : dn
@@ -100,7 +101,7 @@ function GoodsReceiptManagement() {
         if (response.code !== 200) throw new Error(response.message);
         const updatedNote = {
           ...note,
-          grnDetail: response.data.grnDetail,
+          grnDetails: response.data.grnDetails, // Sửa từ grnDetail thành grnDetails
           isLoadingDetails: false,
         };
         setGoodsReceiptNote((prev) =>

@@ -152,8 +152,8 @@ function GoodsReceiptNoteList({ goodsReceiptNotes, onFetchDetails, onDelete }) {
                           Đang tải chi tiết...
                         </span>
                       </div>
-                    ) : note.grnDetail ? (
-                      <DeliveryNoteDetail details={note.grnDetail} />
+                    ) : note.grnDetails ? (
+                      <DeliveryNoteDetail details={note.grnDetails} />
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Chưa có dữ liệu chi tiết.
