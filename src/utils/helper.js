@@ -74,4 +74,12 @@ const generateSlug = (text) => {
         .replace(/^-+/, "")
         .replace(/-+$/, "");
 };
-export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };
+const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+};
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, formatDate, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };

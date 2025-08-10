@@ -22,6 +22,18 @@ const ChangeEmail = () => {
 
   const newEmail = watch("newEmail");
 
+  const getAccessToken = () => {
+    try {
+      const raw = localStorage.getItem("persist:shop/user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return JSON.parse(parsed.accessToken); // parse 2 lần vì redux-persist lưu dạng string lồng string
+    } catch (err) {
+      return null;
+    }
+  };
+
+
   useEffect(() => {
     if (success) {
       toast.success("🎉 Đổi email thành công!", { autoClose: 2000 });
@@ -51,7 +63,13 @@ const ChangeEmail = () => {
     setLoading(true);
     try {
       if (step === 1) {
-        const res = await apiSendOtpChangeEmail(data.newEmail);
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+          toast.error("Bạn chưa đăng nhập.");
+          return;
+        }
+        console.log("accessToken GỬI OTP:", accessToken);
+        const res = await apiSendOtpChangeEmail(data.newEmail, accessToken);
         if (res.code === 200) {
           toast.success("📩 Mã xác nhận đã được gửi đến email!");
           setStep(2);
@@ -66,9 +84,15 @@ const ChangeEmail = () => {
         }
         setStep(3);
       } else if (step === 3) {
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+          toast.error("Bạn chưa đăng nhập.");
+          return;
+        }
         const res = await apiChangeEmail({
           newEmail: data.newEmail,
           otpCode: otp.join(""),
+          accessToken,
         });
         if (res.code === 200) {
           setSuccess(true);

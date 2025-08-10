@@ -6,155 +6,119 @@ import "react-toastify/dist/ReactToastify.css";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Pagination from "~/components/pagination/Pagination";
+
+import CategoryStats from "./components/CategoryStats";
+import CategoryTableRow from "./components/CategoryTableRow";
+import CategoryForm from "./components/CategoryForm";
+
 import { useSelector } from "react-redux";
 
-import SeriesStats from "./components/SeriesStats";
-import SeriesTableRow from "./components/SeriesTableRow";
-import SeriesForm from "./components/SeriesForm";
+import { apiGetCategories, apiCreateCategory, apiDeleteCategory, apiUpdateCategory } from "~/apis/categoryApi";
 
-import { apiGetSeries, apiCreateSeries, apiUpdateSeries, apiDeleteSeries } from "~/apis/series"
-import { apiGetBrands } from "~/apis/brandApi";
 
-function Series() {
-  const [series, setSeries] = useState([]);
+function Category() {
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedSeries, setSelectedSeries] = useState(null);
-  const [seriesToDelete, setSeriesToDelete] = useState(null);
-  const [brands, setBrands] = useState([]);
-  const {accessToken}=useSelector(state=>state.user)
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  const seriesPerPage = 5;
+  const { accessToken } = useSelector((state) => state.user);
+
+  const categoriesPerPage = 5;
 
   useEffect(() => {
-    const fetchSeries = async () => {
+    const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        const res = await apiGetSeries();
-
-        // 📌 LOG DỮ LIỆU NHẬN ĐƯỢC
-        console.log("📦 Kết quả từ API getSeries:", res);
-
-        // Kiểm tra nếu res là { code: 200, data: [...] }
+        const res= await apiGetCategories();
+        console.log("Kết quả từ API getcate:", res);
         const list = Array.isArray(res?.data) ? res.data : [];
-
         const formatted = list.map((item) => ({
           ...item,
-          brandName: item.brandName || "Unknown",
         }));
-
-        setSeries(formatted);
+        setCategories(formatted);
+        setTimeout(() => setIsLoading(false), 600);
       } catch (error) {
-        console.error("❌ Lỗi khi gọi getSeries:", error);
-        toast.error("Không thể tải danh sách series");
-      } finally {
+        toast.error("Lỗi khi tải dữ liệu danh mục");
         setIsLoading(false);
       }
     };
-    const fetchBrands = async () => {
-      try {
-        const res = await apiGetBrands();
-        if (res && res.code === 200 && Array.isArray(res.data)) {
-          setBrands(res.data);
-        }
-      } catch (error) {
-        toast.error("Không thể tải danh sách thương hiệu");
-      }
-    };
-
-    fetchSeries();
-    fetchBrands();
+    fetchCategories();
   }, []);
 
-  
-  const handleAdd = async (newSeries) => {
-    try {
-      // console.log("🔥 Brands đang có:", brands);
-      const res = await apiCreateSeries({ brandId: newSeries.brandId, body: newSeries, accessToken });
-      if (res.success) {
-        const brand = brands.find(b => String(b.id) === String(newSeries.brandId));
-        const seriesWithBrand = {
-          ...res.data,
-          name: res.data.name || newSeries.name,
-          description: res.data.description || newSeries.description,
-          brandName: brand ? brand.name : "Unknown"
-        };
+  const handleAdd = async (newCategory) => {
+    console.log("Dữ liệu gửi thêm: ", newCategory);  
 
-        setSeries([seriesWithBrand, ...series]);
-        toast.success("Thêm dòng sản phẩm thành công!");
-        setShowDialog(false);
+    try {
+      const res = await apiCreateCategory({ body: newCategory, accessToken });
+      
+      if (res.success && res.data) {
+        setCategories((prev) => [...prev, res.data]); 
+        toast.success(res.message || "Thêm danh mục thành công!");
+        setShowDialog(false); 
       } else {
-        toast.error(res.message);
+        toast.error(res.message || "Thêm danh mục thất bại!");
       }
     } catch (error) {
-      toast.error("Thêm thất bại!");
+      toast.error("Thêm danh mục thất bại!");
     }
   };
 
-  const handleUpdate = async (updatedSeries) => {
+  const handleUpdate = async (updated) => {
+    console.log("Dữ liệu gửi sửa:", updated); 
     try {
-      const res = await apiUpdateSeries({ seriesId: updatedSeries.id, body: updatedSeries, accessToken });
-      console.log("🔍 ID cần sửa  :", updatedSeries?.id);
-      if (res.success) {
-        setSeries(series.map((s) => 
-          s.id === updatedSeries.id
-            ? {
-                ...s, // giữ lại brandName, brandId, v.v...
-                name: updatedSeries.name,
-                description:updatedSeries.description,
-              }
-            : s
-        ));
-
-        toast.success("Cập nhật dòng sản phẩm thành công!");
+      const res = await apiUpdateCategory({
+        id: updated.id,
+        body: updated,
+        accessToken,
+      });
+      if (res?.success) {
+        console.log("jsjsj", updated)
+        setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
+        toast.success("Cập nhật danh mục thành công!");
         setShowDialog(false);
-      } else {
-        toast.error(res.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("Cập nhật thất bại!");
     }
   };
 
   const confirmDelete = async () => {
-    if (seriesToDelete) {
-      try {
-        const res = await apiDeleteSeries({ seriesId: seriesToDelete.id, accessToken });
-        console.log("🔍 ID cần xóa:", seriesToDelete?.id);
-        if (res.success) {
-          setSeries(series.filter((s) => s.id !== seriesToDelete.id));
-          toast.success(`Đã xóa "${seriesToDelete.name}"`);
-        } else {
-          toast.error(res.message);
-        }
-      } catch (error) {
-        toast.error("Xóa thất bại!");
+    if (!categoryToDelete) return;
+    try {
+      const res = await apiDeleteCategory({ id: categoryToDelete.id, accessToken });
+      if (res?.success) {
+        setCategories(categories.filter((c) => c.id !== categoryToDelete.id));
+        toast.success(`Đã xóa "${categoryToDelete.name}"`);
       }
+    } catch {
+      console.log("🛑 Lỗi khi update/delete:", err.response?.data);
+      toast.error("Xóa danh mục thất bại!");
     }
     setShowDeleteDialog(false);
   };
 
-  const filteredSeries = series.filter((s) =>
-    (s.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter((category) =>
+    (category.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const indexOfLast = currentPage * seriesPerPage;
-  const indexOfFirst = indexOfLast - seriesPerPage;
-  const currentSeries = filteredSeries.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredSeries.length / seriesPerPage);
-  const totalProducts = series.reduce((sum, s) => sum + (s.productCount || 0), 0);
+  const indexOfLast = currentPage * categoriesPerPage;
+  const indexOfFirst = indexOfLast - categoriesPerPage;
+  const currentCategories = filteredCategories.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
 
   return (
     <div className="p-6 bg-white min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Dòng sản phẩm</h1>
-      <p className="text-gray-600 mb-6">Theo dõi & kiểm soát các dòng sản phẩm</p>
+      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Danh mục</h1>
+      <p className="text-gray-600 mb-6">Theo dõi & kiểm soát các danh mục sản phẩm</p>
 
-      <SeriesStats total={series.length} totalProducts={totalProducts} />
+      <CategoryStats total={categories.length} />
 
       <div className="flex items-center justify-between bg-white border p-4 rounded-xl shadow-sm mb-6">
         <div className="relative w-96">
@@ -166,18 +130,18 @@ function Series() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Tìm kiếm dòng sản phẩm..."
+            placeholder="Tìm kiếm danh mục..."
             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
           onClick={() => {
-            setSelectedSeries(null);
+            setSelectedCategory(null);
             setShowDialog(true);
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
-          <FaPlus /> Thêm dòng sản phẩm
+          <FaPlus /> Thêm danh mục
         </button>
       </div>
 
@@ -186,10 +150,7 @@ function Series() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dòng sản phẩm
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Thương hiệu
+                Danh mục
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động
@@ -203,20 +164,17 @@ function Series() {
                   <Skeleton count={5} height={40} />
                 </td>
               </tr>
-            ) : currentSeries.length > 0 ? (
-              currentSeries.map((s) => (
-                <SeriesTableRow
-                  key={`series-${s.id}`}
-                  series={s}
-                  onEdit={(s) => {
-                    const actualSeries = s.data ?? s; // Nếu có s.data thì dùng, không thì dùng s
-                    console.log("🟡 Đang sửa series:", actualSeries);
-                    setSelectedSeries(actualSeries);
+            ) : currentCategories.length > 0 ? (
+              currentCategories.map((category) => (
+                <CategoryTableRow
+                  key={category.id}
+                  category={category}
+                  onEdit={(c) => {
+                    setSelectedCategory(c);
                     setShowDialog(true);
                   }}
-                  onDelete={(s) => {
-                    console.log("🗑 Xóa dòng:", s);
-                    setSeriesToDelete(s);
+                  onDelete={(c) => {
+                    setCategoryToDelete(c);
                     setShowDeleteDialog(true);
                   }}
                 />
@@ -224,7 +182,7 @@ function Series() {
             ) : (
               <tr>
                 <td colSpan="3" className="text-center text-gray-500 py-4">
-                  Không có dòng sản phẩm nào
+                  Không có danh mục nào
                 </td>
               </tr>
             )}
@@ -242,7 +200,6 @@ function Series() {
         />
       )}
 
-       {/* Dialog - Xóa */}
       <Transition appear show={showDeleteDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDeleteDialog(false)}>
           <Transition.Child
@@ -269,10 +226,10 @@ function Series() {
               >
                 <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
                   <Dialog.Title className="text-lg font-semibold mb-4">
-                    Xác nhận xóa dòng sản phẩm
+                    Xác nhận xóa danh mục
                   </Dialog.Title>
                   <p className="text-sm text-gray-600 mb-6">
-                    Bạn có chắc chắn muốn xóa dòng sản phẩm "{seriesToDelete?.name}" không? Hành động này không thể hoàn tác.
+                    Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}" không? Hành động này không thể hoàn tác.
                   </p>
                   <div className="flex justify-end gap-3">
                     <button
@@ -295,17 +252,16 @@ function Series() {
         </Dialog>
       </Transition>
 
-      {/* Dialog - Thêm / Sửa */}
       <Transition appear show={showDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDialog(false)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
             leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black bg-opacity-30" />
           </Transition.Child>
@@ -321,11 +277,13 @@ function Series() {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-xl transition-all">
-                  <SeriesForm
-                    series={selectedSeries}
-                    onSubmit={selectedSeries ? handleUpdate : handleAdd}
+                  <Dialog.Title className="text-lg font-bold mb-4">
+                    {selectedCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
+                  </Dialog.Title>
+                  <CategoryForm
+                    category={selectedCategory}
+                    onSubmit={selectedCategory ? handleUpdate : handleAdd}
                     onCancel={() => setShowDialog(false)}
-                    brands={brands}
                   />
                 </Dialog.Panel>
               </Transition.Child>
@@ -337,4 +295,4 @@ function Series() {
   );
 }
 
-export default Series;
+export default Category;

@@ -1,7 +1,8 @@
 import { http } from "~/utils/http";
 
 const getAuthHeader = () => {
-  const { accessToken } = JSON.parse(localStorage.getItem("persist:shop/user")) || {};
+  const { accessToken } = JSON.parse(localStorage.getItem("persist:shop/user"));
+  console.log("aaa", accessToken)
   return {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -27,9 +28,14 @@ const apiFetchMyInfo = async ({ accessToken }) => {
   }
 };
 
-export const apiUpdateUserInfo = async ({ body }) => {
+export const apiUpdateUserInfo = async ({ body, accessToken }) => {
   try {
-    const response = await http.put("/users/update", body, getAuthHeader());
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+    const response = await http.put("/users/update", body, config);
     const res = response.data;
 
     if (res?.code === 200) {
@@ -73,12 +79,18 @@ export const apiGetMyVouchers = async () => {
 };
 
 /// 🆕 Gửi OTP để đổi email
-export const apiSendOtpChangeEmail = async (email) => {
+export const apiSendOtpChangeEmail = async (email, accessToken) => {
   try {
-    const response = await http.get("/users/send-otp-change-email", {
-      params: { email },
-      ...getAuthHeader(),
-    });
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        email,
+      },
+    }
+    console.log("âsa", accessToken)
+    const response = await http.get("/users/send-otp-change-email", config);
 
     return {
       code: response.data.code,
@@ -93,16 +105,18 @@ export const apiSendOtpChangeEmail = async (email) => {
 };
 
 /// 🆕 Đổi email
-export const apiChangeEmail = async ({ newEmail, otpCode }) => {
+export const apiChangeEmail = async ({ newEmail, otpCode, accessToken }) => {
   try {
-    const response = await http.put(
-      "/users/change-email",
-      {},
-      {
-        params: { newEmail, otpCode },
-        ...getAuthHeader(),
-      }
-    );
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        newEmail,
+        otpCode,
+      },
+    }
+    const response = await http.put("/users/change-email", {}, config);
 
     return {
       code: response.data.code,

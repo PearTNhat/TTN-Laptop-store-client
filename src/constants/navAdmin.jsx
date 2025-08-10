@@ -1,7 +1,6 @@
 import {
   BarChart3,
   Users,
-  Tag,
   Palette,
   ShoppingBag,
   PackageCheck,
@@ -11,7 +10,9 @@ import {
   Ticket,
 } from "lucide-react";
 import { adminPaths } from "./paths";
-
+import { IoMdColorFill } from "react-icons/io";
+import { BiFontSize } from "react-icons/bi";
+import { TbCategoryFilled } from "react-icons/tb";
 const navItems = [
   {
     icon: <BarChart3 size={20} />,
@@ -24,9 +25,19 @@ const navItems = [
     path: "/admin/users",
   },
   {
-    icon: <Tag size={20} />,
+    icon: <TbCategoryFilled />,
+    name: "Danh mục",
+    path: "/admin/category",
+  },
+  {
+    icon: <BiFontSize />,
     name: "Thương hiệu",
     path: "/admin/brand",
+  },
+  {
+    icon: <IoMdColorFill />,
+    name: "Màu sắc",
+    path: "/admin/color",
   },
   {
     icon: <Palette size={20} />,

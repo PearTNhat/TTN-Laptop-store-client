@@ -26,6 +26,8 @@ const adminPaths = {
     PURCHASE_ORDERS: 'purchase-orders',
     DELIVERY_NOTES: 'delivery-notes',
     GOODS_RECEIPT: 'goods-receipt',
+    CATEGORY: 'category',
+    COLOR: 'color',
     PRODUCTS: 'products',
     ORDERS: 'orders',
     ORDER_CONFIRMS: 'orders/confirms',

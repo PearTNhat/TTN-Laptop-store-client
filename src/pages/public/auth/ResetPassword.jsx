@@ -36,6 +36,7 @@ const ResetPassword = () => {
     try {
       // Gọi API gửi OTP
       const res = await apiSendOtpForgotPw(email);
+      console.log('res gửi OTP:', res);
       if (res.success) {
         setSuccess(`Đã gửi mã xác minh đến ${email}`);
         setStep(2); // Chuyển sang bước nhập OTP

@@ -18,6 +18,7 @@ const userSlice = createSlice({
             state.accessToken = action.payload.accessToken;
             // state.userData = action.payload.userData;
             state.isLoggedIn = true;
+            //localStorage.setItem("token", action.payload.accessToken);
         },
         setUserData: (state, action) => {
             state.userData = action.payload.userData
@@ -25,7 +26,10 @@ const userSlice = createSlice({
         logout: (state) => {
             state.accessToken = null;
             state.isLoggedIn = false;
-            state.userData = {}
+            state.userData = {};
+
+            // localStorage.removeItem("token");
+            // localStorage.removeItem("persist:shop/user");
         },
     },
     extraReducers: (builder) => {

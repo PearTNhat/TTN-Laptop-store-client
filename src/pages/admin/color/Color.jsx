@@ -8,83 +8,49 @@ import "react-loading-skeleton/dist/skeleton.css";
 import Pagination from "~/components/pagination/Pagination";
 import { useSelector } from "react-redux";
 
-import SeriesStats from "./components/SeriesStats";
-import SeriesTableRow from "./components/SeriesTableRow";
-import SeriesForm from "./components/SeriesForm";
+import ColorStat from "./components/ColorStat";
+import ColorTableRow from "./components/ColorTableRow";
+import ColorForm from "./components/ColorForm";
 
-import { apiGetSeries, apiCreateSeries, apiUpdateSeries, apiDeleteSeries } from "~/apis/series"
-import { apiGetBrands } from "~/apis/brandApi";
+import { apiGetColors, apiCreateColor, apiUpdateColor, apiDeleteColor } from "~/apis/colorApi";
 
-function Series() {
-  const [series, setSeries] = useState([]);
+function Color() {
+  const [colors, setColors] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [selectedSeries, setSelectedSeries] = useState(null);
-  const [seriesToDelete, setSeriesToDelete] = useState(null);
-  const [brands, setBrands] = useState([]);
-  const {accessToken}=useSelector(state=>state.user)
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [colorToDelete, setColorToDelete] = useState(null);
+  const { accessToken } = useSelector(state => state.user);
 
-  const seriesPerPage = 5;
+  const colorsPerPage = 5;
 
   useEffect(() => {
-    const fetchSeries = async () => {
+    const fetchColors = async () => {
       setIsLoading(true);
       try {
-        const res = await apiGetSeries();
-
-        // 📌 LOG DỮ LIỆU NHẬN ĐƯỢC
-        console.log("📦 Kết quả từ API getSeries:", res);
-
-        // Kiểm tra nếu res là { code: 200, data: [...] }
-        const list = Array.isArray(res?.data) ? res.data : [];
-
-        const formatted = list.map((item) => ({
-          ...item,
-          brandName: item.brandName || "Unknown",
-        }));
-
-        setSeries(formatted);
+        const res = await apiGetColors({ accessToken });
+        setColors(Array.isArray(res?.data) ? res.data : []);
       } catch (error) {
-        console.error("❌ Lỗi khi gọi getSeries:", error);
-        toast.error("Không thể tải danh sách series");
+        console.error("❌ Lỗi khi gọi getColors:", error);
+        toast.error("Không thể tải danh sách màu sắc");
       } finally {
         setIsLoading(false);
       }
     };
-    const fetchBrands = async () => {
-      try {
-        const res = await apiGetBrands();
-        if (res && res.code === 200 && Array.isArray(res.data)) {
-          setBrands(res.data);
-        }
-      } catch (error) {
-        toast.error("Không thể tải danh sách thương hiệu");
-      }
-    };
 
-    fetchSeries();
-    fetchBrands();
-  }, []);
+    fetchColors();
+  }, [accessToken]);
 
-  
-  const handleAdd = async (newSeries) => {
+  const handleAdd = async (newColor) => {
+    console.log("zô đây: ", newColor)
     try {
-      // console.log("🔥 Brands đang có:", brands);
-      const res = await apiCreateSeries({ brandId: newSeries.brandId, body: newSeries, accessToken });
+      const res = await apiCreateColor({ body: newColor, accessToken });
       if (res.success) {
-        const brand = brands.find(b => String(b.id) === String(newSeries.brandId));
-        const seriesWithBrand = {
-          ...res.data,
-          name: res.data.name || newSeries.name,
-          description: res.data.description || newSeries.description,
-          brandName: brand ? brand.name : "Unknown"
-        };
-
-        setSeries([seriesWithBrand, ...series]);
-        toast.success("Thêm dòng sản phẩm thành công!");
+        setColors([res.data, ...colors]);
+        toast.success("Thêm màu sắc thành công!");
         setShowDialog(false);
       } else {
         toast.error(res.message);
@@ -94,22 +60,26 @@ function Series() {
     }
   };
 
-  const handleUpdate = async (updatedSeries) => {
-    try {
-      const res = await apiUpdateSeries({ seriesId: updatedSeries.id, body: updatedSeries, accessToken });
-      console.log("🔍 ID cần sửa  :", updatedSeries?.id);
-      if (res.success) {
-        setSeries(series.map((s) => 
-          s.id === updatedSeries.id
-            ? {
-                ...s, // giữ lại brandName, brandId, v.v...
-                name: updatedSeries.name,
-                description:updatedSeries.description,
-              }
-            : s
-        ));
+  const handleUpdate = async (updatedColor) => {
+    console.log("màu update: ", updatedColor);
 
-        toast.success("Cập nhật dòng sản phẩm thành công!");
+    try {
+      const body = {
+        name: updatedColor.name,
+        hex: updatedColor.hex
+      };
+
+      const res = await apiUpdateColor({ 
+        id: updatedColor.id, 
+        body, 
+        accessToken 
+      });
+      
+      if (res.success) {
+        setColors(colors.map(c => 
+          c.id === updatedColor.id ? { ...c, ...updatedColor } : c
+        ));
+        toast.success("Cập nhật màu sắc thành công!");
         setShowDialog(false);
       } else {
         toast.error(res.message);
@@ -120,13 +90,16 @@ function Series() {
   };
 
   const confirmDelete = async () => {
-    if (seriesToDelete) {
+    if (colorToDelete) {
       try {
-        const res = await apiDeleteSeries({ seriesId: seriesToDelete.id, accessToken });
-        console.log("🔍 ID cần xóa:", seriesToDelete?.id);
+        const res = await apiDeleteColor({ 
+          id: colorToDelete.id, 
+          accessToken 
+        });
+        
         if (res.success) {
-          setSeries(series.filter((s) => s.id !== seriesToDelete.id));
-          toast.success(`Đã xóa "${seriesToDelete.name}"`);
+          setColors(colors.filter(c => c.id !== colorToDelete.id));
+          toast.success(`Đã xóa "${colorToDelete.name}"`);
         } else {
           toast.error(res.message);
         }
@@ -137,24 +110,24 @@ function Series() {
     setShowDeleteDialog(false);
   };
 
-  const filteredSeries = series.filter((s) =>
-    (s.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredColors = colors.filter(c =>
+    (c.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.hex || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const indexOfLast = currentPage * seriesPerPage;
-  const indexOfFirst = indexOfLast - seriesPerPage;
-  const currentSeries = filteredSeries.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredSeries.length / seriesPerPage);
-  const totalProducts = series.reduce((sum, s) => sum + (s.productCount || 0), 0);
+  const indexOfLast = currentPage * colorsPerPage;
+  const indexOfFirst = indexOfLast - colorsPerPage;
+  const currentColors = filteredColors.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredColors.length / colorsPerPage);
 
   return (
     <div className="p-6 bg-white min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
 
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Dòng sản phẩm</h1>
-      <p className="text-gray-600 mb-6">Theo dõi & kiểm soát các dòng sản phẩm</p>
+      <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý Màu sắc</h1>
+      <p className="text-gray-600 mb-6">Theo dõi & quản lý các màu sắc sản phẩm</p>
 
-      <SeriesStats total={series.length} totalProducts={totalProducts} />
+      <ColorStat total={colors.length} />
 
       <div className="flex items-center justify-between bg-white border p-4 rounded-xl shadow-sm mb-6">
         <div className="relative w-96">
@@ -166,18 +139,18 @@ function Series() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="Tìm kiếm dòng sản phẩm..."
+            placeholder="Tìm kiếm màu sắc"
             className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <button
           onClick={() => {
-            setSelectedSeries(null);
+            setSelectedColor(null);
             setShowDialog(true);
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
-          <FaPlus /> Thêm dòng sản phẩm
+          <FaPlus /> Thêm màu mới
         </button>
       </div>
 
@@ -186,10 +159,10 @@ function Series() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dòng sản phẩm
+                Màu sắc
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Thương hiệu
+                Mã HEX
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động
@@ -203,20 +176,17 @@ function Series() {
                   <Skeleton count={5} height={40} />
                 </td>
               </tr>
-            ) : currentSeries.length > 0 ? (
-              currentSeries.map((s) => (
-                <SeriesTableRow
-                  key={`series-${s.id}`}
-                  series={s}
-                  onEdit={(s) => {
-                    const actualSeries = s.data ?? s; // Nếu có s.data thì dùng, không thì dùng s
-                    console.log("🟡 Đang sửa series:", actualSeries);
-                    setSelectedSeries(actualSeries);
+            ) : currentColors.length > 0 ? (
+              currentColors.map((c) => (
+                <ColorTableRow
+                  key={`color-${c.id}`}
+                  color={c}
+                  onEdit={(color) => {
+                    setSelectedColor(color);
                     setShowDialog(true);
                   }}
-                  onDelete={(s) => {
-                    console.log("🗑 Xóa dòng:", s);
-                    setSeriesToDelete(s);
+                  onDelete={(color) => {
+                    setColorToDelete(color);
                     setShowDeleteDialog(true);
                   }}
                 />
@@ -224,7 +194,7 @@ function Series() {
             ) : (
               <tr>
                 <td colSpan="3" className="text-center text-gray-500 py-4">
-                  Không có dòng sản phẩm nào
+                  Không có màu sắc nào
                 </td>
               </tr>
             )}
@@ -242,7 +212,7 @@ function Series() {
         />
       )}
 
-       {/* Dialog - Xóa */}
+      {/* Dialog - Xóa */}
       <Transition appear show={showDeleteDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDeleteDialog(false)}>
           <Transition.Child
@@ -269,11 +239,20 @@ function Series() {
               >
                 <Dialog.Panel className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl">
                   <Dialog.Title className="text-lg font-semibold mb-4">
-                    Xác nhận xóa dòng sản phẩm
+                    Xác nhận xóa màu sắc
                   </Dialog.Title>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Bạn có chắc chắn muốn xóa dòng sản phẩm "{seriesToDelete?.name}" không? Hành động này không thể hoàn tác.
-                  </p>
+                  <div className="flex flex-col items-center mb-4">
+                    <div 
+                      className="w-20 h-20 rounded-full mb-3 border-4 border-white shadow-lg"
+                      style={{ backgroundColor: colorToDelete?.hex || '#000000' }}
+                    ></div>
+                    <p className="text-center text-gray-600">
+                      Bạn có chắc chắn muốn xóa màu 
+                      <span className="font-bold" style={{ color: colorToDelete?.hex || '#000000' }}>
+                        {" "}{colorToDelete?.name || ""}
+                      </span>?
+                    </p>
+                  </div>
                   <div className="flex justify-end gap-3">
                     <button
                       onClick={() => setShowDeleteDialog(false)}
@@ -321,12 +300,12 @@ function Series() {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-xl transition-all">
-                  <SeriesForm
-                    series={selectedSeries}
-                    onSubmit={selectedSeries ? handleUpdate : handleAdd}
+                  <ColorForm
+                    color={selectedColor}
+                    onSubmit={selectedColor ? handleUpdate : handleAdd}
                     onCancel={() => setShowDialog(false)}
-                    brands={brands}
                   />
+                  {console.log("selectedColor tại render: ", selectedColor)}
                 </Dialog.Panel>
               </Transition.Child>
             </div>
@@ -337,4 +316,4 @@ function Series() {
   );
 }
 
-export default Series;
+export default Color;

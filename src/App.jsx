@@ -9,11 +9,10 @@ import PublicLayout from "./pages/public/PublicLayout";
 import Home from "./pages/public/home/Home";
 import Login from "~/pages/public/auth/Login";
 import GoogleCallback from "./pages/public/auth/GoogleCallback";
-import Register from "./pages/public/auth/Register";
+import Register from "./pages/public/auth/Register/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
 import ChangeEmail from "./pages/user/components/ChangeEmail";
 import ChangePassword from "./pages/user/components/ChangePassword";
-import MyOrders from "./pages/user/components/MyOrders";
 import Voucher from "~/components/Voucher";
 import ProfileInfo from "./pages/user/components/ProfileInfo";
 import UserProfileLayout from "./pages/user/UserProfileLayout";
@@ -22,6 +21,8 @@ import {
   UsersManagement,
   Brand,
   Series,
+  Category,
+  Color,
   Products,
   Vouchers,
   AdminLayout,
@@ -38,6 +39,7 @@ import PaymentConfirmation from "./pages/payment/PaymentConfirmation";
 import DeliveryNoteManagement from "./pages/admin/deliveryNote";
 import GoodsReceiptManagement from "./pages/admin/goodsReceipt";
 import RankLevelMangement from "./pages/admin/rankLevel/RankLevelMangement";
+import MyOrders from "./pages/user/components/myOrder/MyOrders";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -81,6 +83,8 @@ function App() {
           />
           <Route path={adminPaths.BRAND} element={<Brand />} />
           <Route path={adminPaths.SERIES} element={<Series />} />
+          <Route path={adminPaths.CATEGORY} element={<Category />} />
+          <Route path={adminPaths.COLOR} element={<Color />} />
           <Route
             path={adminPaths.PURCHASE_ORDERS}
             element={<PurchaseOrderManagement />}
