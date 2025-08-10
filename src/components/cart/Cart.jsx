@@ -70,7 +70,7 @@ const Cart = ({
     };
     processItemsWithPromotions();
   }, [cartItems, accessToken]);
-
+  // console.log("Processed Cart Items:", cartItems);
   // Handle select all items
   const handleSelectAll = (checked) => {
     if (checked) {

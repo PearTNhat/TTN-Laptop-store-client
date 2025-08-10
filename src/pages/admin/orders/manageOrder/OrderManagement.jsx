@@ -23,24 +23,6 @@ import SimpleConfirmModal from "./components/SimpleConfirmModal";
 import OrderDetailModal from "./components/OrderDetailModal";
 import { getStatusInfo } from "../utils/helper";
 import { formatDate } from "date-fns";
-import { vi } from "date-fns/locale";
-
-// Helper function để format date đẹp hơn
-const formatOrderDate = (dateString) => {
-  if (!dateString) return "N/A";
-
-  try {
-    const date = new Date(dateString);
-    return {
-      date: formatDate(date, "dd/MM/yyyy", { locale: vi }),
-      time: formatDate(date, "HH:mm:ss", { locale: vi }),
-      full: formatDate(date, "dd/MM/yyyy 'lúc' HH:mm", { locale: vi }),
-    };
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return { date: "N/A", time: "", full: "N/A" };
-  }
-};
 
 const OrderManagement = () => {
   const { accessToken } = useSelector((state) => state.user);
@@ -49,7 +31,6 @@ const OrderManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -67,7 +48,6 @@ const OrderManagement = () => {
     () => Object.fromEntries([...searchParams]),
     [searchParams]
   );
-  const currentStatusFilter = currentParams.status || "all";
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -75,8 +55,8 @@ const OrderManagement = () => {
         page: currentParams.page || 1,
         size: currentParams.size || 10,
         status:
-          currentStatusFilter !== "all"
-            ? currentStatusFilter.toUpperCase()
+          currentParams.status !== "all"
+            ? currentParams?.status?.toUpperCase()
             : undefined,
         code: currentParams.q || undefined,
       };
@@ -169,7 +149,7 @@ const OrderManagement = () => {
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, currentParams, statusFilter]);
+  }, [accessToken, currentParams]);
 
   const handlePageChange = (page) =>
     setSearchParams((prev) => {
@@ -236,7 +216,7 @@ const OrderManagement = () => {
           </div>
           <div className="md:w-64">
             <select
-              value={currentStatusFilter}
+              value={currentParams.status}
               onChange={handleStatusChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >

@@ -12,9 +12,12 @@ import { fakeUserData } from "~/data/fakeOrder";
 import { useLocation } from "react-router-dom";
 import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiCreateOrder } from "~/apis/orderApi";
-
+import { useDispatch } from "react-redux";
+import { cartActions } from "~/stores/slice/cartSlice";
+import { apiDeleteCart } from "~/apis/cartApi";
 export default function PaymentConfirmation() {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { accessToken, userData } = useSelector((state) => state.user);
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
@@ -28,6 +31,17 @@ export default function PaymentConfirmation() {
     email: fakeUserData.email,
     note: "",
   });
+
+  const removeCartItem = async (itemId) => {
+    try {
+      const response = await apiDeleteCart({ accessToken, pId: itemId });
+      if (response.code !== 200) throw new Error(response.message);
+      showToastSuccess("Xóa sản phẩm thành công");
+      dispatch(cartActions.removeFromCart(itemId));
+    } catch (error) {
+      showToastError(error.message || "Lỗi xóa sản phẩm");
+    }
+  };
   const createOrder = async ({ accessToken, body }) => {
     try {
       const res = await apiCreateOrder({ accessToken, body });
@@ -46,7 +60,6 @@ export default function PaymentConfirmation() {
       quantity: item.quantity,
       productPromotionId: item?.productPromotionId,
     }));
-    console.log("___", detailRequest);
     const body = {
       userId: userData.id,
       addressId: selectedShippingInfo.id,
@@ -54,7 +67,7 @@ export default function PaymentConfirmation() {
       userPromotionId: selectedCoupon?.id,
       shopPromotionId: null,
     };
-
+    const { orderData: receivedOrderData, source } = location.state || {};
     if (selectedPayment === "COD") {
       body.paymentMethod = "COD";
       const res = await createOrder({ accessToken, body });
@@ -62,14 +75,25 @@ export default function PaymentConfirmation() {
         showToastSuccess("Đặt hàng thành công!");
       } else {
         showToastError(res?.message || "Đặt hàng thất bại");
+        return;
       }
       console.log(res);
     } else {
       body.paymentMethod = "MOMO";
       const res = await createOrder({ accessToken, body });
-      console.log(res);
-      window.location.href = res?.data?.payUrl;
+      if (res?.code === 200) {
+        window.location.href = res?.data?.payUrl;
+      } else {
+        showToastError(res?.message || "Đặt hàng thất bại");
+        return;
+      }
     }
+    if (source == "cart-checkout") {
+      for (const item of receivedOrderData) {
+        await removeCartItem(item.productDetailId);
+      }
+    }
+    setUserInfo({});
   };
 
   // --- SỬA LỖI TÍNH TOÁN Ở ĐÂY ---

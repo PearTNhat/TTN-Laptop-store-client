@@ -42,21 +42,20 @@ http.interceptors.request.use(async function (config) {
             return new Promise((resolve, reject) => {
                 failedQueue.push({ resolve, reject });
             }).then(token => {
+                console.log("First token:", token)
                 config.headers.Authorization = `Bearer ${token}`;
                 return config;
             }).catch(error => {
                 return Promise.reject(error);
             });
         }
-        console.log("Access token expired, refreshing...");
         isRefreshing = true;
         try {
             const dispatch = store.dispatch
-            console.log("Refreshing token...");
             const res = await apiRefreshToken()
-            console.log("Refresh token response:", res);
             if (res.code === 200) {
                 const newAccessToken = res.data;
+                console.log("refresh", newAccessToken);
                 config.headers.Authorization = `Bearer ${res.accessToken}`
                 dispatch(userActions.setAccessToken({ accessToken: newAccessToken }))
                 processQueue(null, newAccessToken);

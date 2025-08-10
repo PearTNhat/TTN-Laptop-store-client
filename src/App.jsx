@@ -30,7 +30,6 @@ import {
 import { useSelector } from "react-redux";
 import Modal from "./components/modal/Modal";
 import UserManagement from "./pages/admin/users";
-import OrderConfirms from "./pages/admin/orders/confirmOrder";
 import OrderManagement from "./pages/admin/orders/manageOrder/OrderManagement";
 import NotFound from "./components/NotFound";
 import DetailProduct from "./pages/public/detailProduct/DetailProduct";
@@ -95,7 +94,6 @@ function App() {
             element={<GoodsReceiptManagement />}
           />
           <Route path={adminPaths.PRODUCTS} element={<Products />} />
-          <Route path={adminPaths.ORDER_CONFIRMS} element={<OrderConfirms />} />
           <Route
             path={adminPaths.ORDER_MANAGEMENT}
             element={<OrderManagement />}

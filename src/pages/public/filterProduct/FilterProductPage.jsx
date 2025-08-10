@@ -44,7 +44,7 @@ const FilterProductPage = () => {
         setProducts(res.data.content);
         setPagination({
           totalPages: res.data.totalPages,
-          currentPage: res.data.number, // API trả về trang hiện tại (0-based)
+          currentPage: res.data.pageNumber, // API trả về trang hiện tại (0-based)
         });
       } catch (err) {
         const errorMessage = err.message || "Không thể kết nối đến máy chủ.";

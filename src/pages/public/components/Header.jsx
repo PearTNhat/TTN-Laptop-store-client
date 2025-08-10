@@ -23,6 +23,7 @@ import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
 import { fetchMyAddress } from "~/stores/action/address";
 import { DefaultUser } from "~/assets/images";
 import { SearchBar } from "./SearchBar";
+import { fetchBrands } from "~/stores/action/brand";
 
 // Navigation links data
 const navigationLinks = [
@@ -72,11 +73,29 @@ function Header() {
   useEffect(() => {
     if (accessToken) {
       dispatch(fetchCurrentUser({ accessToken }));
-      dispatch(fetchCart({ accessToken }));
       dispatch(fetchMyAddress({ accessToken }));
+      dispatch(fetchCart({ accessToken }));
     }
+    dispatch(fetchBrands());
     dispatch(fetchCategories());
   }, [accessToken, dispatch]);
+  useEffect(() => {
+    console.log("dataa", userData);
+    if (!userData?.id) return;
+    let isCustomer = false;
+    let isAdmin = false;
+    for (const role of userData.roles) {
+      if (role.id === "ADMIN") {
+        isAdmin = true;
+      } else if (role.id === "CUSTOMER") {
+        isCustomer = true;
+      }
+    }
+    // admin k phai customeer
+    if (isAdmin && !isCustomer) {
+      navigate("/admin");
+    }
+  }, [userData]);
 
   const handleLogout = () => {
     dispatch(userActions.logout());

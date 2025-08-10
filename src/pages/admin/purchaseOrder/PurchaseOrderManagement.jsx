@@ -261,7 +261,7 @@ const PurchaseOrderManagement = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="text-white">
                 <h1 className="text-4xl font-bold mb-2">
-                  📦 Quản lý Đơn Nhập Hàng
+                  📦 Quản lý nhập hàng từ nhà cung cấp
                 </h1>
                 <p className="text-cyan-100 text-lg">
                   Theo dõi và xác nhận các đơn hàng nhập từ nhà cung cấp

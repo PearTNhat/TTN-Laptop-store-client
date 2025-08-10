@@ -47,7 +47,7 @@ const DeliveryNoteManagement = () => {
       };
       const response = await apiGetDeliveryNotes({ accessToken, ...params });
       if (response.code !== 200)
-        throw new Error(response.message || "Lỗi khi tải phiếu giao hàng");
+        throw new Error(response.message || "Lỗi khi tải phiếu xuất hàng");
       setDeliveryNotes(response.data.content || []);
       setPagination({
         currentPage: response.data.pageNumber + 1,
@@ -131,7 +131,7 @@ const DeliveryNoteManagement = () => {
   const handleDeleteNote = async (noteId, noteCode) => {
     const result = await Swal.fire({
       title: "Xác nhận xóa",
-      text: `Bạn có chắc chắn muốn xóa phiếu giao "${noteCode}"?`,
+      text: `Bạn có chắc chắn muốn xóa phiếu xuất "${noteCode}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
@@ -146,13 +146,13 @@ const DeliveryNoteManagement = () => {
           id: noteId,
         });
         if (response.code === 200) {
-          showToastSuccess(`Đã xóa phiếu giao ${noteCode}`);
+          showToastSuccess(`Đã xóa phiếu xuất ${noteCode}`);
           fetchDeliveryNotes();
         } else {
-          showToastError(response.message || "Không thể xóa phiếu giao");
+          showToastError(response.message || "Không thể xóa phiếu xuất");
         }
       } catch (error) {
-        showToastError(error.message || "Lỗi khi xóa phiếu giao");
+        showToastError(error.message || "Lỗi khi xóa phiếu xuất");
       }
     }
   };
@@ -173,17 +173,17 @@ const DeliveryNoteManagement = () => {
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            Chưa có phiếu giao hàng nào
+            Chưa có phiếu xuất hàng nào
           </h3>
           <p className="text-gray-500 text-center max-w-md">
-            Tạo phiếu giao đầu tiên để bắt đầu quản lý việc giao hàng cho khách
+            Tạo phiếu xuất đầu tiên để bắt đầu quản lý việc xuất hàng cho khách
             hàng
           </p>
           <button
             onClick={handleOpenCreateModal}
             className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Tạo phiếu giao đầu tiên
+            Tạo phiếu xuất đầu tiên
           </button>
         </div>
       );
@@ -212,10 +212,10 @@ const DeliveryNoteManagement = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="text-white">
                 <h1 className="text-4xl font-bold mb-2">
-                  📦 Quản lý Phiếu Giao Hàng
+                  📦 Quản lý phiếu xuất hàng cho đơn mua
                 </h1>
                 <p className="text-green-100 text-lg">
-                  Theo dõi và quản lý các phiếu giao hàng một cách hiệu quả
+                  Theo dõi và quản lý các phiếu xuất hàng một cách hiệu quả
                 </p>
               </div>
               <button
@@ -223,7 +223,7 @@ const DeliveryNoteManagement = () => {
                 className="bg-white text-green-700 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
               >
                 <PlusCircle className="h-5 w-5" />
-                Tạo phiếu giao mới
+                Tạo phiếu xuất mới
               </button>
             </div>
           </div>
@@ -237,7 +237,7 @@ const DeliveryNoteManagement = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm theo mã đơn hàng, mã phiếu giao..."
+                  placeholder="Tìm kiếm theo mã đơn hàng, mã phiếu xuất..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"

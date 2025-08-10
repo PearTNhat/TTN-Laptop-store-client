@@ -173,14 +173,14 @@ function GoodsReceiptManagement() {
             Chưa có phiếu xuất nào
           </h3>
           <p className="text-gray-500 text-center max-w-md">
-            Tạo phiếu xuất đầu tiên để bắt đầu quản lý việc giao hàng cho khách
+            Tạo phiếu nhập đầu tiên để bắt đầu quản lý việc giao hàng cho khách
             hàng
           </p>
           <button
             onClick={handleOpenCreateModal}
             className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Tạo phiếu xuất đầu tiên
+            Tạo phiếu nhập đầu tiên
           </button>
         </div>
       );
@@ -208,7 +208,7 @@ function GoodsReceiptManagement() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="text-white">
                 <h1 className="text-4xl font-bold mb-2">
-                  📦 Quản lý Phiếu Xuất Hàng
+                  📦 Nhập hàng từ nhà cung cấp
                 </h1>
               </div>
               <button
@@ -216,7 +216,7 @@ function GoodsReceiptManagement() {
                 className="bg-white text-green-700 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
               >
                 <PlusCircle className="h-5 w-5" />
-                Tạo phiếu xuất mới
+                Tạo phiếu nhập mới
               </button>
             </div>
           </div>

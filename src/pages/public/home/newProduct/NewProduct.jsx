@@ -9,10 +9,9 @@ function NewProduct() {
       const response = await apiGetProducts({
         page: 1,
         size: 10,
-        sort: "createdAt",
+        sortBy: "NEW",
       });
-      console.log("data", response);
-      setProducts(response.content);
+      setProducts(response.data.content);
     } catch (error) {
       console.error("Error fetching products:", error);
     }

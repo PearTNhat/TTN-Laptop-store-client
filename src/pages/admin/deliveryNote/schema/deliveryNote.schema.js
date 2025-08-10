@@ -12,5 +12,5 @@ export const deliveryNoteSchema = z.object({
     orderCode: z.string().min(1, "Vui lòng chọn đơn hàng"),
     status: z.enum(["DRAFT", "COMPLETED"]).default("DRAFT"),
     note: z.string().optional(),
-    details: z.array(detailSchema).min(1, "Phiếu giao phải có ít nhất một sản phẩm."),
+    details: z.array(detailSchema).min(1, "Phiếu xuất phải có ít nhất một sản phẩm."),
 });

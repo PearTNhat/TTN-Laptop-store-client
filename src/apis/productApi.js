@@ -7,7 +7,7 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice,
     seriesId,
     sortBy,
     sortDirection,
-    keyword = ""
+    keyword
 }) => {
     try {
         page = page <= 1 ? 0 : page - 1;

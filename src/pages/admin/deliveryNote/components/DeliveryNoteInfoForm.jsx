@@ -28,7 +28,7 @@ const DeliveryNoteInfoForm = ({ onOrderSelect }) => {
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
         <CardTitle className="text-lg text-gray-900 flex items-center gap-2">
           <FileText className="h-5 w-5 text-blue-600" />
-          Thông tin Phiếu Giao Hàng
+          Thông tin phiếu xuất hàng
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
@@ -78,7 +78,7 @@ const DeliveryNoteInfoForm = ({ onOrderSelect }) => {
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Thêm ghi chú cho phiếu giao (không bắt buộc)..."
+                  placeholder="Thêm ghi chú cho phiếu xuất (không bắt buộc)..."
                   rows={3}
                   {...field}
                   className="border-gray-300 focus:border-green-500 focus:ring-green-500 resize-none"

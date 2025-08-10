@@ -13,17 +13,7 @@ export const SearchBar = () => {
 
   // Hàm xử lý việc tìm kiếm và điều hướng
   const handleSearch = (e) => {
-    // Ngăn form submit và reload trang (nếu dùng thẻ form)
     e.preventDefault();
-
-    // Bỏ qua nếu ô tìm kiếm trống
-    if (!searchTerm.trim()) {
-      // Tùy chọn: có thể điều hướng về trang products không có keyword
-      // navigate(productPaths.PRODUCTS);
-      return;
-    }
-
-    // Điều hướng đến trang sản phẩm với query parameter
     navigate(`${productPaths.PRODUCTS}?keyword=${searchTerm.trim()}`);
   };
 

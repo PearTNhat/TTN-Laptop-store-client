@@ -15,7 +15,6 @@ const userSlice = createSlice({
             state.accessToken = action.payload.accessToken;
         },
         login: (state, action) => {
-            console.log("Login action payload:", action.payload);
             state.accessToken = action.payload.accessToken;
             // state.userData = action.payload.userData;
             state.isLoggedIn = true;
@@ -41,6 +40,7 @@ const userSlice = createSlice({
         })
         builder.addCase(fetchCurrentUser.rejected, (state) => {
             state.isLoading = false
+            state.accessToken = null
             state.isError = true
         })
     }

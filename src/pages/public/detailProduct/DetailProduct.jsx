@@ -102,7 +102,6 @@ function DetailProduct() {
       },
     });
   };
-
   const handleAddToCart = async () => {
     if (!accessToken) {
       showToastError("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
@@ -110,7 +109,7 @@ function DetailProduct() {
     }
     const res = await apiCreateCart({
       accessToken,
-      productDetailId: colorProduct.productId,
+      productDetailId: colorProduct.id,
       quantity,
       productPromotionId: selectedPromotion?.id || null,
     });
@@ -154,7 +153,7 @@ function DetailProduct() {
       setFinalPriceInfo(priceInfo);
     }
   }, [colorProduct, selectedPromotion]);
-
+  console.log("color product", colorProduct);
   useEffect(() => {
     const element = descRef.current;
     if (element) {

@@ -45,7 +45,7 @@ const navItems = [
   },
   {
     icon: <UserPlus size={20} />,
-    name: "Nhập hàng cho user",
+    name: "Xuất hàng cho đơn mua",
     path: "/admin/delivery-notes",
   },
   {
@@ -55,19 +55,8 @@ const navItems = [
   },
   {
     icon: <ShoppingCart size={20} />,
-    name: "Đơn hàng",
-    subItems: [
-      {
-        name: "Quản lý đơn hàng",
-        path: adminPaths.ORDER_MANAGEMENT,
-        pro: true,
-      },
-      {
-        name: "Chờ xác nhận",
-        path: adminPaths.ORDER_CONFIRMS,
-        pro: false,
-      },
-    ],
+    name: "Quản lý đơn hàng",
+    path: adminPaths.ORDER_MANAGEMENT,
   },
   {
     icon: <Ticket size={20} />,

@@ -103,16 +103,23 @@ function RankLevelMangement() {
   return (
     <div className="p-6 space-y-6">
       <Card>
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+        <CardHeader className="bg-gradient-to-r from-blue-500 via-purple-500 to-purple-600 text-white border-b-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Award className="h-6 w-6 text-blue-600" />
-              <CardTitle className="text-xl text-gray-900">
-                Quản lý Rank Level
-              </CardTitle>
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <Award className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-bold text-white mb-1">
+                  Quản lý Rank Level
+                </CardTitle>
+                <p className="text-blue-100 text-sm opacity-90">
+                  Theo dõi và cập nhật trạng thái rank khách hàng
+                </p>
+              </div>
             </div>
             <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30 border backdrop-blur-sm"
               onClick={handleCreateRank}
             >
               <Plus className="mr-2 h-4 w-4" />

@@ -56,11 +56,11 @@ const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
         body: formData,
       });
       if (response.code === 200) {
-        showToastSuccess("Tạo phiếu giao thành công!");
+        showToastSuccess("Tạo phiếu xuất thành công!");
         onSuccess();
         setIsOpen(false);
       } else {
-        throw new Error(response.message || "Lỗi khi tạo phiếu giao");
+        throw new Error(response.message || "Lỗi khi tạo phiếu xuất");
       }
     } catch (error) {
       console.error("Submit error:", error);
@@ -113,7 +113,7 @@ const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
                         as="h3"
                         className="text-xl font-semibold text-white"
                       >
-                        Tạo Phiếu Giao Mới
+                        Tạo phiếu xuất mới
                       </Dialog.Title>
                     </div>
                     <button

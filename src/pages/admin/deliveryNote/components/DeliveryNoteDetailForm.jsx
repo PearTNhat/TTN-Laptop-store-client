@@ -1,6 +1,6 @@
 // src/pages/DeliveryNoteManagement/components/DeliveryNoteDetailForm.jsx
 
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { useSelector } from "react-redux";
 import {
@@ -133,7 +133,7 @@ const ProductRow = ({ index, remove, orderProducts }) => {
                           {product.productTitle}
                         </span>
                         <span className="text-xs text-gray-500">
-                          ID: {product.productDetailId} | Có thể giao:{" "}
+                          ID: {product.productDetailId} | Có thể xuất:{" "}
                           {product.quantity}
                         </span>
                       </div>
@@ -306,7 +306,7 @@ const DeliveryNoteDetailForm = ({ selectedOrder }) => {
       <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200">
         <CardTitle className="text-lg text-gray-900 flex items-center gap-2">
           <Package2 className="h-5 w-5 text-green-600" />
-          Chi tiết Sản phẩm Giao
+          Chi tiết sản phẩm xuất
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -342,7 +342,7 @@ const DeliveryNoteDetailForm = ({ selectedOrder }) => {
               Chưa có sản phẩm nào
             </h3>
             <p className="text-gray-500 mb-4">
-              Thêm sản phẩm đầu tiên vào phiếu giao hàng
+              Thêm sản phẩm đầu tiên vào phiếu xuất hàng
             </p>
             <Button
               type="button"

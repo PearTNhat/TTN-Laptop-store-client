@@ -30,7 +30,7 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
       <div className="p-6 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Package className="h-5 w-5 text-green-600" />
-          Danh sách phiếu giao hàng
+          Danh sách phiếu xuất hàng
           <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium">
             {deliveryNotes.length}
           </span>
@@ -59,14 +59,14 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
                 <div className="flex items-center w-full px-6 py-5 rounded-xl">
                   <AccordionTrigger className="flex-1 p-0 hover:no-underline bg-transparent text-left">
                     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
-                      {/* Mã Phiếu Giao */}
+                      {/* Mã Phiếu xuất */}
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                           <Hash className="h-5 w-5 text-emerald-600" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium">
-                            Mã Phiếu Giao
+                            Mã Phiếu Xuấtiao
                           </p>
                           <p className="font-semibold text-gray-900 text-sm">
                             {note.code}
@@ -74,14 +74,14 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
                         </div>
                       </div>
 
-                      {/* Ngày Giao */}
+                      {/* Ngày Xuất */}
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                           <Calendar className="h-5 w-5 text-purple-600" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium">
-                            Ngày Giao
+                            Ngày Xuất
                           </p>
                           <p className="font-semibold text-gray-900 text-sm">
                             {new Date(note.date).toLocaleDateString("vi-VN")}

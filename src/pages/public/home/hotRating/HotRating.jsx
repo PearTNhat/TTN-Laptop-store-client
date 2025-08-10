@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { apiGetProducts } from "~/apis/productApi";
 import ProductCarousel from "../components/ProductCarousel";
 
-function HotProduct() {
+function HotRating() {
   const [products, setProducts] = useState([]);
   const fetchProducts = async () => {
     try {
       const response = await apiGetProducts({
         page: 1,
         size: 10,
-        sortBy: "SOLD",
+        sortBy: "RATING",
+        sortDirection: "ASC",
       });
-      console.log("data", response);
       setProducts(response.data.content);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -21,10 +21,10 @@ function HotProduct() {
     fetchProducts();
   }, []);
   return (
-    <div className="bg-white py-4">
-      <ProductCarousel title="🔥 Sản phẩm bán chạy" products={products} />
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 py-4">
+      <ProductCarousel title="⭐ Sản phẩm đánh giá cao" products={products} />
     </div>
   );
 }
 
-export default HotProduct;
+export default HotRating;

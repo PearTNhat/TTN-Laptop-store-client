@@ -3,7 +3,7 @@ import CustomSliceProducts from "~/components/customeSlice/CustomSliceProducts";
 const defaultSettings = {
   infinite: true,
   speed: 500,
-  autoplay: true,
+  autoplay: false,
   autoplaySpeed: 3000,
   pauseOnHover: true,
   arrows: true,
