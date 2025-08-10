@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ProfileInfo from "./components/ProfileInfo";
-import MyOrders from "./components/MyOrders";
+// import MyOrders from "./components/MyOrders";
+import MyOrders from "./components/MyOrder/MyOrders-Main";
 import VoucherList from "./components/VoucherList";
 import Voucher from "./components/Voucher";
 

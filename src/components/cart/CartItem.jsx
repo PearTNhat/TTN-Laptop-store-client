@@ -1,8 +1,7 @@
-import React from "react";
 import { Plus, Minus, Trash2, Laptop } from "lucide-react";
 import { formatPrice } from "~/utils/helper";
 import { Link } from "react-router-dom";
-
+import { showToastWarning } from "~/utils/alert";
 const CartItem = ({
   item,
   index,
@@ -12,6 +11,20 @@ const CartItem = ({
   onUpdateQuantity,
   onRemoveItem,
 }) => {
+  const handleIncreaseQuantity = () => {
+    // Kiểm tra trước khi tăng
+    if (item?.appliedPromotion && item?.appliedPromotion.usageLimit) {
+      const remainingUses = item.appliedPromotion.usageLimit;
+      // Nếu số lượng hiện tại đã bằng số lượt còn lại, lần tăng tiếp theo sẽ vi phạm
+      if (item.quantity >= remainingUses) {
+        showToastWarning(
+          `Vượt quá giới hạn khuyến mãi! KM sẽ không áp dụng nếu tăng số lượng.`
+        );
+      }
+    }
+    // Vẫn gọi update, logic tính giá ở useEffect sẽ xử lý phần còn lại
+    onUpdateQuantity(item.productDetailId, item.quantity + 1);
+  };
   return (
     <div
       className={`border rounded-lg p-3 transition-all duration-200 shadow-sm hover:shadow-md transform ${
@@ -28,15 +41,18 @@ const CartItem = ({
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={(e) => onSelectItem(item.productId, e.target.checked)}
+          onChange={(e) =>
+            onSelectItem(item.productDetailId, e.target.checked, {
+              finalPrice: item.discountPrice,
+            })
+          }
           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-offset-2 mt-1"
         />
-
         {/* Product Image */}
         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
           {item.thumbnail ? (
             <Link
-              to={`/products/${item.productId}`}
+              to={`/products/${item.productDetailId}`}
               className="block w-full h-full"
             >
               <img
@@ -77,22 +93,18 @@ const CartItem = ({
           )}
 
           <div className="mb-2">
-            {item.originalPrice &&
-            item.discountPrice &&
-            item.originalPrice > item.discountPrice ? (
+            {item.originalPrice && item.originalPrice > item.discountPrice ? (
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-400 line-through">
-                  {formatPrice(item.originalPrice)}
-                </span>
                 <span className="text-sm font-semibold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
                   {formatPrice(item.discountPrice)}
+                </span>
+                <span className="text-xs text-gray-400 line-through">
+                  {formatPrice(item.originalPrice)}
                 </span>
               </div>
             ) : (
               <p className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {formatPrice(
-                  item.discountPrice || item.originalPrice || item.price
-                )}
+                {formatPrice(item.originalPrice)}
               </p>
             )}
           </div>
@@ -102,7 +114,7 @@ const CartItem = ({
             <div className="flex items-center space-x-2 bg-gray-50 rounded-full p-1">
               <button
                 onClick={() =>
-                  onUpdateQuantity(item.productId, item.quantity - 1)
+                  onUpdateQuantity(item.productDetailId, item.quantity - 1)
                 }
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all duration-200 disabled:opacity-50"
                 disabled={item.quantity <= 1}
@@ -113,9 +125,7 @@ const CartItem = ({
                 {item.quantity}
               </span>
               <button
-                onClick={() =>
-                  onUpdateQuantity(item.productId || item.id, item.quantity + 1)
-                }
+                onClick={handleIncreaseQuantity}
                 className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-green-50 hover:border-green-300 transition-all duration-200"
               >
                 <Plus
@@ -126,7 +136,7 @@ const CartItem = ({
             </div>
 
             <button
-              onClick={() => onRemoveItem(item.productId || item.id)}
+              onClick={() => onRemoveItem(item.productDetailId || item.id)}
               className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-all duration-200 hover:scale-110"
             >
               <Trash2 size={14} />
@@ -136,11 +146,7 @@ const CartItem = ({
           {/* Item Total */}
           <div className="mt-2 text-right">
             <span className="text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Tổng:{" "}
-              {formatPrice(
-                (item.discountPrice || item.originalPrice || item.price) *
-                  item.quantity
-              )}
+              Tổng: {formatPrice(item.discountPrice * item.quantity)}
             </span>
           </div>
         </div>

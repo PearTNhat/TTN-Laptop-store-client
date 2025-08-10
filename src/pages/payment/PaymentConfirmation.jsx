@@ -6,17 +6,19 @@ import CustomerInfo from "./components/CustomerInfo";
 import OrderSummary from "./components/OrderSummary";
 import DiscountSection from "./components/DiscountSection";
 import PaymentMethod from "./components/PaymentMethod";
-
+import { useSelector } from "react-redux";
 // Import dữ liệu giả
 import { fakeUserData } from "~/data/fakeOrder";
 import { useLocation, useNavigate } from "react-router-dom";
+import { showToastError } from "~/utils/alert";
+import { apiCreateOrder } from "~/apis/orderApi";
 
 export default function PaymentConfirmation() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { accessToken, userData } = useSelector((state) => state.user);
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
-  const [selectedCoupon, setSelectdCoupon] = useState(null);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [selectedShippingInfo, setSelectedShippingInfo] = useState(null);
   const [orderData, setOrderData] = useState(null);
@@ -26,42 +28,59 @@ export default function PaymentConfirmation() {
     email: fakeUserData.email,
     note: "",
   });
-
-  const handleCreateOrder = () => {
+  const createOrder = async ({ accessToken, body }) => {
+    try {
+      const res = await apiCreateOrder({ accessToken, body });
+      return res;
+    } catch (error) {
+      showToastError(error.message || "Đặt hàng thất bại");
+    }
+  };
+  const handleCreateOrder = async () => {
     if (!selectedShippingInfo) {
       alert("Vui lòng chọn hoặc thêm địa chỉ giao hàng!");
       return;
     }
-
-    const finalOrderData = {
-      shippingAddress: selectedShippingInfo,
-      customerInfo: userInfo,
-      order: orderData,
-      paymentMethod: selectedPayment,
-      coupon: selectedCoupon,
-      discountAmount: discountAmount,
-      finalTotal: orderData?.totalAmount - discountAmount,
+    const detailRequest = orderData.items.map((item) => ({
+      productDetailId: item.productDetailId,
+      quantity: item.quantity,
+      productPromotionId: item?.productPromotionId,
+    }));
+    console.log("___", detailRequest);
+    const body = {
+      userId: userData.id,
+      addressId: selectedShippingInfo.id,
+      detailRequest,
+      userPromotionId: selectedCoupon?.id,
+      shopPromotionId: null,
     };
 
-    console.log("--- SUBMITTING ORDER ---", finalOrderData);
-
     if (selectedPayment === "COD") {
-      alert("Đơn hàng đã được tạo thành công! Cảm ơn bạn đã mua sắm.");
+      body.paymentMethod = "COD";
+      const res = await createOrder({ accessToken, body });
+      console.log(res);
     } else {
-      alert("Bạn sẽ được chuyển hướng đến trang thanh toán Momo...");
-      // window.location.href = '...momo_payment_url...';
+      body.paymentMethod = "MOMO";
+      const res = await createOrder({ accessToken, body });
+      console.log(res);
+      window.location.href = res?.data?.payUrl;
     }
   };
+
+  // --- SỬA LỖI TÍNH TOÁN Ở ĐÂY ---
   useEffect(() => {
     const { orderData: receivedOrderData, source } = location.state || {};
-    console.log("Received order data:", receivedOrderData, "Source:", source);
+
+    // Tạo một biến tạm để chứa dữ liệu order đã được chuẩn hóa
+    let processedOrder = null;
+
     if (receivedOrderData && source === "buy-now") {
-      // Chuyển đổi dữ liệu từ buy-now thành format order
       const product = receivedOrderData.product;
-      const formattedOrder = {
+      processedOrder = {
         items: [
           {
-            id: product.id,
+            // Thay id bằng productDetailId nếu có, hoặc một key duy nhất khác
+            productDetailId: product.id,
             imageUrl: product.images[0],
             productName: product.title,
             quantity: product.quantity,
@@ -69,16 +88,29 @@ export default function PaymentConfirmation() {
             ram: product.config.ramValue,
             hardDrive: product.config.hardDriveValue,
             discountPrice: product.discountPrice,
-            originalPrice: product.discountPrice,
+            originalPrice: product.originalPrice, // Giả sử có originalPrice
+            productPromotionId: product?.productPromotionId || null, // Nếu có khuyến mãi
           },
         ],
       };
-      setOrderData(formattedOrder);
     } else if (receivedOrderData && source === "cart-checkout") {
-      // Dữ liệu từ cart đã được format sẵn
-      setOrderData(receivedOrderData);
+      // Dữ liệu từ giỏ hàng đã có mảng `items`
+      processedOrder = receivedOrderData;
+    }
+    if (processedOrder && processedOrder.items) {
+      const total = processedOrder.items.reduce((acc, item) => {
+        return acc + item.discountPrice * item.quantity;
+      }, 0);
+      setOrderData({
+        ...processedOrder,
+        totalAmount: total,
+      });
+    } else {
+      // Nếu không có dữ liệu, set state về null
+      setOrderData(null);
     }
   }, [location.state]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -94,7 +126,7 @@ export default function PaymentConfirmation() {
 
         <div className="space-y-6">
           <ShippingAddress
-            addresses={fakeUserData.addresses}
+            accessToken={accessToken}
             setSelectedShippingInfo={setSelectedShippingInfo}
           />
 
@@ -103,13 +135,12 @@ export default function PaymentConfirmation() {
             userInfo={userInfo}
             selectedShippingInfo={selectedShippingInfo}
           />
-
           <OrderSummary order={orderData} discountAmount={discountAmount} />
-
           <DiscountSection
-            orderTotal={10}
+            accessToken={accessToken}
+            orderTotal={orderData?.totalAmount} // Luôn có giá trị đúng
             selectedCoupon={selectedCoupon}
-            setSelectdCoupon={setSelectdCoupon}
+            setSelectedCoupon={setSelectedCoupon}
             setDiscountAmount={setDiscountAmount}
           />
 
@@ -123,6 +154,8 @@ export default function PaymentConfirmation() {
             <button
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               onClick={handleCreateOrder}
+              // Vô hiệu hóa nút nếu chưa có dữ liệu đơn hàng
+              disabled={!orderData}
             >
               {selectedPayment === "COD"
                 ? "🚚 HOÀN TẤT ĐẶT HÀNG"

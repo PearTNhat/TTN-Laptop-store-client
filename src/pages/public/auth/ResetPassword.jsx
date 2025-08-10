@@ -36,7 +36,8 @@ const ResetPassword = () => {
     try {
       // Gọi API gửi OTP
       const res = await apiSendOtpForgotPw(email);
-      if (res.code===200) {
+      console.log('res gửi OTP:', res);
+      if (res.success) {
         setSuccess(`Đã gửi mã xác minh đến ${email}`);
         setStep(2); // Chuyển sang bước nhập OTP
       } else {
@@ -87,7 +88,7 @@ const ResetPassword = () => {
       // Gọi API xác minh OTP
       const res = await apiVerifyOtp({ email, otp: code });
 
-      if (res.code===200) {
+      if (res.success) {
         setResetToken(res.resetToken); // ✅ Lưu resetToken để dùng bước 3
         setOtp(['', '', '', '', '', '']);
         setStep(3); // ✅ Chuyển bước nhập mật khẩu mới

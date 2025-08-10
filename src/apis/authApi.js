@@ -1,29 +1,21 @@
+import { data } from "autoprefixer";
 import { axiosPrivate, http } from "~/utils/http";
 
 export const apiLogin = async ({ body }) => {
   try {
-    const response = await http.post("/auth/login", body);
-    const res = response.data;
-
-    // ✅ Kiểm tra đúng theo backend (code === 200 là thành công)
-    if (res?.code === 200 && res?.data) {
-      return { success: true, accessToken: res.data };
-    } else {
-      return {
-        success: false,
-        message: res?.message || "Đăng nhập thất bại.",
-      };
+    const config = {
+      withCredentials: true
     }
+    const { data } = await http.post("/auth/login", body, config);
+    return data;
   } catch (error) {
-    if (error.response) {
-      return {
-        success: false,
-        message: error.response.data?.message || "Lỗi từ máy chủ.",
-      };
+    if (error.response && error.response.data) {
+      return error.response.data;
     }
-    return { success: false, message: "Không kết nối được đến máy chủ." };
+    throw new Error(error.message);
   }
 };
+
 
 
 export const apiLoginWithGoogle = async ({ code, redirectUri }) => {
@@ -53,34 +45,46 @@ export const apiLoginWithGoogle = async ({ code, redirectUri }) => {
   }
 };
 
-export const apiChangePassword = async ({ oldPassword, newPassword }) => {
+export const apiChangePassword = async ({ oldPassword, newPassword, accessToken }) => {
   try {
-    const token = localStorage.getItem("token");
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
+    const encodedOldPassword = encodeURIComponent(oldPassword);
+    const encodedNewPassword = encodeURIComponent(newPassword);
+    
     const response = await http.put(
-      `/users/change-password?oldPassword=${encodeURIComponent(oldPassword)}&newPassword=${encodeURIComponent(newPassword)}`,
-      null, 
-      config
+      `users/change-password?oldPassword=${encodedOldPassword}&newPassword=${encodedNewPassword}`,
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
-    const res = response.data;
-    if (res?.code === 200) {
-      return { success: true, message: res.message };
+    console.log("API response:", response.data);
+
+    if (response.data?.success || response.status === 200) {
+      return {
+        success: true,
+        message: response.data?.message || "Đổi mật khẩu thành công!"
+      };
     } else {
-      return { success: false, message: res.message || "Đổi mật khẩu thất bại" };
+      return {
+        success: false,
+        message: response.data?.message || "Đổi mật khẩu thất bại"
+      };
     }
   } catch (error) {
+    console.error("API error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || "Không thể kết nối máy chủ",
+      message: error.response?.data?.message || 
+              error.message || 
+              "Không thể kết nối máy chủ"
     };
   }
 };
+
 
 
 // ✅ 1. Gửi OTP đến email
@@ -139,17 +143,53 @@ export const apiResetPassword = async ({ email, newPassword, resetToken }) => {
 };
 
 export const apiRefreshToken = async () => {
-    try {
-        const config = {
-            withCredentials: true
-        }
-        const { data } = await axiosPrivate.get("/auth/refresh-token", config);
-        console.log("Refresh token response:", data);
-        return data;
-    } catch (error) {
-        if (error.response && error.response.data) {
-            return error.response.data;
-        }
-        throw new Error(error.message);
+  try {
+    const config = {
+      withCredentials: true
     }
+    const { data } = await axiosPrivate.get("/auth/refresh-token", config);
+    console.log("Refresh token response:", data);
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    throw new Error(error.message);
+  }
+};
+
+// ✅ 1. Gửi OTP khi đăng ký
+export const apiSendOtpRegister = async (email) => {
+  try {
+    const res = await http.get(`/auth/send-otp`, {
+      params: { mail: email }
+    });
+    // Trả nguyên format của backend { code, message, ... }
+    return res.data;
+  } catch (error) {
+    return {
+      code: 500,
+      message: error.response?.data?.message || "Lỗi kết nối khi gửi OTP."
+    };
+  }
+};
+
+// ✅ 2. Đăng ký tài khoản (sau khi nhập OTP)
+export const apiRegister = async ({ firstName, lastName, username, password, otpCode }) => {
+  try {
+    const res = await http.post(`/users/create`, {
+      firstName,
+      lastName,
+      username,
+      password,
+      otpCode
+    });
+    // Trả nguyên format { code, message, ... }
+    return res.data;
+  } catch (error) {
+    return {
+      code: 500,
+      message: error.response?.data?.message || "Lỗi kết nối khi đăng ký."
+    };
+  }
 };

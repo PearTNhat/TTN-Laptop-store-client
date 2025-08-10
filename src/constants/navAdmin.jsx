@@ -34,6 +34,11 @@ const navItems = [
     path: "/admin/series",
   },
   {
+    icon: <IoMdColorFill />,
+    name: "Màu sắc",
+    path: "/admin/color",
+  },
+  {
     icon: <RiProductHuntLine />,
     name: "Sản phẩm",
     path: "/admin/products",

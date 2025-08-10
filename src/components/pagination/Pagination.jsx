@@ -13,9 +13,9 @@ function Pagination({
     currentPage,
     totalPageCount,
   });
-
+  console.log("Pagination Range:", currentPage);
   // Nếu chỉ có 1 trang hoặc không có item nào, không hiển thị pagination
-  if (currentPage === 0 || paginationRange.length < 2) {
+  if (currentPage === 0) {
     return null;
   }
 
@@ -27,7 +27,7 @@ function Pagination({
     onPageChange(currentPage + 1);
   };
 
-  const lastPage = paginationRange[paginationRange.length - 1];
+  const lastPage = paginationRange?.[paginationRange?.length - 1];
 
   return (
     <nav aria-label="Page navigation">
@@ -66,7 +66,7 @@ function Pagination({
         </li>
 
         {/* Các nút số trang */}
-        {paginationRange.map((pageNumber, index) => {
+        {paginationRange?.map((pageNumber, index) => {
           if (pageNumber === DOTS) {
             return (
               <li key={`dots-${index}`}>

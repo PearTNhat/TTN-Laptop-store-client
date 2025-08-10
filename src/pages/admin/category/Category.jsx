@@ -11,6 +11,10 @@ import CategoryStats from "./components/CategoryStats";
 import CategoryTableRow from "./components/CategoryTableRow";
 import CategoryForm from "./components/CategoryForm";
 
+import { useSelector } from "react-redux";
+
+import { apiGetCategories, apiCreateCategory, apiDeleteCategory, apiUpdateCategory } from "~/apis/categoryApi";
+
 
 function Category() {
   const [categories, setCategories] = useState([]);
@@ -22,31 +26,21 @@ function Category() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
+  const { accessToken } = useSelector((state) => state.user);
+
   const categoriesPerPage = 5;
 
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        const mockData = [
-          {
-            id: 1,
-            name: "Gaming Laptop",
-            description: "Dòng máy chơi game",
-            createdDate: "2025-07-20",
-          },
-          {
-            id: 2,
-            name: "Ultrabook",
-            description: "Mỏng nhẹ, thời trang",
-            createdDate: "2025-07-21",
-          },
-        ];
-        const data = mockData.map((item) => ({
+        const res= await apiGetCategories();
+        console.log("Kết quả từ API getcate:", res);
+        const list = Array.isArray(res?.data) ? res.data : [];
+        const formatted = list.map((item) => ({
           ...item,
-          createdDate: item.createdDate || new Date().toISOString().split("T")[0],
         }));
-        setCategories(data);
+        setCategories(formatted);
         setTimeout(() => setIsLoading(false), 600);
       } catch (error) {
         toast.error("Lỗi khi tải dữ liệu danh mục");
@@ -56,30 +50,60 @@ function Category() {
     fetchCategories();
   }, []);
 
-  const handleAdd = (newCategory) => {
-    setCategories([{ ...newCategory, id: Date.now() }, ...categories]);
-    toast.success("Thêm danh mục thành công!");
-    setShowDialog(false);
+  const handleAdd = async (newCategory) => {
+    console.log("Dữ liệu gửi thêm: ", newCategory);  
+
+    try {
+      const res = await apiCreateCategory({ body: newCategory, accessToken });
+      
+      if (res.success && res.data) {
+        setCategories((prev) => [...prev, res.data]); 
+        toast.success(res.message || "Thêm danh mục thành công!");
+        setShowDialog(false); 
+      } else {
+        toast.error(res.message || "Thêm danh mục thất bại!");
+      }
+    } catch (error) {
+      toast.error("Thêm danh mục thất bại!");
+    }
   };
 
-  const handleUpdate = (updated) => {
-    setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
-    toast.success("Cập nhật danh mục thành công!");
-    setShowDialog(false);
+  const handleUpdate = async (updated) => {
+    console.log("Dữ liệu gửi sửa:", updated); 
+    try {
+      const res = await apiUpdateCategory({
+        id: updated.id,
+        body: updated,
+        accessToken,
+      });
+      if (res?.success) {
+        console.log("jsjsj", updated)
+        setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
+        toast.success("Cập nhật danh mục thành công!");
+        setShowDialog(false);
+      }
+    } catch {
+      toast.error("Cập nhật thất bại!");
+    }
   };
 
-  const confirmDelete = () => {
-    if (categoryToDelete) {
-      setCategories(categories.filter((c) => c.id !== categoryToDelete.id));
-      toast.success(`Đã xóa "${categoryToDelete.name}"`);
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+    try {
+      const res = await apiDeleteCategory({ id: categoryToDelete.id, accessToken });
+      if (res?.success) {
+        setCategories(categories.filter((c) => c.id !== categoryToDelete.id));
+        toast.success(`Đã xóa "${categoryToDelete.name}"`);
+      }
+    } catch {
+      console.log("🛑 Lỗi khi update/delete:", err.response?.data);
+      toast.error("Xóa danh mục thất bại!");
     }
     setShowDeleteDialog(false);
   };
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (category.description || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter((category) =>
+    (category.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const indexOfLast = currentPage * categoriesPerPage;
@@ -127,9 +151,6 @@ function Category() {
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Danh mục
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ngày tạo
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động

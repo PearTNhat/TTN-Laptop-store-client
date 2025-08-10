@@ -1,4 +1,3 @@
-// Brand.jsx
 import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,6 +8,9 @@ import Pagination from "~/components/pagination/Pagination";
 import BrandStats from "./components/BrandStats";
 import BrandTableRow from "./components/BrandTableRow";
 import BrandForm from "./components/BrandForm";
+import { useSelector } from "react-redux";
+
+import {apiGetBrands, apiCreateBrand, apiUpdateBrand, apiDeleteBrand } from "~/apis/brandApi"
 
 // Import icons
 import { 
@@ -31,77 +33,99 @@ function Brand() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [brandToDelete, setBrandToDelete] = useState(null);
+
+  const {accessToken}= useSelector(state => state.user)
+
   const brandsPerPage = 4;
 
   useEffect(() => {
     const fetchBrands = async () => {
       setIsLoading(true);
       try {
-        const mockBrands = [
-          {
-            id: 1,
-            name: "Apple",
-            description: "Công ty công nghệ đa quốc gia từ Mỹ, chuyên về điện tử tiêu dùng, phần mềm và dịch vụ trực tuyến",
-            logo: "/images/apple-logo.png",
-            createdDate: "2024-01-10",
-          },
-          {
-            id: 2,
-            name: "Dell",
-            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
-            logo: "/images/dell-logo.png",
-            createdDate: "2024-02-15",
-          },
-          {
-            id: 3,
-            name: "Luật",
-            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
-            logo: "/images/dell-logo.png",
-            createdDate: "2024-02-15",
-          },
-          {
-            id: 5,
-            name: "Hello",
-            description: "Hãng công nghệ Mỹ, nổi tiếng với laptop và PC chất lượng cao",
-            logo: "/images/dell-logo.png",
-            createdDate: "2024-02-15",
-          },
-        ];
-        setBrands(mockBrands);
-        setTimeout(() => setIsLoading(false), 800);
+        const res = await apiGetBrands();
+        console.log("Kết quả từ API getBrand:", res);
+        if (res && res.code === 200 && Array.isArray(res.data)) {
+          setBrands(res.data);
+        } else {
+          toast.error("Không thể lấy dữ liệu thương hiệu");
+        }
       } catch (error) {
+        console.error("Lỗi khi gọi getBrand:", error);
         toast.error("Lỗi khi tải dữ liệu thương hiệu");
+      } finally {
         setIsLoading(false);
       }
     };
     fetchBrands();
   }, []);
 
-  const handleAdd = (newBrand) => {
-    setBrands([{ ...newBrand, id: Date.now() }, ...brands]);
-    toast.success("Thêm thương hiệu thành công!");
-    setShowDialog(false);
+
+  const handleAdd = async (newBrand) => {
+    console.log("Dữ liệu gửi thêm: ", newBrand);
+    try {
+      console.log("Token: ", accessToken) 
+      const res = await apiCreateBrand({ body: newBrand, accessToken });
+
+      if (res.success && res.data) {
+        setBrands((prev) => [...prev, res.data]);
+        toast.success(res.message||"Thêm thương hiệu thành công!");
+        setShowDialog(false);
+      } else {
+        toast.error(res.message || "Thêm thương hiệu thất bại!");
+      }
+    } catch (err) {
+      toast.error("Lỗi khi gọi API tạo thương hiệu.");
+    }
   };
 
-  const handleUpdate = (updated) => {
-    setBrands(brands.map((b) => (b.id === updated.id ? updated : b)));
-    toast.success("Cập nhật thương hiệu thành công!");
-    setShowDialog(false);
+  const handleUpdate = async (updatedData) => {
+    console.log("Dữ liệu gửi sửa:", updatedData); 
+    try {
+      const res = await apiUpdateBrand({
+        id: updatedData.id,
+        body: updatedData,
+        accessToken,
+      });
+
+      if (res?.success) {
+        toast.success("✅ Cập nhật thương hiệu thành công!");
+        setBrands(brands.map((brand) => (brand.id === updatedData.id ? updatedData : brand)));
+        setShowDialog(false);
+      } else {
+        toast.error("❌ " + res.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi cập nhật thương hiệu!");
+    }
   };
 
-  const confirmDelete = () => {
-    if (brandToDelete) {
-      setBrands(brands.filter((b) => b.id !== brandToDelete.id));
-      toast.success(`Đã xóa "${brandToDelete.name}"`);
+
+  const confirmDelete = async () => {
+    if (!brandToDelete) return;
+    try {
+      const res = await apiDeleteBrand({ id: brandToDelete.id, accessToken });
+
+      if (res?.success) {
+        setBrands(brands.filter((b) => b.id !== brandToDelete.id));
+        toast.success(`Đã xóa "${brandToDelete.name}"`);
+      } else {
+        if (res.message.includes("Conflict")) {
+          toast.error(`Không thể xóa thương hiệu "${brandToDelete.name}" vì đang được sử dụng.`);
+        } else {
+          toast.error(res.message || "Xóa không thành công");
+        }
+      }
+    } catch{
+      console.log("🛑 Lỗi khi update/delete:", err.response?.data);
+      toast.error("Xóa danh mục thất bại!");
     }
     setShowDeleteDialog(false);
   };
-
-  const filteredBrands = brands.filter(
-    (brand) =>
-      brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      brand.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBrands = brands.filter((brand) =>
+    (brand.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
 
   const indexOfLast = currentPage * brandsPerPage;
   const indexOfFirst = indexOfLast - brandsPerPage;
@@ -174,11 +198,6 @@ function Brand() {
                 <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <div className="flex items-center gap-1">
                     <FiTag /> Thương hiệu
-                  </div>
-                </th>
-                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <div className="flex items-center gap-1">
-                    <FiCalendar /> Ngày tạo
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">

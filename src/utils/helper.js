@@ -49,14 +49,30 @@ const calculatePercent = (price, priceDiscount) => {
     // toFixed trả về string, nên cần Number() để chuyển lại thành số
     return Number((((price - priceDiscount) / price) * 100).toFixed(2));
 };
-const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    }).format(price);
-};
+// const formatPrice = (price) => {
+//     return new Intl.NumberFormat("vi-VN", {
+//         style: "currency",
+//         currency: "VND",
+//     }).format(price);
+// };
 function capitalizeFirstCharacter(str) {
     if (!str) return str; // Handle empty or null strings
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
-export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, covertMoneyToNumber, capitalizeFirstCharacter };
+
+const formatPrice = (price) => {
+  if (typeof price === 'number') return price.toLocaleString('vi-VN') + ' ₫';
+  if (typeof price === 'string') return parseInt(price.replace(/\./g, ""), 10).toLocaleString('vi-VN') + ' ₫';
+  return '';
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+export { formatNumber, convertNumberToStar, calculatePercent, covertMoneyToNumber, capitalizeFirstCharacter, formatPrice,formatDate };

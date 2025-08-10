@@ -11,13 +11,17 @@ import Pagination from "~/components/pagination/Pagination";
 import { apiGetProducts } from "~/apis/productApi";
 
 const FilterProductPage = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // Dùng useMemo để chỉ tính toán lại currentParams khi searchParams thay đổi
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),
     [searchParams]
   );
-
+  const [pagination, setPagination] = useState({
+    totalItems: 0,
+    totalPages: 0,
+    currentPage: 0,
+  });
   const [products, setProducts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,17 +35,20 @@ const FilterProductPage = () => {
         // Lấy các tham số từ URL, gán giá trị mặc định nếu cần
         const params = {
           page: currentParams.page || "0",
-          limit: currentParams.limit || "12",
+          size: currentParams.limit || "12",
           ...currentParams,
         };
-        console.log(params);
         const res = await apiGetProducts({
           ...params,
         });
-        console.log("data", res);
+        console.log(res.data);
         setProducts(res.data.content);
+        setPagination({
+          totalItems: res.data.totalElements,
+          totalPages: res.data.totalPages,
+          currentPage: res.data.pageNumber + 1, // API trả về trang hiện tại (0-based)
+        });
       } catch (err) {
-        console.error(err);
         const errorMessage = err.message || "Không thể kết nối đến máy chủ.";
         showToastError(errorMessage);
         setError(errorMessage);
@@ -52,7 +59,11 @@ const FilterProductPage = () => {
 
     fetchProducts();
   }, [currentParams]); // Chỉ chạy lại khi params trên URL thay đổi
-
+  const handlePageChange = (page) => {
+    const newPage = page;
+    const newParams = { ...currentParams, page: newPage };
+    setSearchParams(newParams);
+  };
   useEffect(() => {
     window.scrollTo(0, 0); // Cuộn lên đầu trang mỗi khi filter thay đổi
   }, []);
@@ -64,13 +75,12 @@ const FilterProductPage = () => {
         <div className="flex flex-col lg:flex-row gap-2 items-start">
           <FilterSidebar />
           <div className="w-full lg:flex-1">
-            {/* Header với thông tin filter */}
             <FilterHeader totalProducts={fakeProducts.length} />
             <ProductGrid products={products} loading={loading} error={error} />
             <Pagination
-              currentPage={1}
-              totalPageCount={5}
-              onPageChange={() => {}}
+              currentPage={pagination.currentPage}
+              totalPageCount={pagination.totalPages}
+              onPageChange={handlePageChange}
             />
           </div>
         </div>

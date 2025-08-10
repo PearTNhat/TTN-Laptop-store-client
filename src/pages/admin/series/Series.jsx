@@ -6,10 +6,14 @@ import "react-toastify/dist/ReactToastify.css";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import Pagination from "~/components/pagination/Pagination";
+import { useSelector } from "react-redux";
 
 import SeriesStats from "./components/SeriesStats";
 import SeriesTableRow from "./components/SeriesTableRow";
 import SeriesForm from "./components/SeriesForm";
+
+import { apiGetSeries, apiCreateSeries, apiUpdateSeries, apiDeleteSeries } from "~/apis/series"
+import { apiGetBrands } from "~/apis/brandApi";
 
 function Series() {
   const [series, setSeries] = useState([]);
@@ -20,6 +24,8 @@ function Series() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedSeries, setSelectedSeries] = useState(null);
   const [seriesToDelete, setSeriesToDelete] = useState(null);
+  const [brands, setBrands] = useState([]);
+  const {accessToken}=useSelector(state=>state.user)
 
   const seriesPerPage = 5;
 
@@ -27,66 +33,112 @@ function Series() {
     const fetchSeries = async () => {
       setIsLoading(true);
       try {
-        // ✅ Dữ liệu mock thay cho API
-        const mockSeries = [
-          {
-            id: 1,
-            name: "Asus Notebook",
-            description: null,
-            brandName: "Asus",
-            createdDate: "2024-01-10",
-            productCount: 150,
-          },
-          {
-            id: 2,
-            name: "Dell Inspiron",
-            description: "Dòng laptop phổ thông",
-            brandName: "Dell",
-            createdDate: "2024-02-15",
-            productCount: 200,
-          },
-        ];
-        const data = mockSeries.map((item) => ({
+        const res = await apiGetSeries();
+
+        // 📌 LOG DỮ LIỆU NHẬN ĐƯỢC
+        console.log("📦 Kết quả từ API getSeries:", res);
+
+        // Kiểm tra nếu res là { code: 200, data: [...] }
+        const list = Array.isArray(res?.data) ? res.data : [];
+
+        const formatted = list.map((item) => ({
           ...item,
           brandName: item.brandName || "Unknown",
-          createdDate: item.createdDate || new Date().toISOString().split("T")[0],
-          productCount: item.productCount || 0,
         }));
-        setSeries(data);
-        setTimeout(() => setIsLoading(false), 600);
+
+        setSeries(formatted);
       } catch (error) {
-        toast.error("Lỗi khi tải dữ liệu dòng sản phẩm");
+        console.error("❌ Lỗi khi gọi getSeries:", error);
+        toast.error("Không thể tải danh sách series");
+      } finally {
         setIsLoading(false);
       }
     };
+    const fetchBrands = async () => {
+      try {
+        const res = await apiGetBrands();
+        if (res && res.code === 200 && Array.isArray(res.data)) {
+          setBrands(res.data);
+        }
+      } catch (error) {
+        toast.error("Không thể tải danh sách thương hiệu");
+      }
+    };
+
     fetchSeries();
+    fetchBrands();
   }, []);
 
-  const handleAdd = (newSeries) => {
-    setSeries([{ ...newSeries, id: Date.now() }, ...series]);
-    toast.success("Thêm dòng sản phẩm thành công!");
-    setShowDialog(false);
+  
+  const handleAdd = async (newSeries) => {
+    try {
+      // console.log("🔥 Brands đang có:", brands);
+      const res = await apiCreateSeries({ brandId: newSeries.brandId, body: newSeries, accessToken });
+      if (res.success) {
+        const brand = brands.find(b => String(b.id) === String(newSeries.brandId));
+        const seriesWithBrand = {
+          ...res.data,
+          name: res.data.name || newSeries.name,
+          description: res.data.description || newSeries.description,
+          brandName: brand ? brand.name : "Unknown"
+        };
+
+        setSeries([seriesWithBrand, ...series]);
+        toast.success("Thêm dòng sản phẩm thành công!");
+        setShowDialog(false);
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error("Thêm thất bại!");
+    }
   };
 
-  const handleUpdate = (updated) => {
-    setSeries(series.map((s) => (s.id === updated.id ? updated : s)));
-    toast.success("Cập nhật dòng sản phẩm thành công!");
-    setShowDialog(false);
+  const handleUpdate = async (updatedSeries) => {
+    try {
+      const res = await apiUpdateSeries({ seriesId: updatedSeries.id, body: updatedSeries, accessToken });
+      console.log("🔍 ID cần sửa  :", updatedSeries?.id);
+      if (res.success) {
+        setSeries(series.map((s) => 
+          s.id === updatedSeries.id
+            ? {
+                ...s, // giữ lại brandName, brandId, v.v...
+                name: updatedSeries.name,
+                description:updatedSeries.description,
+              }
+            : s
+        ));
+
+        toast.success("Cập nhật dòng sản phẩm thành công!");
+        setShowDialog(false);
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.error("Cập nhật thất bại!");
+    }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (seriesToDelete) {
-      setSeries(series.filter((s) => s.id !== seriesToDelete.id));
-      toast.success(`Đã xóa "${seriesToDelete.name}"`);
+      try {
+        const res = await apiDeleteSeries({ seriesId: seriesToDelete.id, accessToken });
+        console.log("🔍 ID cần xóa:", seriesToDelete?.id);
+        if (res.success) {
+          setSeries(series.filter((s) => s.id !== seriesToDelete.id));
+          toast.success(`Đã xóa "${seriesToDelete.name}"`);
+        } else {
+          toast.error(res.message);
+        }
+      } catch (error) {
+        toast.error("Xóa thất bại!");
+      }
     }
     setShowDeleteDialog(false);
   };
 
-  const filteredSeries = series.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (s.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.brandName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSeries = series.filter((s) =>
+    (s.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const indexOfLast = currentPage * seriesPerPage;
@@ -139,12 +191,6 @@ function Series() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Thương hiệu
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Số sản phẩm
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ngày tạo
-              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động
               </th>
@@ -160,13 +206,16 @@ function Series() {
             ) : currentSeries.length > 0 ? (
               currentSeries.map((s) => (
                 <SeriesTableRow
-                  key={s.id}
+                  key={`series-${s.id}`}
                   series={s}
                   onEdit={(s) => {
-                    setSelectedSeries(s);
+                    const actualSeries = s.data ?? s; // Nếu có s.data thì dùng, không thì dùng s
+                    console.log("🟡 Đang sửa series:", actualSeries);
+                    setSelectedSeries(actualSeries);
                     setShowDialog(true);
                   }}
                   onDelete={(s) => {
+                    console.log("🗑 Xóa dòng:", s);
                     setSeriesToDelete(s);
                     setShowDeleteDialog(true);
                   }}
@@ -272,13 +321,11 @@ function Series() {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-xl transition-all">
-                  <Dialog.Title className="text-lg font-bold mb-4">
-                    {selectedSeries ? "Chỉnh sửa dòng sản phẩm" : "Thêm dòng sản phẩm mới"}
-                  </Dialog.Title>
                   <SeriesForm
                     series={selectedSeries}
                     onSubmit={selectedSeries ? handleUpdate : handleAdd}
                     onCancel={() => setShowDialog(false)}
+                    brands={brands}
                   />
                 </Dialog.Panel>
               </Transition.Child>

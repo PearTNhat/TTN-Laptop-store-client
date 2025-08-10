@@ -1,118 +1,89 @@
 // src/components/DiscountSection.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { apiGetMyPromotion } from "~/apis/promotionApi";
 import VoucherCard from "~/components/voucher/VoucherCard";
-
-// Dữ liệu fake
-const fakeVouchers = [
-  {
-    userPromotionId: "USR_PROMO_1",
-    promotion: {
-      promotionId: 1,
-      promoCode: "FREESHIP50K",
-      discountType: "AMOUNT",
-      discountValue: 50000,
-      minOrderValue: 300000,
-      maxValue: 50000,
-      endDate: "2025-08-30",
-    },
-  },
-  {
-    userPromotionId: "USR_PROMO_2",
-    promotion: {
-      promotionId: 2,
-      promoCode: "SALE20",
-      discountType: "PERCENTATE",
-      discountValue: 20,
-      minOrderValue: 500000,
-      maxValue: 150000,
-      endDate: "2025-09-15",
-    },
-  },
-  // ... các voucher khác
-];
+import { showToastError, showToastSuccess } from "~/utils/alert";
+import { formatNumber } from "~/utils/helper";
+import { calculateDiscount } from "~/utils/promotion";
 
 const DiscountSection = ({
   orderTotal,
   selectedCoupon,
   setSelectedCoupon,
   setDiscountAmount,
+  accessToken,
 }) => {
   const [showVouchers, setShowVouchers] = useState(false);
   const [inputCode, setInputCode] = useState("");
+  const [vouchers, setVouchers] = useState([]);
+  console.log("--- DISCOUNT SECTION ---", vouchers);
+  useEffect(() => {
+    const getPromotions = async () => {
+      try {
+        const response = await apiGetMyPromotion({ accessToken });
+        if (response.code === 200) {
+          const today = new Date();
+          const availableVouchers = response.data.filter(
+            (v) => new Date(v.endDate) >= today
+          );
+          setVouchers(availableVouchers);
+        } else {
+          throw new Error(response.message || "Failed to fetch vouchers");
+        }
+      } catch (error) {
+        showToastError(`Lỗi khi lấy voucher: ${error.message}`);
+      }
+    };
 
-  const processVoucherSelection = (voucherObject) => {
-    // Trường hợp 1: Bỏ chọn voucher (voucherObject là null)
-    if (!voucherObject) {
-      alert("Đã bỏ chọn voucher.");
+    if (accessToken) {
+      getPromotions();
+    }
+  }, [accessToken]);
+
+  // useEffect này rất quan trọng, nó đồng bộ input với voucher được chọn
+  useEffect(() => {
+    if (selectedCoupon?.code) {
+      setInputCode(selectedCoupon.code);
+    } else {
+      // Khi voucher được bỏ chọn, xóa trống input
+      setInputCode("");
+    }
+  }, [selectedCoupon]);
+
+  const applyOrRemoveVoucher = (code) => {
+    if (!code) return;
+    // Logic này vẫn giữ nguyên vì nó đã xử lý cả 2 trường hợp
+    if (selectedCoupon?.code === code) {
+      showToastSuccess("Đã bỏ chọn voucher.");
       setSelectedCoupon(null);
       setDiscountAmount(0);
-      // ===> XÓA TRỐNG Ô INPUT KHI BỎ CHỌN
-      setInputCode("");
+      return;
+    }
+    const foundVoucher = vouchers.find((v) => v.code === code);
+
+    if (!foundVoucher) {
+      showToastError("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
       return;
     }
 
-    const { promotion, userPromotionId } = voucherObject;
-
-    // Trường hợp 2: Áp dụng voucher mới
-    if (orderTotal >= promotion.minOrderValue) {
-      let valueDiscount =
-        promotion.discountType === "AMOUNT"
-          ? promotion.discountValue
-          : (promotion.discountValue * orderTotal) / 100;
-
-      if (promotion.maxValue && valueDiscount > promotion.maxValue) {
-        valueDiscount = promotion.maxValue;
-      }
-
-      setDiscountAmount(valueDiscount);
-      setSelectedCoupon({
-        code: promotion.promoCode,
-        promotionId: userPromotionId,
-      });
-      // ===> ĐƯA MÃ VOUCHER VÀO Ô INPUT KHI ÁP DỤNG THÀNH CÔNG
-      setInputCode(promotion.promoCode);
-      setShowVouchers(false);
-      alert("Áp dụng voucher thành công!");
+    if (orderTotal >= foundVoucher.minOrderValue) {
+      setDiscountAmount(calculateDiscount(orderTotal, foundVoucher));
+      setSelectedCoupon({ code: foundVoucher.code, id: foundVoucher.id });
+      // Tự động đóng danh sách voucher khi áp dụng thành công từ danh sách
+      showToastSuccess(`Áp dụng voucher ${foundVoucher.id} thành công!`);
     } else {
-      alert("Đơn hàng không đủ điều kiện để áp dụng voucher này.");
-    }
-  };
-
-  const handleVoucherCardClick = (promoCode) => {
-    if (selectedCoupon?.code === promoCode) {
-      processVoucherSelection(null);
-    } else {
-      const foundVoucher = fakeVouchers.find(
-        (v) => v.promotion.promoCode === promoCode
+      showToastError(
+        `Đơn hàng của bạn chưa đạt ${formatNumber(
+          foundVoucher.minOrderValue
+        )} để áp dụng voucher này.`
       );
-      if (foundVoucher) {
-        processVoucherSelection(foundVoucher);
-      }
     }
   };
 
-  const handleApplyFromInput = () => {
-    if (!inputCode) return;
-    const foundVoucher = fakeVouchers.find(
-      (v) => v.promotion.promoCode === inputCode
-    );
-
-    if (foundVoucher) {
-      // Nếu nhập mã đang active thì bỏ chọn, ngược lại thì áp dụng
-      if (selectedCoupon?.code === inputCode) {
-        processVoucherSelection(null);
-      } else {
-        processVoucherSelection(foundVoucher);
-      }
-    } else {
-      alert("Mã giảm giá không hợp lệ.");
-    }
-  };
-
-  const today = new Date();
-  const availableVouchers = fakeVouchers.filter(
-    (v) => new Date(v.promotion.endDate) >= today
-  );
+  // --- LOGIC MỚI ĐỂ ĐIỀU KHIỂN NÚT BẤM ---
+  // Biến này sẽ là `true` khi có voucher được chọn, và mã trong input khớp với voucher đó.
+  const isCodeApplied =
+    selectedCoupon && selectedCoupon.code === inputCode && inputCode !== "";
 
   return (
     <div className="mt-6 bg-white p-5 rounded-lg shadow-sm border border-gray-200">
@@ -120,18 +91,22 @@ const DiscountSection = ({
       <div className="flex space-x-2">
         <input
           type="text"
-          // Cải tiến UX: Tự động chuyển thành chữ hoa khi gõ
           onChange={(e) => setInputCode(e.target.value.toUpperCase())}
           value={inputCode}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono tracking-wider"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 tracking-wider"
           placeholder="NHẬP MÃ GIẢM GIÁ"
-          onKeyUp={(e) => e.key === "Enter" && handleApplyFromInput()}
+          onKeyUp={(e) => e.key === "Enter" && applyOrRemoveVoucher(inputCode)}
         />
+        {/* --- NÚT BẤM ĐƯỢC THAY ĐỔI Ở ĐÂY --- */}
         <button
-          onClick={handleApplyFromInput}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex-shrink-0"
+          onClick={() => applyOrRemoveVoucher(inputCode)}
+          className={`px-6 py-2 rounded-lg font-semibold transition-colors flex-shrink-0 text-white ${
+            isCodeApplied
+              ? "bg-red-500 hover:bg-red-600" // Màu đỏ cho hành động "Bỏ chọn"
+              : "bg-blue-600 hover:bg-blue-700" // Màu xanh cho hành động "Áp dụng"
+          }`}
         >
-          Áp dụng
+          {isCodeApplied ? "Bỏ chọn" : "Áp dụng"}
         </button>
       </div>
       <button
@@ -143,18 +118,18 @@ const DiscountSection = ({
 
       {showVouchers && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6 border-t border-gray-200 pt-6">
-          {availableVouchers.length > 0 ? (
-            availableVouchers.map((voucher) => (
+          {vouchers.length > 0 ? (
+            vouchers.map((voucher) => (
               <VoucherCard
-                key={voucher.userPromotionId}
-                promotion={voucher.promotion}
-                isActive={selectedCoupon?.code === voucher.promotion.promoCode}
-                hanleApplyDiscount={handleVoucherCardClick}
+                key={voucher.id}
+                promotion={voucher}
+                isActive={selectedCoupon?.code === voucher.code}
+                handleApplyDiscount={() => applyOrRemoveVoucher(voucher.code)}
               />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-500">
-              Không có voucher nào khả dụng.
+              Bạn không có voucher nào khả dụng.
             </p>
           )}
         </div>

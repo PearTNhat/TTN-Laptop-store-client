@@ -11,4 +11,36 @@ const apiGetComments = async ({ pId }) => {
         throw new Error(error.message);
     }
 };
-export { apiGetComments };
+const apiReplyComment = async ({ accessToken, body }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.post("/reviews/reply", body, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+}
+const apiComment = async ({ accessToken, body }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.post("/reviews/comment", body, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+}
+export { apiGetComments, apiReplyComment, apiComment };

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userActions } from "~/stores/slice/userSlice";
 import { apiLoginWithGoogle } from "~/apis/authApi"; 
-import { apiFetchMyInfo } from "~/apis/userApi"; // ✅ để lấy info user
+import { apiFetchMyInfo } from "~/apis/userApi"; 
 import { showToastSuccess, showToastError } from "~/utils/alert";
 
 const GoogleCallback = () => {
@@ -22,16 +22,14 @@ const GoogleCallback = () => {
       }
 
       try {
-        const redirectUri = "http://localhost:5173/login/callback"; // ✅ URI phải khớp Google Developer Console
+        const redirectUri = "http://localhost:5173/login/callback";
 
-        // Gọi API backend để đổi code lấy access token
         const res = await apiLoginWithGoogle({ code, redirectUri });
+        console.log("response: ", res);
 
         if (res.success && res.token) {
-          localStorage.setItem("token", res.token);
+          const fetchRes = await apiFetchMyInfo({ accessToken: res.token });
 
-          // Lấy thông tin người dùng
-          const fetchRes = await apiFetchMyInfo({ token: res.token });
           if (fetchRes.code === 200 && fetchRes.data) {
             dispatch(
               userActions.login({

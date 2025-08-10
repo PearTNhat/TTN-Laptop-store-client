@@ -24,6 +24,7 @@ const adminPaths = {
     BRAND: 'brand',
     SERIES: 'series',
     CATEGORY: 'category',
+    COLOR: 'color',
     PRODUCTS: 'products',
     ORDERS: 'orders',
     ORDER_CONFIRMS: 'orders/confirms',

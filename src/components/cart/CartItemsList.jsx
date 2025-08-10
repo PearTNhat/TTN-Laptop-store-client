@@ -13,11 +13,11 @@ const CartItemsList = ({
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {cartItems.map((item, index) => (
         <CartItem
-          key={item.productId}
+          key={item.productDetailId}
           item={item}
           index={index}
           isOpen={isOpen}
-          isSelected={selectedItems.includes(item.productId)}
+          isSelected={selectedItems.includes(item.productDetailId)}
           onSelectItem={onSelectItem}
           onUpdateQuantity={onUpdateQuantity}
           onRemoveItem={onRemoveItem}

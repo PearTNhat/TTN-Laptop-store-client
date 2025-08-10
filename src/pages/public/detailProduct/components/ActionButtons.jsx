@@ -1,8 +1,9 @@
-function ActionButtons({ handleBuyNow, handleAddToCart }) {
+function ActionButtons({ handleBuyNow, handleAddToCart, isOutOfStock }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10">
       <button
         onClick={handleBuyNow}
+        disabled={isOutOfStock}
         className="group relative bg-gradient-to-r from-red-500 via-pink-500 to-red-600 text-white font-bold py-6 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -17,6 +18,7 @@ function ActionButtons({ handleBuyNow, handleAddToCart }) {
 
       <button
         onClick={handleAddToCart}
+        disabled={isOutOfStock}
         className="group relative bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 text-white font-bold py-6 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-white/30"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
