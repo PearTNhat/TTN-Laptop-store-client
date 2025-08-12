@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import UserTableRow from "./UserTableRow";
 
-const UserTable = ({ users, onView, onEdit, onBlock, onDelete }) => (
+const UserTable = ({ users, onView, onEdit, onDelete }) => (
   <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -27,18 +27,6 @@ const UserTable = ({ users, onView, onEdit, onBlock, onDelete }) => (
                 Vai trò
               </div>
             </th>
-            <th className="px-6 py-4 text-left font-semibold text-gray-700 uppercase tracking-wider">
-              <div className="flex items-center gap-2">
-                <FaCircle className="text-green-500" />
-                Trạng thái
-              </div>
-            </th>
-            <th className="px-6 py-4 text-left font-semibold text-gray-700 uppercase tracking-wider">
-              <div className="flex items-center gap-2">
-                <FaCalendarAlt className="text-orange-500" />
-                Ngày tham gia
-              </div>
-            </th>
             <th className="px-6 py-4 text-center font-semibold text-gray-700 uppercase tracking-wider">
               <div className="flex items-center justify-center gap-2">
                 <FaCogs className="text-gray-600" />
@@ -54,7 +42,6 @@ const UserTable = ({ users, onView, onEdit, onBlock, onDelete }) => (
               user={user}
               onView={onView}
               onEdit={onEdit}
-              onBlock={onBlock}
               onDelete={onDelete}
             />
           ))}

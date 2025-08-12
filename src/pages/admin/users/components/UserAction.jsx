@@ -20,21 +20,7 @@ const UserActions = ({ searchTerm, onSearchChange, onAddClick }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            className="inline-flex items-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-            title="Lọc"
-          >
-            <FaFilter className="h-4 w-4 mr-2" />
-            Lọc
-          </button>
-
-          <button
-            onClick={onAddClick}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <FaPlus className="h-4 w-4 mr-2" />
-            Thêm người dùng
-          </button>
+          
         </div>
       </div>
     </div>

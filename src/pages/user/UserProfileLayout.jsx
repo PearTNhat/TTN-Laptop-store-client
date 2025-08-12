@@ -1,42 +1,63 @@
-import React, { useState } from "react";
-import ProfileInfo from "./components/ProfileInfo";
-// import MyOrders from "./components/MyOrders";
-import MyOrders from "./components/MyOrder/MyOrders-Main";
-import VoucherList from "./components/VoucherList";
-import Voucher from "./components/Voucher";
+import { NavLink, Outlet } from "react-router-dom";
+import { userNavItems } from "~/constants/navUser";
+import { HiOutlineUser, HiCamera } from "react-icons/hi";
+import { useSelector } from "react-redux";
+import { useEffect, useRef, useState } from "react";
+import { apiFetchMyInfo, apiGetRankUser } from "~/apis/userApi";
+import { apiUpdateAvatar } from "~/apis/update_useravatarApi";
 
-import ChangePassword from "./components/ChangePassword";
-import ChangeEmail from "./components/ChangeEmail"; // 👉 mới
+export default function UserProfileLayout() {
+  const { accessToken } = useSelector((state) => state.user);
+  const [avatar, setAvatar] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [userRank, setUserRank] = useState(null);
+  const [loadingAvatar, setLoadingAvatar] = useState(false);
+  const fileInputRef = useRef(null);
 
-const Profile = () => {
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("activeTab") || "info";
-  });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await apiFetchMyInfo({ accessToken });
+        if (response.code === 200 && response.data) {
+          setAvatar(response.data.avatar);
+          const name = `${response.data.lastName || ""} ${response.data.firstName || ""}`.trim();
+          setFullName(name || "Người dùng");
+        }
 
-  const changeTab = (tab) => {
-    setActiveTab(tab);
-    localStorage.setItem("activeTab", tab);
-  };
+        const rankRes = await apiGetRankUser({ accessToken });
+        if (rankRes.code === 200 && rankRes.data) {
+          setUserRank(rankRes.data);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi khi fetch profile data:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "info": return <ProfileInfo />;
-      case "orders": return <MyOrders />;
-      case "vouchers": return <VoucherList  />;
-      case "password": return <ChangePassword />;
-      case "change_email": return <ChangeEmail />;
-      default: return null;
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || file.size > 2 * 1024 * 1024) {
+      alert("Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.");
+      return;
     }
-  };
 
-  const getTabLabel = () => {
-    switch (activeTab) {
-      case "info": return "Thông tin cá nhân";
-      case "orders": return "Đơn hàng của tôi";
-      case "vouchers": return "Kho voucher";
-      case "password": return "Đổi mật khẩu";
-      case "changemail": return "Đổi Email"
-      default: return "";
+    const formData = new FormData();
+    formData.append("file", file);
+    setLoadingAvatar(true);
+
+    try {
+      const updateRes = await apiUpdateAvatar({ accessToken, file: formData });
+      if (updateRes.code === 200) {
+        setAvatar(URL.createObjectURL(file));
+      } else {
+        alert(updateRes.message || "Cập nhật avatar thất bại!");
+      }
+    } catch (err) {
+      console.error("❌ Lỗi khi xử lý ảnh:", err);
+      alert("Có lỗi xảy ra khi cập nhật ảnh.");
+    } finally {
+      setLoadingAvatar(false);
     }
   };
 
@@ -45,73 +66,119 @@ const Profile = () => {
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full border-4 border-sky-500 overflow-hidden shadow-lg">
-              <img
-                src="/images/arsenal.jpg"
-                alt="Avatar"
-                className="w-full h-full object-cover scale-105 hover:scale-110 transition"
+          <div className="flex items-center gap-4 relative">
+            {/* Avatar */}
+            <label className="relative group w-20 h-20 rounded-full overflow-hidden border-4 border-sky-500 shadow-lg cursor-pointer">
+              {avatar ? (
+                <>
+                  <img
+                    src={avatar}
+                    alt="Avatar"
+                    className="w-full h-full object-cover group-hover:opacity-60 transition"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-30">
+                    <HiCamera className="text-white text-2xl" />
+                  </div>
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-sky-100 text-sky-500">
+                  <HiOutlineUser size={40} />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
               />
-            </div>
+            </label>
+
+            {/* Thông tin người dùng */}
             <div>
-              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">
-                Nguyễn Văn A
-              </h1>
-              <p className="text-sm text-sky-600 dark:text-gray-400">
-                Thành viên từ 2025 • TP.HCM
-              </p>
+              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">{fullName}</h1>
+              <div className="space-y-2">
+                <p className="text-sm text-sky-600 dark:text-gray-400 flex items-center gap-2">
+                  <span>Thành viên hạng: </span>
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 text-xs rounded-full font-medium">
+                    {userRank?.currentRank?.name || "Chưa có hạng"}
+                  </span>
+                </p>
+
+                {userRank?.nextRank && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>
+                        Tiến tới hạng <strong>{userRank.nextRank.name}</strong>
+                      </span>
+                      <span className="ml-2">
+                        {new Intl.NumberFormat("vi-VN").format(userRank.amountUsed || 0)}đ /{" "}
+                        {new Intl.NumberFormat("vi-VN").format(
+                          userRank.spendingToNextRank + (userRank.amountUsed || 0)
+                        )}đ
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-sky-400 to-indigo-500 h-2 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(
+                            ((userRank.amountUsed || 0) /
+                              (userRank.spendingToNextRank + (userRank.amountUsed || 0))) *
+                              100,
+                            100
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {!userRank?.nextRank && userRank?.currentRank && (
+                  <p className="text-xs text-green-600 font-medium">
+                    🎉 Bạn đã đạt hạng cao nhất: <strong>{userRank.currentRank.name}</strong>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           <a
             href="/"
-            onClick={() => localStorage.removeItem("activeTab")} 
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-indigo-600 hover:to-sky-600 rounded-lg shadow transition"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-full shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
           >
-            🏠 Về trang chủ
+            <span className="text-xl">🏠</span>
+            <span>Trang chủ</span>
           </a>
         </div>
       </header>
 
-      {/* Body */}
+      {/* Tabs + Content */}
       <div className="max-w-5xl mx-auto px-6 mt-6">
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
-            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
-            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
-            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
-            <TabButton active={activeTab === "change_email"} onClick={() => changeTab("change_email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
+            {userNavItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.path}
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                    isActive
+                      ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
+                      : "bg-sky-100 text-sky-700 hover:bg-sky-200"
+                  }`
+                }
+              >
+                {item.icon} {item.name}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Section Title */}
-          <h2 className="text-lg font-semibold text-indigo-700 mb-4">
-            {getTabLabel()}
-          </h2>
-
-          {/* Tab Content */}
-          <div className="animate-fade-in">{renderContent()}</div>
+          {/* Nội dung tab */}
+          <Outlet />
         </div>
       </div>
     </div>
   );
-};
-
-// Tab Button component
-const TabButton = ({ active, onClick, children }) => (
-  <button
-    onClick={onClick}
-    className={`px-4 py-2 rounded-full text-sm font-medium transition-all 
-      ${
-        active
-          ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
-          : "bg-sky-100 text-sky-700 hover:bg-sky-200"
-      }`}
-  >
-    {children}
-  </button>
-);
-
-export default Profile;
-
+}

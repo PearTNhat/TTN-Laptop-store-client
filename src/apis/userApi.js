@@ -10,8 +10,7 @@ const getAuthHeader = () => {
   };
 };
 
-
-const apiFetchMyInfo = async ({ accessToken }) => {
+export const apiFetchMyInfo = async ({ accessToken }) => {
   try {
     const config = {
       headers: {
@@ -129,4 +128,106 @@ export const apiChangeEmail = async ({ newEmail, otpCode, accessToken}) => {
     };
   }
 };
-export { apiFetchMyInfo }
+
+
+export const apiGetRankUser = async({ accessToken }) => {
+  try{
+    const config={
+      headers: {
+        Authorization:`Bearer ${accessToken}`,
+      },
+    }
+    const { data } = await http.get("rank-levels/user", config);
+    return data;
+  } catch (error) {
+    if (error.res && error.res.data){
+      return error.res.data;
+    }
+    throw new Error(error.message)
+  }
+}
+
+export const apiPostRating = async ({ accessToken, content, reviewImage, productDetailId, orderId, rating }) => {
+  try {
+    const config = {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    };
+    const body = { content, reviewImage, productDetailId, orderId, rating };
+    const { data } = await http.post("/reviews/rating", body, config);
+    return data;
+  } catch (error) {
+    if (error.response?.data) return error.response.data;
+    throw new Error(error.message);
+  }
+};
+
+
+
+
+// để đưa qua usermanagement
+export const apiGetRoles = async ({accessToken}) => {
+  try {
+    const { data } = await http.get("/roles", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return data; 
+  } catch (error) {
+    console.error("Lỗi getRoles:", error);
+    throw error;
+  }
+};
+
+export const apiChangeUserRole = async ({ userId, roleId, accessToken }) => {
+  try {
+    const payload = {
+      userId,
+      roleIds: [roleId], 
+    };
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+    const { data } = await http.put("users/change-role", payload, config);
+    return data;
+  } catch (error) {
+    if (error.response?.data) {
+      return error.response.data;
+    }
+    throw new Error(error.message);
+  }
+};
+
+export const apiDeleteUser = async ({ userId, accessToken }) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        userId, // truyền userId vào query param
+      }
+    };
+
+    const response = await http.delete("/users", config);
+    const res = response.data;
+
+    if (res?.code === 200) {
+      return {
+        success: true,
+        message: res.message || "Khóa tài khoản thành công!",
+      };
+    } else {
+      return {
+        success: false,
+        message: res.message || "Khóa tài khoản thất bại.",
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error.response?.data?.message || "Không thể kết nối máy chủ.",
+    };
+  }
+};
