@@ -23,6 +23,22 @@ const apiGetDeliveryNotes = async ({ accessToken, page = 1, size = 10, status, o
         throw new Error(error.message);
     }
 };
+const apiConfirmDeliveryDraft = async ({ accessToken, id }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.post(`delivery-notes/confirm/${id}`, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
 const apiGetDeliveryNoteDetail = async ({ accessToken, id }) => {
     try {
         const config = {
@@ -87,4 +103,4 @@ const apiDeleteDeliveryNote = async ({ accessToken, id }) => {
         throw new Error(error.message);
     }
 };
-export { apiGetDeliveryNotes, apiGetDeliveryNoteDetail, apiCreateDeliveryNote, apiUpdateDeliveryNote, apiDeleteDeliveryNote };
+export { apiGetDeliveryNotes, apiGetDeliveryNoteDetail, apiConfirmDeliveryDraft, apiCreateDeliveryNote, apiUpdateDeliveryNote, apiDeleteDeliveryNote };

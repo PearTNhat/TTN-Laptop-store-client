@@ -37,7 +37,7 @@ http.interceptors.request.use(async function (config) {
     if (!accessToken) return config
     const decodeAccessToken = jwtDecode(accessToken)
     const currentTime = Date.now() / 1000
-    if (decodeAccessToken.exp < currentTime - 5) {
+    if (decodeAccessToken.exp < currentTime - 60) {
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
                 failedQueue.push({ resolve, reject });
@@ -62,7 +62,7 @@ http.interceptors.request.use(async function (config) {
             } else {
                 throw new Error("Failed to refresh token");
             }
-            // return config
+            return config
         } catch (error) {
             processQueue(error, null);
             await Swal.fire("Oops!", "Đăng nhập đã hết hạn vui lòng đăng nhập lại", "info").then(() => {

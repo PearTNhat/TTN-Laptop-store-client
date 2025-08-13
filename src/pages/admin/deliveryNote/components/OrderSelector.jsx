@@ -23,7 +23,7 @@ import { Search, Package2, Calendar, User, Check } from "lucide-react";
 import { apiGetOrderList } from "~/apis/orderApi";
 import { showToastError } from "~/utils/alert";
 
-const OrderSelector = ({ onOrderSelect }) => {
+const OrderSelector = ({ onOrderSelect, preselectedOrder }) => {
   const { control, setValue, watch } = useFormContext();
   const { accessToken } = useSelector((state) => state.user);
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +64,7 @@ const OrderSelector = ({ onOrderSelect }) => {
     if (isOpen) {
       fetchOrders({ keyword: searchTerm });
     }
-  }, [isOpen, fetchOrders]);
+  }, [isOpen, searchTerm, fetchOrders]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -95,11 +95,18 @@ const OrderSelector = ({ onOrderSelect }) => {
           <FormControl>
             <div className="flex gap-2">
               <Input
-                placeholder="Chưa chọn đơn hàng"
+                placeholder={
+                  preselectedOrder
+                    ? `${preselectedOrder.code} - ${
+                        preselectedOrder.customerName || "N/A"
+                      }`
+                    : "Chưa chọn đơn hàng"
+                }
                 {...field}
                 readOnly
                 className="flex-1 border-gray-300 focus:border-green-500 focus:ring-green-500 cursor-pointer"
-                onClick={() => setIsOpen(true)}
+                onClick={() => !preselectedOrder && setIsOpen(true)}
+                disabled={!!preselectedOrder}
               />
               <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogTrigger asChild>
@@ -107,9 +114,10 @@ const OrderSelector = ({ onOrderSelect }) => {
                     type="button"
                     variant="outline"
                     className="border-green-300 text-green-700 hover:bg-green-50"
+                    disabled={!!preselectedOrder}
                   >
                     <Search className="h-4 w-4 mr-2" />
-                    Chọn
+                    {preselectedOrder ? "Đã chọn" : "Chọn"}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
@@ -205,6 +213,7 @@ const OrderSelector = ({ onOrderSelect }) => {
               </Dialog>
             </div>
           </FormControl>
+
           <FormMessage className="text-red-500 text-xs" />
         </FormItem>
       )}

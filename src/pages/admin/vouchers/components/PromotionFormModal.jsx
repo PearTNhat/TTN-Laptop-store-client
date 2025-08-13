@@ -62,7 +62,7 @@ const PromotionFormModal = ({
       promotionType: "USER_PROMOTION",
       minOrderValue: 0,
       maxDiscountValue: 0,
-      usageLimit: 0,
+      usageLimit: null,
       startDate: "",
       endDate: "",
       productDetailIds: [],

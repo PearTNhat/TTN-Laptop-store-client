@@ -92,9 +92,9 @@ function Header() {
       }
     }
     // admin k phai customeer
-    if (isAdmin && !isCustomer) {
-      navigate("/admin");
-    }
+    // if (isAdmin && !isCustomer) {
+    //   navigate("/admin");
+    // }
   }, [userData]);
 
   const handleLogout = () => {

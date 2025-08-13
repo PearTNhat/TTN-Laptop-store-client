@@ -132,7 +132,7 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
           {/* Giới hạn sử dụng */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Giới hạn sử dụng *
+              Giới hạn sử dụng
             </label>
             <Controller
               name="usageLimit"
@@ -141,10 +141,16 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
                 <input
                   {...field}
                   type="number"
-                  min="0"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="0 = Không giới hạn"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  placeholder="Để trống = Không giới hạn"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Nếu input trống hoặc bằng 0 thì set null, ngược lại set Number
+                    field.onChange(
+                      value === "" || Number(value) === 0 ? null : Number(value)
+                    );
+                  }}
+                  value={field.value === null ? "" : field.value}
                 />
               )}
             />
@@ -154,7 +160,7 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Để trống hoặc nhập 0 để không giới hạn
+              Để trống hoặc nhập 0 để không giới hạn số lần sử dụng
             </p>
           </div>
         </div>

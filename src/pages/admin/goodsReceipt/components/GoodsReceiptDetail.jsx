@@ -1,3 +1,4 @@
+import { Hash, Package2 } from "lucide-react";
 import React from "react";
 
 function GoodsReceiptDetail({ details }) {
@@ -61,12 +62,25 @@ function GoodsReceiptDetail({ details }) {
                     {item.quantity}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
-                      {item?.serialNumber || "N/A"}
-                    </span>
+                <td className="px-6 py-4">
+                  <div className="space-y-1">
+                    {item.serialNumbers && item.serialNumbers.length > 0 ? (
+                      item.serialNumbers.map((serial, serialIndex) => (
+                        <div
+                          key={serialIndex}
+                          className="flex items-center gap-2"
+                        >
+                          <Hash className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                          <span className="text-xs font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                            {serial}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-sm text-gray-400">
+                        Không có serial
+                      </span>
+                    )}
                   </div>
                 </td>
               </tr>

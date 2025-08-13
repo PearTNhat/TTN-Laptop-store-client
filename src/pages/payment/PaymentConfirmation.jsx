@@ -22,7 +22,9 @@ export default function PaymentConfirmation() {
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
   const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [selectedShopCoupon, setSelectedShopCoupon] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [shopDiscountAmount, setShopDiscountAmount] = useState(0);
   const [selectedShippingInfo, setSelectedShippingInfo] = useState(null);
   const [orderData, setOrderData] = useState(null);
   const [userInfo, setUserInfo] = useState({
@@ -65,7 +67,7 @@ export default function PaymentConfirmation() {
       addressId: selectedShippingInfo.id,
       detailRequest,
       userPromotionId: selectedCoupon?.id,
-      shopPromotionId: null,
+      shopPromotionId: selectedShopCoupon?.id,
     };
     const { orderData: receivedOrderData, source } = location.state || {};
     if (selectedPayment === "COD") {
@@ -89,7 +91,8 @@ export default function PaymentConfirmation() {
       }
     }
     if (source == "cart-checkout") {
-      for (const item of receivedOrderData) {
+      console.log(receivedOrderData);
+      for (const item of receivedOrderData.items) {
         await removeCartItem(item.productDetailId);
       }
     }
@@ -164,13 +167,20 @@ export default function PaymentConfirmation() {
             userInfo={userInfo}
             selectedShippingInfo={selectedShippingInfo}
           />
-          <OrderSummary order={orderData} discountAmount={discountAmount} />
+          <OrderSummary
+            order={orderData}
+            discountAmount={discountAmount}
+            shopDiscountAmount={shopDiscountAmount}
+          />
           <DiscountSection
             accessToken={accessToken}
             orderTotal={orderData?.totalAmount} // Luôn có giá trị đúng
             selectedCoupon={selectedCoupon}
             setSelectedCoupon={setSelectedCoupon}
             setDiscountAmount={setDiscountAmount}
+            selectedShopCoupon={selectedShopCoupon}
+            setSelectedShopCoupon={setSelectedShopCoupon}
+            setShopDiscountAmount={setShopDiscountAmount}
           />
 
           <PaymentMethod

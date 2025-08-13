@@ -21,7 +21,7 @@ export const promotionSchema = z.object({
     maxDiscountValue: z
         .number()
         .min(0, "Giá trị giảm tối đa phải lớn hơn hoặc bằng 0"),
-    usageLimit: z.number().min(0, "Giới hạn sử dụng phải lớn hơn hoặc bằng 0"),
+    usageLimit: z.number().min(0, "Giới hạn sử dụng phải lớn hơn hoặc bằng 0").nullable(),
     startDate: z.string().min(1, "Ngày bắt đầu không được để trống"),
     endDate: z.string().min(1, "Ngày kết thúc không được để trống"),
     productDetailIds: z.array(z.number()).optional(),

@@ -8,6 +8,7 @@ import { Calendar, FileText, Hash, Loader2, Package, User } from "lucide-react";
 import React from "react";
 import OrderActions from "./OrderAction";
 import DeliveryNoteDetail from "../../deliveryNote/components/DeliveryNoteDetail";
+import GoodsReceiptDetail from "./GoodsReceiptDetail";
 
 function GoodsReceiptNoteList({ goodsReceiptNotes, onFetchDetails, onDelete }) {
   const handleAccordionChange = (openItemValues) => {
@@ -153,7 +154,7 @@ function GoodsReceiptNoteList({ goodsReceiptNotes, onFetchDetails, onDelete }) {
                         </span>
                       </div>
                     ) : note.grnDetails ? (
-                      <DeliveryNoteDetail details={note.grnDetails} />
+                      <GoodsReceiptDetail details={note.grnDetails} />
                     ) : (
                       <div className="text-center py-4 text-sm text-gray-500">
                         Chưa có dữ liệu chi tiết.

@@ -18,7 +18,12 @@ const STATUS_STYLES = {
   CANCELLED: { text: "Đã hủy", color: "text-red-600 bg-red-100" },
 };
 
-const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
+const DeliveryNoteList = ({
+  deliveryNotes,
+  onFetchDetails,
+  onDelete,
+  onConfirm,
+}) => {
   const handleAccordionChange = (openItemValues) => {
     const lastOpenedId = openItemValues[openItemValues.length - 1];
     if (lastOpenedId) {
@@ -58,7 +63,7 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
                 {/* Header */}
                 <div className="flex items-center w-full px-6 py-5 rounded-xl">
                   <AccordionTrigger className="flex-1 p-0 hover:no-underline bg-transparent text-left">
-                    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
                       {/* Mã Phiếu xuất */}
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -66,7 +71,7 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium">
-                            Mã Phiếu Xuấtiao
+                            Mã Phiếu Xuất
                           </p>
                           <p className="font-semibold text-gray-900 text-sm">
                             {note.code}
@@ -85,6 +90,21 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
                           </p>
                           <p className="font-semibold text-gray-900 text-sm">
                             {new Date(note.date).toLocaleDateString("vi-VN")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tổng số lượng */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Package className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            Tổng SL
+                          </p>
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {note.totalQuantity || 0}
                           </p>
                         </div>
                       </div>
@@ -117,7 +137,11 @@ const DeliveryNoteList = ({ deliveryNotes, onFetchDetails, onDelete }) => {
 
                   {/* Actions */}
                   <div className="ml-6 flex-shrink-0">
-                    <OrderActions order={note} onDelete={onDelete} />
+                    <OrderActions
+                      order={note}
+                      onDelete={onDelete}
+                      onConfirm={onConfirm}
+                    />
                   </div>
                 </div>
 

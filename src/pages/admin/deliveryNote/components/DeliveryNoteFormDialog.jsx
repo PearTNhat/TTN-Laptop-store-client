@@ -13,7 +13,12 @@ import DeliveryNoteInfoForm from "./DeliveryNoteInfoForm";
 import DeliveryNoteDetailForm from "./DeliveryNoteDetailForm";
 import Button from "~/components/Button";
 
-const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
+const DeliveryNoteFormDialog = ({
+  isOpen,
+  setIsOpen,
+  onSuccess,
+  preselectedOrder,
+}) => {
   const { accessToken } = useSelector((state) => state.user);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -39,6 +44,16 @@ const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
       setSelectedOrder(null);
     }
   }, [isOpen, methods]);
+
+  // Auto-select order when preselectedOrder is provided
+  useEffect(() => {
+    if (isOpen && preselectedOrder) {
+      setSelectedOrder(preselectedOrder);
+      methods.setValue("orderCode", preselectedOrder.code);
+      // Reset details when preselected order changes
+      methods.setValue("details", []);
+    }
+  }, [isOpen, preselectedOrder, methods]);
 
   const handleOrderSelect = (order) => {
     setSelectedOrder(order);
@@ -133,7 +148,10 @@ const DeliveryNoteFormDialog = ({ isOpen, setIsOpen, onSuccess }) => {
                       onSubmit={methods.handleSubmit(onSubmit)}
                       className="p-6 space-y-6"
                     >
-                      <DeliveryNoteInfoForm onOrderSelect={handleOrderSelect} />
+                      <DeliveryNoteInfoForm
+                        onOrderSelect={handleOrderSelect}
+                        preselectedOrder={preselectedOrder}
+                      />
                       <DeliveryNoteDetailForm selectedOrder={selectedOrder} />
 
                       {/* Hiển thị lỗi validation */}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { apiGetMyVouchers } from "~/apis/userApi";
+import { AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { apiGetMyPromotion } from "~/apis/promotionApi";
 // Component hiển thị một voucher

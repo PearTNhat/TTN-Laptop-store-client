@@ -11,6 +11,7 @@ const CartItem = ({
   onUpdateQuantity,
   onRemoveItem,
 }) => {
+  console.log("item:", item);
   const handleIncreaseQuantity = () => {
     // Kiểm tra trước khi tăng
     if (item?.appliedPromotion && item?.appliedPromotion.usageLimit) {

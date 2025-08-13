@@ -11,12 +11,12 @@ const DeliveryNoteDetail = ({ details }) => {
       </div>
     );
   }
-
+  console.log("details:", details);
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <Package2 className="h-5 w-5 text-green-600" />
-        Chi tiết sản phẩm nhập kho
+        Chi tiết sản phẩm xuất kho
       </h4>
 
       <div className="overflow-x-auto">
@@ -26,14 +26,12 @@ const DeliveryNoteDetail = ({ details }) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Sản phẩm
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Đơn giá
-              </th>
+
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Số lượng
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Serial Numbers
+                Serial Number
               </th>
             </tr>
           </thead>
@@ -60,29 +58,19 @@ const DeliveryNoteDetail = ({ details }) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-medium text-green-600">
-                    {item.unitPrice?.toLocaleString("vi-VN")}₫
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                     {item.quantity}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="space-y-1">
-                    {item.serialNumbers && item.serialNumbers.length > 0 ? (
-                      item.serialNumbers.map((serial, serialIndex) => (
-                        <div
-                          key={serialIndex}
-                          className="flex items-center gap-2"
-                        >
-                          <Hash className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                          <span className="text-xs font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
-                            {serial}
-                          </span>
-                        </div>
-                      ))
+                    {item.serialNumber ? (
+                      <div className="flex items-center gap-2">
+                        <Hash className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <span className="text-xs font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                          {item.serialNumber}
+                        </span>
+                      </div>
                     ) : (
                       <span className="text-sm text-gray-400">
                         Không có serial

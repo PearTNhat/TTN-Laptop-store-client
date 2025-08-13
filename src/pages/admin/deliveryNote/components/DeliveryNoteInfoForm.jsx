@@ -21,7 +21,7 @@ import {
 import { FileText, Package } from "lucide-react";
 import OrderSelector from "./OrderSelector";
 
-const DeliveryNoteInfoForm = ({ onOrderSelect }) => {
+const DeliveryNoteInfoForm = ({ onOrderSelect, preselectedOrder }) => {
   const { control } = useFormContext();
   return (
     <Card className="shadow-sm border-gray-200">
@@ -34,7 +34,10 @@ const DeliveryNoteInfoForm = ({ onOrderSelect }) => {
       <CardContent className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Chọn Đơn Hàng */}
-          <OrderSelector onOrderSelect={onOrderSelect} />
+          <OrderSelector
+            onOrderSelect={onOrderSelect}
+            preselectedOrder={preselectedOrder}
+          />
 
           {/* Trạng thái */}
           <FormField

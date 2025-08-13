@@ -129,17 +129,17 @@ const RevenueChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={revenueData}>
               <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.6} />
+                <linearGradient id="colorBuy" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0.6} />
                 </linearGradient>
-                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="colorSell" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="#10B981" stopOpacity={0.6} />
                 </linearGradient>
-                <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0.6} />
+                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.6} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -159,14 +159,14 @@ const RevenueChart = () => {
                 formatter={(value, name) => {
                   let label = "";
                   switch (name) {
-                    case "monthlyRevenue":
-                      label = "Doanh thu";
+                    case "monthlyTotalCost":
+                      label = "Tiền mua";
                       break;
                     case "monthlyGrossProfit":
-                      label = "Lợi nhuận";
+                      label = "Tiền bán";
                       break;
-                    case "monthlyTotalCost":
-                      label = "Tổng chi phí";
+                    case "monthlyRevenue":
+                      label = "Lợi nhuận";
                       break;
                     default:
                       label = name;
@@ -175,27 +175,26 @@ const RevenueChart = () => {
                 }}
               />
               <Bar
-                dataKey="monthlyRevenue"
-                fill="url(#colorRevenue)"
+                dataKey="buy"
+                fill="url(#colorBuy)"
                 radius={[4, 4, 0, 0]}
-                name="monthlyRevenue"
+                name="buy"
               />
               <Bar
-                dataKey="monthlyGrossProfit"
+                dataKey="sell"
+                fill="url(#colorSell)"
+                radius={[4, 4, 0, 0]}
+                name="sell"
+              />
+              <Bar
+                dataKey="profit"
                 fill="url(#colorProfit)"
                 radius={[4, 4, 0, 0]}
-                name="monthlyGrossProfit"
-              />
-              <Bar
-                dataKey="monthlyTotalCost"
-                fill="url(#colorCost)"
-                radius={[4, 4, 0, 0]}
-                name="monthlyTotalCost"
+                name="profit"
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
-
         {/* Summary Statistics */}
         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
           <div className="text-center">

@@ -144,7 +144,6 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
     ? "text-slate-800 font-semibold"
     : "text-white font-semibold";
   const labelColor = isActive ? "text-slate-500" : "text-blue-200";
-
   return (
     <div
       className={`relative flex flex-col p-5 rounded-xl transition-all duration-300 shadow-md overflow-hidden ${
@@ -160,7 +159,7 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
         </div>
       )}
       {/* Ribbon nếu hết lượt */}
-      {isFullyUsed && (
+      {!!isFullyUsed && (
         <div className="absolute top-3 left-[-35px] -rotate-45 bg-red-600 text-white text-xs font-bold w-32 text-center py-1 shadow-md z-10">
           HẾT LƯỢT
         </div>
@@ -195,7 +194,6 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
           </div>
         </div>
       </div>
-
       {/* --- PHẦN CHI TIẾT (EXPANDED VIEW) --- */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden ${
@@ -204,7 +202,6 @@ const VoucherCard = ({ promotion, isActive = false, handleApplyDiscount }) => {
       >
         <ExpandedDetails promotion={fullPromotion} isActive={isActive} />
       </div>
-
       {/* --- CHÂN CARD (ACTIONS) --- */}
       <div className="flex items-center justify-between mt-4">
         <button

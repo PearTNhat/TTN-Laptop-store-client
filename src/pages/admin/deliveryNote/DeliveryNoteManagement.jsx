@@ -10,6 +10,7 @@ import {
   apiGetDeliveryNotes,
   apiGetDeliveryNoteDetail,
   apiDeleteDeliveryNote,
+  apiConfirmDeliveryDraft,
 } from "~/apis/deliveryNoteApi";
 import { showToastError, showToastSuccess } from "~/utils/alert";
 import DeliveryNoteList from "./components/DeliveryNoteList";
@@ -70,16 +71,16 @@ const DeliveryNoteManagement = () => {
         const newParams = new URLSearchParams(prev);
         if (searchTerm.trim()) {
           newParams.set("q", searchTerm.trim());
+          newParams.set("page", "1");
         } else {
           newParams.delete("q");
         }
-        newParams.set("page", "1");
         return newParams;
       });
     }, 500);
     return () => clearTimeout(timer);
   }, [searchTerm, setSearchParams]);
-
+  console.log(deliveryNotes);
   const handlePageChange = (page) =>
     setSearchParams((prev) => ({ ...Object.fromEntries(prev), page }));
 
@@ -157,6 +158,43 @@ const DeliveryNoteManagement = () => {
     }
   };
 
+  const handleConfirmDeliveryDraft = useCallback(
+    async (noteId, noteCode) => {
+      const result = await Swal.fire({
+        title: "Xác nhận phiếu xuất",
+        text: `Bạn có chắc chắn muốn xác nhận phiếu xuất "${noteCode}" thành hoàn thành?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#10b981",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Xác nhận",
+        cancelButtonText: "Hủy",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          console.log(accessToken);
+
+          const response = await apiConfirmDeliveryDraft({
+            accessToken,
+            id: noteId,
+          });
+          if (response.code === 200) {
+            showToastSuccess(
+              `Đã xác nhận phiếu xuất ${noteCode} thành hoàn thành`
+            );
+            fetchDeliveryNotes();
+          } else {
+            showToastError(response.message || "Không thể xác nhận phiếu xuất");
+          }
+        } catch (error) {
+          showToastError(error.message || "Lỗi khi xác nhận phiếu xuất");
+        }
+      }
+    },
+    [accessToken]
+  );
+
   const renderContent = () => {
     if (isLoading) return <LoadingSpinner />;
     if (!deliveryNotes || deliveryNotes.length === 0)
@@ -193,6 +231,7 @@ const DeliveryNoteManagement = () => {
           deliveryNotes={deliveryNotes}
           onFetchDetails={handleFetchDetails}
           onDelete={handleDeleteNote}
+          onConfirm={handleConfirmDeliveryDraft}
         />
         <Pagination
           currentPage={pagination.currentPage}
