@@ -3,9 +3,17 @@ import { FaShoppingCart } from "react-icons/fa";
 
 const formatNumber = (num) => (num || 0).toLocaleString("vi-VN");
 
-const OrderSummary = ({ order, discountAmount }) => {
-  console.log("Order Summary Data:", order, "Discount Amount:", discountAmount);
-  const finalTotal = order?.totalAmount - discountAmount;
+const OrderSummary = ({ order, discountAmount, shopDiscountAmount }) => {
+  console.log(
+    "Order Summary Data:",
+    order,
+    "Discount Amount:",
+    discountAmount,
+    "Shop Discount:",
+    shopDiscountAmount
+  );
+  const totalDiscount = (discountAmount || 0) + (shopDiscountAmount || 0);
+  const finalTotal = order?.totalAmount - totalDiscount;
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
@@ -67,12 +75,22 @@ const OrderSummary = ({ order, discountAmount }) => {
 
           {discountAmount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Giảm giá voucher:</span>
+              <span>Giảm giá voucher cá nhân:</span>
               <span className="font-semibold">
                 - {formatNumber(discountAmount)} đ
               </span>
             </div>
           )}
+
+          {shopDiscountAmount > 0 && (
+            <div className="flex justify-between text-orange-600">
+              <span>Giảm giá Shop:</span>
+              <span className="font-semibold">
+                - {formatNumber(shopDiscountAmount)} đ
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between text-xl font-bold text-blue-600 pt-3 border-t border-gray-200">
             <span>Thành tiền:</span>
             <span>{formatNumber(finalTotal > 0 ? finalTotal : 0)} đ</span>

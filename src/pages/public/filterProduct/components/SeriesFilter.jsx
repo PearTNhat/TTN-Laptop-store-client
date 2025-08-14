@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 const SeriesFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { brands } = useSelector((state) => state.brand);
-
   const selectedBrandId = searchParams.get("brandId");
   const selectedSeriesId = searchParams.get("seriesId");
 

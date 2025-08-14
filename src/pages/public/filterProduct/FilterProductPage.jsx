@@ -35,18 +35,16 @@ const FilterProductPage = () => {
         // Lấy các tham số từ URL, gán giá trị mặc định nếu cần
         const params = {
           page: currentParams.page || "0",
-          size: currentParams.limit || "12",
+          limit: currentParams.limit || "12",
           ...currentParams,
         };
         const res = await apiGetProducts({
           ...params,
         });
-        console.log(res.data);
         setProducts(res.data.content);
         setPagination({
-          totalItems: res.data.totalElements,
           totalPages: res.data.totalPages,
-          currentPage: res.data.pageNumber + 1, // API trả về trang hiện tại (0-based)
+          currentPage: res.data.pageNumber, // API trả về trang hiện tại (0-based)
         });
       } catch (err) {
         const errorMessage = err.message || "Không thể kết nối đến máy chủ.";
@@ -78,7 +76,7 @@ const FilterProductPage = () => {
             <FilterHeader totalProducts={fakeProducts.length} />
             <ProductGrid products={products} loading={loading} error={error} />
             <Pagination
-              currentPage={pagination.currentPage}
+              currentPage={pagination.currentPage + 1}
               totalPageCount={pagination.totalPages}
               onPageChange={handlePageChange}
             />

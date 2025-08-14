@@ -1,4 +1,3 @@
-import { data } from "autoprefixer";
 import { axiosPrivate, http } from "~/utils/http";
 
 export const apiLogin = async ({ body }) => {
@@ -8,15 +7,13 @@ export const apiLogin = async ({ body }) => {
     }
     const { data } = await http.post("/auth/login", body, config);
     return data;
+
   } catch (error) {
     if (error.response && error.response.data) {
       return error.response.data;
     }
-    throw new Error(error.message);
-  }
-};
-
-
+  };
+}
 
 export const apiLoginWithGoogle = async ({ code, redirectUri }) => {
   try {
@@ -49,7 +46,7 @@ export const apiChangePassword = async ({ oldPassword, newPassword, accessToken 
   try {
     const encodedOldPassword = encodeURIComponent(oldPassword);
     const encodedNewPassword = encodeURIComponent(newPassword);
-    
+
     const response = await http.put(
       `users/change-password?oldPassword=${encodedOldPassword}&newPassword=${encodedNewPassword}`,
       null,
@@ -78,9 +75,9 @@ export const apiChangePassword = async ({ oldPassword, newPassword, accessToken 
     console.error("API error:", error.response?.data || error.message);
     return {
       success: false,
-      message: error.response?.data?.message || 
-              error.message || 
-              "Không thể kết nối máy chủ"
+      message: error.response?.data?.message ||
+        error.message ||
+        "Không thể kết nối máy chủ"
     };
   }
 };

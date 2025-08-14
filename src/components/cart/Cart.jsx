@@ -70,7 +70,7 @@ const Cart = ({
     };
     processItemsWithPromotions();
   }, [cartItems, accessToken]);
-
+  // console.log("Processed Cart Items:", cartItems);
   // Handle select all items
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -142,9 +142,11 @@ const Cart = ({
         quantity: item.quantity,
         discountPrice: item.discountPrice,
         originalPrice: item.originalPrice,
+        productDetailId: item.productDetailId,
       })),
       totalAmount: totalAmount,
     };
+    console.log(formattedOrder);
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {

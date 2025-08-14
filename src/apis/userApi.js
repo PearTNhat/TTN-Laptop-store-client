@@ -1,8 +1,8 @@
 import { http } from "~/utils/http";
 
 const getAuthHeader = () => {
-  const {accessToken} = JSON.parse(localStorage.getItem("persist:shop/user"));
-  console.log("aaa",accessToken)
+  const { accessToken } = JSON.parse(localStorage.getItem("persist:shop/user"));
+  console.log("aaa", accessToken)
   return {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -27,7 +27,7 @@ export const apiFetchMyInfo = async ({ accessToken }) => {
   }
 };
 
-export const apiUpdateUserInfo = async ({ body, accessToken}) => {
+export const apiUpdateUserInfo = async ({ body, accessToken }) => {
   try {
     const config = {
       headers: {
@@ -88,8 +88,8 @@ export const apiSendOtpChangeEmail = async (email, accessToken) => {
         email,
       },
     }
-    console.log("âsa",accessToken)
-    const response = await http.get("/users/send-otp-change-email",config);
+    console.log("âsa", accessToken)
+    const response = await http.get("/users/send-otp-change-email", config);
 
     return {
       code: response.data.code,
@@ -104,7 +104,7 @@ export const apiSendOtpChangeEmail = async (email, accessToken) => {
 };
 
 /// 🆕 Đổi email
-export const apiChangeEmail = async ({ newEmail, otpCode, accessToken}) => {
+export const apiChangeEmail = async ({ newEmail, otpCode, accessToken }) => {
   try {
     const config = {
       headers: {
@@ -128,6 +128,32 @@ export const apiChangeEmail = async ({ newEmail, otpCode, accessToken}) => {
     };
   }
 };
+const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false }) => {
+  try {
+    page = page <= 1 ? 0 : page - 1;
+    const params = {
+      page,
+      size,
+      block
+    };
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params,
+    };
+    const { data } = await http.get("users/all", config);
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    }
+    throw new Error(error.message);
+  }
+};
+
+
+export { apiFetchMyInfo, apiGetAllUsers }
 
 
 export const apiGetRankUser = async({ accessToken }) => {

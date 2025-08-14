@@ -49,30 +49,37 @@ const calculatePercent = (price, priceDiscount) => {
     // toFixed trả về string, nên cần Number() để chuyển lại thành số
     return Number((((price - priceDiscount) / price) * 100).toFixed(2));
 };
-// const formatPrice = (price) => {
-//     return new Intl.NumberFormat("vi-VN", {
-//         style: "currency",
-//         currency: "VND",
-//     }).format(price);
-// };
+const formatPrice = (price) => {
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    }).format(price);
+};
 function capitalizeFirstCharacter(str) {
     if (!str) return str; // Handle empty or null strings
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-const formatPrice = (price) => {
-  if (typeof price === 'number') return price.toLocaleString('vi-VN') + ' ₫';
-  if (typeof price === 'string') return parseInt(price.replace(/\./g, ""), 10).toLocaleString('vi-VN') + ' ₫';
-  return '';
+// --- Hàm tiện ích để tạo slug ---
+const generateSlug = (text) => {
+    if (!text) return "";
+    return text
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "")
+        .replace(/--+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
 };
-
 const formatDate = (dateStr) => {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
 };
-
-export { formatNumber, convertNumberToStar, calculatePercent, covertMoneyToNumber, capitalizeFirstCharacter, formatPrice,formatDate };
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, formatDate, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };

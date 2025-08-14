@@ -1,6 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import NextArrow from "~/components/customeSlice/NextArrow";
 import PrevArrow from "~/components/customeSlice/PreviousArrow";
 import { fakeBrands } from "~/data/fakeData";
@@ -41,60 +41,21 @@ const enrichedBrands = fakeBrands.map((brand, index) => ({
 }));
 
 const BrandCard = ({ brand }) => {
-  const getBadgeColor = (badge) => {
-    switch (badge) {
-      case "Premium":
-        return "bg-gradient-to-r from-gray-600 to-gray-800";
-      case "Bestseller":
-        return "bg-gradient-to-r from-blue-500 to-blue-700";
-      case "Popular":
-        return "bg-gradient-to-r from-cyan-500 to-cyan-700";
-      case "Gaming":
-        return "bg-gradient-to-r from-red-500 to-red-700";
-      case "Business":
-        return "bg-gradient-to-r from-gray-700 to-gray-900";
-      case "Value":
-        return "bg-gradient-to-r from-green-500 to-green-700";
-      case "Innovation":
-        return "bg-gradient-to-r from-purple-500 to-purple-700";
-      default:
-        return "bg-gradient-to-r from-gray-500 to-gray-700";
-    }
-  };
-
   return (
     <div className="group relative px-3">
       <div
-        className={`bg-gradient-to-br ${brand.color} rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer border border-white/20 backdrop-blur-sm`}
+        className={`bg-gradient-to-br ${brand.bgColor} rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer border border-white/20 backdrop-blur-sm`}
       >
-        {/* Badge */}
-        <div
-          className={`absolute top-4 right-4 ${getBadgeColor(
-            brand.badge
-          )} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg`}
-        >
-          {brand.badge}
-        </div>
-
         {/* Logo */}
         <div className="relative mb-6">
           <div className="w-20 h-20 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
             <img
               src={
-                brand.logo ||
+                brand?.image ||
                 `https://logo.clearbit.com/${brand.name.toLowerCase()}.com`
               }
               alt={brand.name}
               className="w-12 h-12 object-contain"
-              onError={(e) => {
-                // Fallback 1: Try logo.clearbit.com
-                if (!e.target.src.includes("logo.clearbit.com")) {
-                  e.target.src = `https://logo.clearbit.com/${brand.name.toLowerCase()}.com`;
-                } else {
-                  // Fallback 2: Use a placeholder with brand initial
-                  e.target.src = `https://ui-avatars.com/api/?name=${brand.name}&background=4F46E5&color=fff&size=48&format=png&font-size=0.33`;
-                }
-              }}
             />
           </div>
           {/* Glow effect */}
@@ -154,6 +115,7 @@ const BrandCarousel = () => {
       },
     ],
   };
+  const { brands, isLoading: loading } = useSelector((state) => state.brand);
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
@@ -170,7 +132,7 @@ const BrandCarousel = () => {
         <div className="relative">
           {" "}
           <Slider {...settings}>
-            {enrichedBrands.map((brand) => (
+            {brands.slice(0, 5).map((brand) => (
               <BrandCard key={brand.id} brand={brand} />
             ))}
           </Slider>

@@ -23,6 +23,9 @@ const adminPaths = {
     USERS: 'users',
     BRAND: 'brand',
     SERIES: 'series',
+    PURCHASE_ORDERS: 'purchase-orders',
+    DELIVERY_NOTES: 'delivery-notes',
+    GOODS_RECEIPT: 'goods-receipt',
     CATEGORY: 'category',
     COLOR: 'color',
     PRODUCTS: 'products',
@@ -30,6 +33,7 @@ const adminPaths = {
     ORDER_CONFIRMS: 'orders/confirms',
     ORDER_MANAGEMENT: 'orders/management',
     VOUCHERS: 'vouchers',
+    RANK_LEVEL: 'rank-level',
 }
 const demoPaths = {
     CART_DEMO: '/demo/cart',

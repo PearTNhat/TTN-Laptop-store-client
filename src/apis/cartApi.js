@@ -30,7 +30,6 @@ const apiCreateCart = async ({ accessToken, productDetailId, quantity, productPr
             quantity,
             productPromotionId
         }
-        console.log(body)
         const { data } = await http.post("carts/create", body, config);
         return data;
     } catch (error) {
@@ -48,7 +47,6 @@ const apiUpdateCart = async ({ accessToken, body }) => {
             },
 
         }
-        console.log("Updating cart with access token:", accessToken, "and body:", body);
         const { data } = await http.put("carts/update", body, config);
         return data;
     } catch (error) {
@@ -60,7 +58,6 @@ const apiUpdateCart = async ({ accessToken, body }) => {
 };
 const apiDeleteCart = async ({ accessToken, pId }) => {
     try {
-        console.log("Deleting cart with access token:", accessToken, "and product ID:", pId);
         const config = {
             headers: {
                 Authorization: `Bearer ${accessToken}`,

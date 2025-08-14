@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { apiGetMyVouchers } from "~/apis/userApi";
+import { AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { apiGetMyPromotion } from "~/apis/promotionApi";
 // Component hiển thị một voucher
@@ -110,6 +109,19 @@ const VoucherCard = ({ voucher, isActive, onApply, onCopy, copiedCode }) => {
           >
             {copiedCode === voucher.name ? "✅ Đã sao chép" : "📋 Sao chép mã"}
           </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => onApply(voucher)}
+            className={`px-4 py-2 rounded-lg font-medium ${
+              isActive
+                ? "bg-green-500 text-white hover:bg-green-600 shadow-lg ring-2 ring-green-300"
+                : "bg-gradient-to-r from-lime-400 via-emerald-500 to-teal-600 text-white hover:brightness-110"
+            }`}
+          >
+            {isActive ? "Đã áp dụng ✓" : "Áp dụng ngay"}
+          </motion.button>
         </div>
       </div>
     </motion.div>
@@ -118,6 +130,7 @@ const VoucherCard = ({ voucher, isActive, onApply, onCopy, copiedCode }) => {
 
 // Component danh sách voucher
 const VoucherList = ({ onVoucherSelect = () => {} }) => {
+  const [activeCode, setActiveCode] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
   const [promotions, setPromotions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,6 +159,12 @@ const VoucherList = ({ onVoucherSelect = () => {} }) => {
 
     fetchPromotions();
   }, []);
+
+  const handleApply = (voucher) => {
+    setActiveCode((prev) => (prev === voucher.name ? null : voucher.name));
+    onVoucherSelect(voucher);
+  };
+
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
@@ -182,6 +201,8 @@ const VoucherList = ({ onVoucherSelect = () => {} }) => {
               <VoucherCard
                 key={voucher.id}
                 voucher={voucher}
+                isActive={activeCode === voucher.name}
+                onApply={handleApply}
                 onCopy={handleCopy}
                 copiedCode={copiedCode}
               />

@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FiMenu } from "react-icons/fi";
 import { IoChevronDownCircleOutline } from "react-icons/io5";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useDispatch, useSelector } from "react-redux";
 import { sideBarActions } from "~/stores/slice/sideBar";
 import { navItems } from "~/constants/navAdmin";
+import { showToastSuccess } from "~/utils/alert";
+import { userActions } from "~/stores/slice/userSlice";
 
 const SideBar = () => {
+  const navigate = useNavigate();
   const { isExpanded, isMobileOpen, isHovered } = useSelector(
     (state) => state.sideBar
   );
@@ -25,7 +28,11 @@ const SideBar = () => {
     (path) => location.pathname === path,
     [location.pathname]
   );
-
+  const handleLogout = () => {
+    dispatch(userActions.logout());
+    showToastSuccess("Đăng xuất thành công!");
+    navigate("/login");
+  };
   useEffect(() => {
     let submenuMatched = false;
     ["main"].forEach((menuType) => {
@@ -217,15 +224,17 @@ const SideBar = () => {
         }`}
       >
         <div className="flex items-center justify-between flex-1">
-          <Link to="/">
+          <button>
             {isExpanded || isHovered || isMobileOpen ? (
-              <img
-                className="rounded-full w-10 h-10"
-                src="/images/logo_stationery.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
+              <div className="">
+                <img
+                  className="rounded-full w-10 h-10"
+                  src="/images/logo_stationery.svg"
+                  alt="Logo"
+                  width={150}
+                  height={40}
+                />
+              </div>
             ) : (
               <img
                 className="rounded-full w-10 h-10"
@@ -235,7 +244,7 @@ const SideBar = () => {
                 height={32}
               />
             )}
-          </Link>
+          </button>
           <button
             className={`${
               !isExpanded && !isHovered && "hidden"
@@ -252,6 +261,36 @@ const SideBar = () => {
             <div>{renderMenuItems(navItems, "main")}</div>
           </div>
         </nav>
+      </div>
+
+      {/* Logout Button */}
+      <div className="mt-auto p-1 border-t border-gray-200">
+        <button
+          onClick={handleLogout}
+          className={`w-full menu-item group menu-item-inactive hover:menu-item-active transition-all duration-200 ${
+            !isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
+          }`}
+        >
+          <span className="menu-item-icon-size menu-item-icon-inactive group-hover:menu-item-icon-active">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          </span>
+          {(isExpanded || isHovered || isMobileOpen) && (
+            <span className="menu-item-text">Đăng xuất</span>
+          )}
+        </button>
       </div>
     </aside>
   );

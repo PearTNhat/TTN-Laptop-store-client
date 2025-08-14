@@ -323,25 +323,12 @@ export const fakeCategories = [
         imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=200&fit=crop"
     },
     {
-        id: "3",
-        name: "MacBook",
-        icon: "🍎",
-        slug: "macbook",
-        imageUrl: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=200&fit=crop"
-    },
-    {
         id: "4",
         name: "Laptop Workstation",
         icon: "⚡",
         slug: "laptop-workstation",
-        imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=300&h=200&fit=crop"
-    },
-    {
-        id: "5",
-        name: "Laptop Mỏng Nhẹ",
-        icon: "✨",
-        slug: "laptop-mong-nhe",
         imageUrl: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=300&h=200&fit=crop"
+
     }
 ];
 

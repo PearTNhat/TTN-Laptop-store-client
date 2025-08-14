@@ -37,33 +37,32 @@ http.interceptors.request.use(async function (config) {
     if (!accessToken) return config
     const decodeAccessToken = jwtDecode(accessToken)
     const currentTime = Date.now() / 1000
-    if (decodeAccessToken.exp < currentTime - 5) {
+    if (decodeAccessToken.exp < currentTime - 60) {
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
                 failedQueue.push({ resolve, reject });
             }).then(token => {
+                console.log("First token:", token)
                 config.headers.Authorization = `Bearer ${token}`;
                 return config;
             }).catch(error => {
                 return Promise.reject(error);
             });
         }
-        console.log("Access token expired, refreshing...");
         isRefreshing = true;
         try {
             const dispatch = store.dispatch
-            console.log("Refreshing token...");
             const res = await apiRefreshToken()
-            console.log("Refresh token response:", res);
             if (res.code === 200) {
                 const newAccessToken = res.data;
+                console.log("refresh", newAccessToken);
                 config.headers.Authorization = `Bearer ${res.accessToken}`
                 dispatch(userActions.setAccessToken({ accessToken: newAccessToken }))
                 processQueue(null, newAccessToken);
             } else {
                 throw new Error("Failed to refresh token");
             }
-            // return config
+            return config
         } catch (error) {
             processQueue(error, null);
             await Swal.fire("Oops!", "Đăng nhập đã hết hạn vui lòng đăng nhập lại", "info").then(() => {

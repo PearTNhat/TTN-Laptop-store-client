@@ -1,12 +1,12 @@
 import React from "react";
 import Carousel from "./components/Carousel";
 import CategoryCarousel from "./components/CategoryCarousel";
-import ProductCarousel from "./components/ProductCarousel";
 import BrandCarousel from "./components/BrandCarousel";
 import PromotionBanner from "./components/PromotionBanner";
 import NewLetter from "./components/NewLetter";
 import HotProduct from "./hotProduct/HotProduct";
 import NewProduct from "./newProduct/NewProduct";
+import HotRating from "./hotRating/HotRating";
 
 const Home = () => {
   return (
@@ -16,9 +16,10 @@ const Home = () => {
         <Carousel />
       </div>
       <CategoryCarousel />
-      <BrandCarousel />
       <HotProduct />
       <NewProduct />
+      <HotRating />
+      <BrandCarousel />
       <PromotionBanner />
       {/* <div className="bg-gradient-to-br from-red-50 to-pink-50 py-4">
         <ProductCarousel
@@ -27,13 +28,7 @@ const Home = () => {
           limit={8}
         />
       </div> */}
-      {/* <div className="bg-gradient-to-br from-blue-50 to-cyan-50 py-4">
-        <ProductCarousel
-          title="⭐ Sản phẩm đánh giá cao"
-          type="topRated"
-          limit={8}
-        />
-      </div> */}
+
       <NewLetter />
     </div>
   );

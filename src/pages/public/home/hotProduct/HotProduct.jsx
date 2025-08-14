@@ -9,7 +9,7 @@ function HotProduct() {
       const response = await apiGetProducts({
         page: 1,
         size: 10,
-        sort: "soldQuantity",
+        sortBy: "SOLD",
       });
       console.log("data", response);
       setProducts(response.data.content);

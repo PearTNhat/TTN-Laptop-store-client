@@ -2,7 +2,7 @@
 import { http } from "~/utils/http";
 
 // Lấy danh sách màu
-export const apiGetColors = async ({accessToken}) => {
+export const apiGetColors = async ({ accessToken }) => {
   try {
     const config = {
       headers: {

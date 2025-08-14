@@ -1,20 +1,26 @@
-import { FaShoppingCart, FaUsers } from "react-icons/fa";
-import { TbCategoryFilled } from "react-icons/tb";
-import { BsTicketPerforatedFill } from "react-icons/bs";
-import { RiProductHuntLine } from "react-icons/ri";
-import { IoHome } from "react-icons/io5";
+import {
+  BarChart3,
+  Users,
+  Palette,
+  ShoppingBag,
+  PackageCheck,
+  UserPlus,
+  Package,
+  ShoppingCart,
+  Ticket,
+} from "lucide-react";
+import { adminPaths } from "./paths";
 import { IoMdColorFill } from "react-icons/io";
 import { BiFontSize } from "react-icons/bi";
-import { adminPaths } from "./paths";
-
+import { TbCategoryFilled } from "react-icons/tb";
 const navItems = [
   {
-    icon: <IoHome />,
+    icon: <BarChart3 size={20} />,
     name: "Thống kê",
     path: "/admin",
   },
   {
-    icon: <FaUsers />,
+    icon: <Users size={20} />,
     name: "Người dùng",
     path: "/admin/users",
   },
@@ -30,35 +36,49 @@ const navItems = [
   },
   {
     icon: <IoMdColorFill />,
-    name: "Dòng sản phẩm",
-    path: "/admin/series",
-  },
-  {
-    icon: <IoMdColorFill />,
     name: "Màu sắc",
     path: "/admin/color",
   },
   {
-    icon: <RiProductHuntLine />,
+    icon: <Palette size={20} />,
+    name: "Dòng sản phẩm",
+    path: "/admin/series",
+  },
+  {
+    icon: <ShoppingBag size={20} />,
+    name: "Đặt hàng nhà cung cấp",
+    path: "/admin/purchase-orders",
+  },
+  {
+    icon: <PackageCheck size={20} />,
+    name: "Nhập hàng từ nhà cung cấp",
+    path: "/admin/goods-receipt",
+  },
+  {
+    icon: <UserPlus size={20} />,
+    name: "Xuất hàng cho đơn mua",
+    path: "/admin/delivery-notes",
+  },
+  {
+    icon: <Package size={20} />,
     name: "Sản phẩm",
     path: "/admin/products",
   },
   {
-    icon: <FaShoppingCart />,
-    name: "Đơn hàng",
-    subItems: [
-      {
-        name: "Quản lý đơn hàng",
-        path: adminPaths.ORDER_MANAGEMENT,
-        pro: true,
-      },
-      { name: "Chờ xác nhận", path: adminPaths.ORDER_CONFIRMS, pro: false },
-    ],
+    icon: <ShoppingCart size={20} />,
+    name: "Quản lý đơn hàng",
+    path: adminPaths.ORDER_MANAGEMENT,
   },
   {
-    icon: <BsTicketPerforatedFill />,
+    icon: <Ticket size={20} />,
     name: "Khuyến mãi",
     path: "/admin/vouchers",
   },
+  {
+    icon: <Ticket size={20} />,
+    name: "Xếp hạng",
+    path: "/admin/rank-level",
+  },
 ];
+
 export { navItems };

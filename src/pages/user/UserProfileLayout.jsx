@@ -145,7 +145,8 @@ export default function UserProfileLayout() {
 
           <a
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-full shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
+            onClick={() => localStorage.removeItem("activeTab")} 
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-indigo-600 hover:to-sky-600 rounded-lg shadow transition"
           >
             <span className="text-xl">🏠</span>
             <span>Trang chủ</span>
@@ -158,21 +159,11 @@ export default function UserProfileLayout() {
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            {userNavItems.map((item, index) => (
-              <NavLink
-                key={index}
-                to={item.path}
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-                    isActive
-                      ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
-                      : "bg-sky-100 text-sky-700 hover:bg-sky-200"
-                  }`
-                }
-              >
-                {item.icon} {item.name}
-              </NavLink>
-            ))}
+            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
+            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
+            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
+            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
+            <TabButton active={activeTab === "change_email"} onClick={() => changeTab("change_email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
           </nav>
 
           {/* Nội dung tab */}
@@ -181,4 +172,22 @@ export default function UserProfileLayout() {
       </div>
     </div>
   );
-}
+};
+
+// Tab Button component
+const TabButton = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    className={`px-4 py-2 rounded-full text-sm font-medium transition-all 
+      ${
+        active
+          ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
+          : "bg-sky-100 text-sky-700 hover:bg-sky-200"
+      }`}
+  >
+    {children}
+  </button>
+);
+
+export default Profile;
+

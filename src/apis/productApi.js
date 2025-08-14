@@ -6,7 +6,9 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice,
     brandId,
     seriesId,
     sortBy,
-    sortDirection }) => {
+    sortDirection,
+    keyword
+}) => {
     try {
         page = page <= 1 ? 0 : page - 1;
         const params = {
@@ -18,7 +20,8 @@ const apiGetProducts = async ({ page = 1, size = 10, minPrice,
             brandId,
             seriesId,
             sortBy,
-            sortDirection
+            sortDirection,
+            keyword
         }
         const config = {
             params
@@ -43,4 +46,119 @@ const apiGetDetailProduct = async ({ pId }) => {
         throw new Error(error.message);
     }
 };
-export { apiGetProducts, apiGetDetailProduct };
+const apiGetListProducts = async ({ accessToken, page = 1, size = 10, keyword, brandId }) => {
+    try {
+        page = page <= 1 ? 0 : page - 1;
+        const params = {
+            page,
+            size,
+            keyword,
+            brandId
+        }
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params
+        }
+        const { data } = await http.get("products", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiCreateProduct = async ({ accessToken, body }) => {
+    try {
+        console.log(body);
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.post("products/create", body, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiUpdateProduct = async ({ accessToken, body, id }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.patch(`products/update/${id}`, body, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+const apiDeleteProduct = async ({ accessToken, id }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.delete(`products/${id}`, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+
+
+const apiDeleteProductDetail = async ({ accessToken, id }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+        const { data } = await http.delete(`product-details/${id}`, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+const apiGetAllProductDetails = async ({ accessToken, page = 1, size = 10, title }) => {
+    try {
+        page = page <= 1 ? 0 : page - 1;
+        const params = {
+            page,
+            size,
+            title
+        }
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            params
+        }
+        const { data } = await http.get("product-details/search", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+}
+export { apiGetProducts, apiGetDetailProduct, apiGetListProducts, apiCreateProduct, apiUpdateProduct, apiDeleteProduct, apiDeleteProductDetail, apiGetAllProductDetails };

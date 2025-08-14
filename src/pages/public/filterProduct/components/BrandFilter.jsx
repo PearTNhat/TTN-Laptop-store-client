@@ -1,21 +1,13 @@
 import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Select from "react-select";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchBrands } from "~/stores/action/brand";
+import { useSelector } from "react-redux";
 
 const BrandFilter = () => {
-  const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const { brands, isLoading: loading } = useSelector((state) => state.brand);
 
   const selectedBrandId = searchParams.get("brandId");
-
-  useEffect(() => {
-    if (brands.length === 0) {
-      dispatch(fetchBrands());
-    }
-  }, [dispatch, brands.length]);
 
   const handleSelectBrand = (selectedOption) => {
     const newSearchParams = new URLSearchParams(searchParams);

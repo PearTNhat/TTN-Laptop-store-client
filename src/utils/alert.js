@@ -69,6 +69,23 @@ const showToastError = (message) => {
     })
 }
 
+/**
+ * Hiển thị dialog xác nhận.
+ * @param {string} message - Nội dung tin nhắn.
+ */
+const showToastConfirm = (message) => {
+    return Swal.fire({
+        title: 'Xác nhận',
+        text: message,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Xác nhận',
+        cancelButtonText: 'Hủy',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => result.isConfirmed);
+}
+
 export {
     showAlertInfo,
     showToastSuccess,
@@ -76,5 +93,6 @@ export {
     showToastWarning,
     showAlertError,
     showAlertSuccess,
-    confirmAlert // Đã sửa tên hàm từ confirmAleart -> confirmAlert
+    confirmAlert, // Đã sửa tên hàm từ confirmAleart -> confirmAlert
+    showToastConfirm
 }

@@ -13,12 +13,10 @@ function Pagination({
     currentPage,
     totalPageCount,
   });
-  console.log("Pagination Range:", currentPage);
   // Nếu chỉ có 1 trang hoặc không có item nào, không hiển thị pagination
   if (currentPage === 0) {
     return null;
   }
-
   const onPrevious = () => {
     onPageChange(currentPage - 1);
   };
