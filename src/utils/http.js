@@ -56,13 +56,13 @@ http.interceptors.request.use(async function (config) {
             if (res.code === 200) {
                 const newAccessToken = res.data;
                 console.log("refresh", newAccessToken);
-                config.headers.Authorization = `Bearer ${res.accessToken}`
+                config.headers.Authorization = `Bearer ${newAccessToken}`
                 dispatch(userActions.setAccessToken({ accessToken: newAccessToken }))
                 processQueue(null, newAccessToken);
+                return config
             } else {
                 throw new Error("Failed to refresh token");
             }
-            return config
         } catch (error) {
             processQueue(error, null);
             await Swal.fire("Oops!", "Đăng nhập đã hết hạn vui lòng đăng nhập lại", "info").then(() => {

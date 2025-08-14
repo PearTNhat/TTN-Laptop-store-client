@@ -13,7 +13,6 @@ import DateTimeForm from "./DateTimeForm";
 import ProductSelectionForm from "./ProductSelectionForm";
 import UserSelectionForm from "./UserSelectionForm";
 import RankSelectionForm from "./RankSelectionForm";
-import UserOrRankSelector from "./UserOrRankSelector";
 import { apiGetAllUsers } from "~/apis/userApi";
 import { useDebounce } from "~/hooks/useDebounce";
 import { apiListRank } from "~/apis/rankApi";
@@ -392,6 +391,21 @@ const PromotionFormModal = ({
               />
             </div>
           )}
+
+          {/* User/Rank Selection for USER_PROMOTION */}
+          {watchPromotionType === "USER_PROMOTION" && (
+            <div>
+              <UserSelectionForm
+                users={users}
+                selectedUsers={selectedUsers}
+                userSearch={userSearch}
+                userLoading={userLoading}
+                onToggleUserSelection={toggleUserSelection}
+                onUserSearch={(e) => setUserSearch(e.target.value)}
+              />
+            </div>
+          )}
+
           {/* Rank Selection for GIFT */}
           {watchPromotionType === "GIFT" && (
             <div>

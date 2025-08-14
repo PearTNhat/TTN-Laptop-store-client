@@ -8,7 +8,7 @@ import { sideBarActions } from "~/stores/slice/sideBar";
 import { navItems } from "~/constants/navAdmin";
 import { showToastSuccess } from "~/utils/alert";
 import { userActions } from "~/stores/slice/userSlice";
-
+import { Laptop } from "~/assets/images";
 const SideBar = () => {
   const navigate = useNavigate();
   const { isExpanded, isMobileOpen, isHovered } = useSelector(
@@ -226,19 +226,19 @@ const SideBar = () => {
         <div className="flex items-center justify-between flex-1">
           <button>
             {isExpanded || isHovered || isMobileOpen ? (
-              <div className="">
+              <Link to="/">
                 <img
                   className="rounded-full w-10 h-10"
-                  src="/images/logo_stationery.svg"
+                  src={Laptop}
                   alt="Logo"
                   width={150}
                   height={40}
                 />
-              </div>
+              </Link>
             ) : (
               <img
                 className="rounded-full w-10 h-10"
-                src="/images/logo_stationery.svg"
+                src={Laptop}
                 alt="Logo"
                 width={32}
                 height={32}

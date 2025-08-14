@@ -51,7 +51,7 @@ const BrandCard = ({ brand }) => {
           <div className="w-20 h-20 mx-auto bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
             <img
               src={
-                brand?.image ||
+                // brand?.image ||
                 `https://logo.clearbit.com/${brand.name.toLowerCase()}.com`
               }
               alt={brand.name}

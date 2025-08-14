@@ -8,4 +8,3 @@ export { default as DateTimeForm } from './DateTimeForm';
 export { default as ProductSelectionForm } from './ProductSelectionForm';
 export { default as UserSelectionForm } from './UserSelectionForm';
 export { default as RankSelectionForm } from './RankSelectionForm';
-export { default as UserOrRankSelector } from './UserOrRankSelector';

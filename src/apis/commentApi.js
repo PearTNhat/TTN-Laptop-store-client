@@ -11,6 +11,24 @@ const apiGetComments = async ({ pId }) => {
         throw new Error(error.message);
     }
 };
+const apiGetRatingProductDetailId = async ({ productDetailId, page, size }) => {
+    try {
+        const config = {
+            params: {
+                productDetailId,
+                page,
+                size,
+            },
+        };
+        const { data } = await http.get("/reviews/comments", config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
 const apiReplyComment = async ({ accessToken, body }) => {
     try {
         const config = {
@@ -43,4 +61,4 @@ const apiComment = async ({ accessToken, body }) => {
         throw new Error(error.message);
     }
 }
-export { apiGetComments, apiReplyComment, apiComment };
+export { apiGetComments, apiReplyComment, apiComment, apiGetRatingProductDetailId };
