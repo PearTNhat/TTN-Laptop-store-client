@@ -30,7 +30,7 @@ const apiConfirmDeliveryDraft = async ({ accessToken, id }) => {
                 Authorization: `Bearer ${accessToken}`,
             },
         }
-        const { data } = await http.post(`delivery-notes/confirm/${id}`, config);
+        const { data } = await http.put(`delivery-notes/confirm/${id}`, {}, config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

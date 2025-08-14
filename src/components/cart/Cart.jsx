@@ -74,7 +74,7 @@ const Cart = ({
   // Handle select all items
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedItems(cartItems.map((item) => item.id));
+      setSelectedItems(cartItems.map((item) => item.productDetailId));
     } else {
       setSelectedItems([]);
     }

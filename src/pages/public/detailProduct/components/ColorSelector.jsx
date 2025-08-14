@@ -1,6 +1,11 @@
 import ImageWithFallback from "~/components/ImageWithFallback";
 
-function ColorSelector({ product, colorProduct, setColorProduct }) {
+function ColorSelector({
+  product,
+  colorProduct,
+  setColorProduct,
+  setSearchParams,
+}) {
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
       <div className="flex items-center gap-4 mb-4">
@@ -26,7 +31,14 @@ function ColorSelector({ product, colorProduct, setColorProduct }) {
                   ? "border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg ring-4 ring-blue-200"
                   : "border-gray-200 hover:border-gray-400 bg-white hover:shadow-md"
               }`}
-              onClick={() => setColorProduct(item)}
+              onClick={() => {
+                setSearchParams((prev) => {
+                  const newParams = new URLSearchParams(prev);
+                  newParams.set("pId", item.id);
+                  return newParams;
+                });
+                setColorProduct(item);
+              }}
             >
               <ImageWithFallback
                 src={item.thumbnail}

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 // Import utils and components
 import Breadcrumbs from "~/components/Breadcrumbs";
@@ -24,6 +24,7 @@ import PromotionSection from "./components/PromotionSection";
 // ✨ Import the new ToggleIcon component
 function DetailProduct() {
   const { pId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const descRef = useRef(null);
   const navigate = useNavigate();
@@ -43,6 +44,10 @@ function DetailProduct() {
     appliedPromotion: {},
   });
   const isOutOfStock = !colorProduct?.quantity || colorProduct?.quantity === 0;
+  const currentParams = useMemo(
+    () => Object.fromEntries([...searchParams]),
+    [searchParams]
+  );
   const getDetailProduct = async (pId) => {
     try {
       const response = await apiGetDetailProduct({ pId });
@@ -51,8 +56,16 @@ function DetailProduct() {
       } else {
         setProduct(response.data);
         setProductDetails(response?.data?.productDetails);
-        if (response?.data?.productDetails?.length > 0) {
+        if (
+          response?.data?.productDetails?.length > 0 &&
+          currentParams.pId === ""
+        ) {
           setColorProduct(response.data.productDetails[0]);
+          setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set("pId", response.data.productDetails[0].id);
+            return newParams;
+          });
         }
       }
     } catch (error) {
@@ -153,7 +166,25 @@ function DetailProduct() {
       setFinalPriceInfo(priceInfo);
     }
   }, [colorProduct, selectedPromotion]);
-  console.log("color product", colorProduct);
+  useEffect(() => {
+    if (!currentParams.pId) {
+      showToastError("Chi tiết sản phẩm không tồn tại");
+
+      return;
+    }
+    if (colorProduct && currentParams.pId == colorProduct?.id) return;
+    let found = false;
+    for (const detail of productDetails) {
+      if (detail.id == currentParams.pId) {
+        setColorProduct(detail);
+        found = true;
+      }
+    }
+    if (!found) {
+      setColorProduct({});
+      showToastError("Chi tiết sản phẩm không tồn tại");
+    }
+  }, [currentParams]);
   useEffect(() => {
     const element = descRef.current;
     if (element) {
@@ -216,6 +247,7 @@ function DetailProduct() {
                   product={productDetails}
                   colorProduct={colorProduct}
                   setColorProduct={setColorProduct}
+                  setSearchParams={setSearchParams}
                 />
 
                 {/* Quantity Selector Component */}

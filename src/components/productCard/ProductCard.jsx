@@ -48,7 +48,9 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Hình ảnh sản phẩm */}
-      <Link to={`/products/${product.productId}`}>
+      <Link
+        to={`/products/${product.productId}?pId=${product.productDetailId}`}
+      >
         <div className="relative w-full h-56 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6 overflow-hidden">
           <img
             src={product.itemImage || DefaultProduct}
