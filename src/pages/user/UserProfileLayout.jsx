@@ -20,7 +20,9 @@ export default function UserProfileLayout() {
         const response = await apiFetchMyInfo({ accessToken });
         if (response.code === 200 && response.data) {
           setAvatar(response.data.avatar);
-          const name = `${response.data.lastName || ""} ${response.data.firstName || ""}`.trim();
+          const name = `${response.data.lastName || ""} ${
+            response.data.firstName || ""
+          }`.trim();
           setFullName(name || "Người dùng");
         }
 
@@ -96,7 +98,9 @@ export default function UserProfileLayout() {
 
             {/* Thông tin người dùng */}
             <div>
-              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">{fullName}</h1>
+              <h1 className="text-2xl font-bold text-sky-800 dark:text-white">
+                {fullName}
+              </h1>
               <div className="space-y-2">
                 <p className="text-sm text-sky-600 dark:text-gray-400 flex items-center gap-2">
                   <span>Thành viên hạng: </span>
@@ -112,10 +116,15 @@ export default function UserProfileLayout() {
                         Tiến tới hạng <strong>{userRank.nextRank.name}</strong>
                       </span>
                       <span className="ml-2">
-                        {new Intl.NumberFormat("vi-VN").format(userRank.amountUsed || 0)}đ /{" "}
                         {new Intl.NumberFormat("vi-VN").format(
-                          userRank.spendingToNextRank + (userRank.amountUsed || 0)
-                        )}đ
+                          userRank.amountUsed || 0
+                        )}
+                        đ /{" "}
+                        {new Intl.NumberFormat("vi-VN").format(
+                          userRank.spendingToNextRank +
+                            (userRank.amountUsed || 0)
+                        )}
+                        đ
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -124,7 +133,8 @@ export default function UserProfileLayout() {
                         style={{
                           width: `${Math.min(
                             ((userRank.amountUsed || 0) /
-                              (userRank.spendingToNextRank + (userRank.amountUsed || 0))) *
+                              (userRank.spendingToNextRank +
+                                (userRank.amountUsed || 0))) *
                               100,
                             100
                           )}%`,
@@ -136,7 +146,8 @@ export default function UserProfileLayout() {
 
                 {!userRank?.nextRank && userRank?.currentRank && (
                   <p className="text-xs text-green-600 font-medium">
-                    🎉 Bạn đã đạt hạng cao nhất: <strong>{userRank.currentRank.name}</strong>
+                    🎉 Bạn đã đạt hạng cao nhất:{" "}
+                    <strong>{userRank.currentRank.name}</strong>
                   </p>
                 )}
               </div>
@@ -145,8 +156,7 @@ export default function UserProfileLayout() {
 
           <a
             href="/"
-            onClick={() => localStorage.removeItem("activeTab")} 
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-indigo-600 hover:to-sky-600 rounded-lg shadow transition"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-full shadow-md transition-all duration-300 hover:scale-105 active:scale-95"
           >
             <span className="text-xl">🏠</span>
             <span>Trang chủ</span>
@@ -159,35 +169,26 @@ export default function UserProfileLayout() {
         <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300">
           {/* Tabs */}
           <nav className="flex flex-wrap gap-3 mb-4 border-b pb-3">
-            <TabButton active={activeTab === "info"} onClick={() => changeTab("info")}>👤 Thông tin</TabButton>
-            <TabButton active={activeTab === "orders"} onClick={() => changeTab("orders")}>📦 Đơn hàng</TabButton>
-            <TabButton active={activeTab === "vouchers"} onClick={() => changeTab("vouchers")}>🎟 Voucher</TabButton>
-            <TabButton active={activeTab === "password"} onClick={() => changeTab("password")}>🔒 Đổi mật khẩu</TabButton>
-            <TabButton active={activeTab === "change_email"} onClick={() => changeTab("change_email")}>✉️ Đổi email</TabButton> {/* 👉 mới */}
+            {userNavItems.map((item, index) => (
+              <NavLink
+                key={index}
+                to={item.path}
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                    isActive
+                      ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
+                      : "bg-sky-100 text-sky-700 hover:bg-sky-200"
+                  }`
+                }
+              >
+                {item.icon} {item.name}
+              </NavLink>
+            ))}
           </nav>
-
           {/* Nội dung tab */}
           <Outlet />
         </div>
       </div>
     </div>
   );
-};
-
-// Tab Button component
-const TabButton = ({ active, onClick, children }) => (
-  <button
-    onClick={onClick}
-    className={`px-4 py-2 rounded-full text-sm font-medium transition-all 
-      ${
-        active
-          ? "bg-gradient-to-r from-sky-500 to-indigo-500 text-white shadow-lg"
-          : "bg-sky-100 text-sky-700 hover:bg-sky-200"
-      }`}
-  >
-    {children}
-  </button>
-);
-
-export default Profile;
-
+}

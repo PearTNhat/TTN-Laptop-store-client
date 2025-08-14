@@ -16,14 +16,15 @@ import RatingBox from "../RatingBox";
 import { formatPrice, formatDate } from "~/utils/helper";
 
 const OrderDetails = ({ isOpen, onClose, order }) => {
+  if (!order) return null;
   const [selectedOrder, setSelectedOrder] = useState(order);
+
   useEffect(() => {
     if (order) {
+      console.log("Order data:", order)
       setSelectedOrder(order);
     }
   }, [order]);
-
-  if (!order) return null;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -100,17 +101,14 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
               {/* Shipping Info */}
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <h3 className="font-bold text-gray-800 text-lg mb-4 flex items-center">
-                  <FiTruck className="mr-2 text-indigo-500" /> Thông tin giao
-                  hàng
+                  <FiTruck className="mr-2 text-indigo-500" /> Thông tin giao hàng
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-start pb-3 border-b border-gray-100">
                     <FiUser className="mt-1 mr-2 text-gray-600" />
                     <div>
                       <p className="text-gray-600">Người nhận</p>
-                      <p className="font-medium text-gray-800">
-                        {order.recipient}
-                      </p>
+                      <p className="font-medium text-gray-800">{order.recipient}</p>
                     </div>
                   </div>
 
@@ -118,9 +116,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                     <FiMapPin className="mt-1 mr-2 text-gray-600" />
                     <div>
                       <p className="text-gray-600">Địa chỉ</p>
-                      <p className="font-medium text-gray-800">
-                        {order.address}
-                      </p>
+                      <p className="font-medium text-gray-800">{order.address}</p>
                     </div>
                   </div>
 
@@ -174,9 +170,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                             </div>
                             <div>
                               <p className="text-gray-500">SSD</p>
-                              <p className="font-medium">
-                                {item.hardDriveValue}
-                              </p>
+                              <p className="font-medium">{item.hardDriveValue}</p>
                             </div>
                             <div>
                               <p className="text-gray-500">Màu sắc</p>
@@ -189,10 +183,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                           </div>
                           <div className="flex justify-between items-center">
                             <p className="text-gray-600 text-sm">
-                              Đơn giá:{" "}
-                              <span className="font-medium">
-                                {formatPrice(item.price)}
-                              </span>
+                              Đơn giá: <span className="font-medium">{formatPrice(item.price)}</span>
                             </p>
                             <p className="font-bold text-indigo-600 text-xl">
                               {formatPrice(item.price * item.quantity)}
@@ -201,7 +192,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                         </div>
                       </div>
                       <div className="mt-6 pt-4 border-t border-gray-100">
-                        <RatingBox />
+                        <RatingBox orderId={order.id} productDetailId={item.productDetailId} />
                       </div>
                     </motion.div>
                   ))}

@@ -108,8 +108,10 @@ const PromotionFormModal = ({
 
   const loadUsers = useCallback(
     async (search = "") => {
-      if (watchPromotionType !== "USER_PROMOTION" || selectedRanks.length > 0)
+      if (watchPromotionType !== "USER_PROMOTION" || selectedRanks.length > 0) {
         return;
+      }
+      console.log("_______", watchPromotionType, selectedRanks);
 
       setUserLoading(true);
       try {
@@ -118,7 +120,7 @@ const PromotionFormModal = ({
           params: {
             page: 0,
             size: 20,
-            search: search.trim(),
+            search: search.trim() || undefined,
           },
         });
 

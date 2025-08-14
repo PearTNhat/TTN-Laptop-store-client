@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   FiCalendar,
   FiInfo,
   FiShoppingCart,
   FiPackage,
-  FiTruck,
-} from "react-icons/fi";
+  FiTruck
+} from 'react-icons/fi';
 import { formatPrice, formatDate } from "~/utils/helper";
 
 const OrderItem = ({ order, onDetail, onBuyAgain }) => {
@@ -22,6 +22,7 @@ const OrderItem = ({ order, onDetail, onBuyAgain }) => {
     return <FiInfo className="text-yellow-400 text-md" />;
   };
 
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-shadow mb-6 overflow-hidden">
       {/* Header */}
@@ -37,9 +38,7 @@ const OrderItem = ({ order, onDetail, onBuyAgain }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${order.statusBadge}`}
-            >
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${order.statusBadge}`}>
               {order.status}
             </span>
             <div className="flex items-center gap-2 text-gray-600">
@@ -105,9 +104,7 @@ const OrderItem = ({ order, onDetail, onBuyAgain }) => {
               </div>
             ))}
             {order.items.length > 4 && (
-              <p className="text-sm text-gray-500">
-                +{order.items.length - 4} sản phẩm khác
-              </p>
+              <p className="text-sm text-gray-500">+{order.items.length - 4} sản phẩm khác</p>
             )}
           </div>
           {/* {zoomImage && (
@@ -146,12 +143,8 @@ const OrderItem = ({ order, onDetail, onBuyAgain }) => {
               </div>
               <div className="border-t border-gray-300 my-2"></div>
               <div className="flex justify-between items-center">
-                <span className="text-base font-semibold text-gray-800">
-                  Tổng cộng:
-                </span>
-                <span className="text-xl font-bold text-orange-600">
-                  {formatPrice(order.total)}
-                </span>
+                <span className="text-base font-semibold text-gray-800">Tổng cộng:</span>
+                <span className="text-xl font-bold text-orange-600">{formatPrice(order.total)}</span>
               </div>
             </div>
 

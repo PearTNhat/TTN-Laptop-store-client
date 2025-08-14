@@ -128,7 +128,7 @@ export const apiChangeEmail = async ({ newEmail, otpCode, accessToken }) => {
     };
   }
 };
-const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false }) => {
+export const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false }) => {
   try {
     page = page <= 1 ? 0 : page - 1;
     const params = {
@@ -153,20 +153,18 @@ const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false 
 };
 
 
-export { apiFetchMyInfo, apiGetAllUsers }
 
-
-export const apiGetRankUser = async({ accessToken }) => {
-  try{
-    const config={
+export const apiGetRankUser = async ({ accessToken }) => {
+  try {
+    const config = {
       headers: {
-        Authorization:`Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     }
     const { data } = await http.get("rank-levels/user", config);
     return data;
   } catch (error) {
-    if (error.res && error.res.data){
+    if (error.res && error.res.data) {
       return error.res.data;
     }
     throw new Error(error.message)
@@ -191,12 +189,12 @@ export const apiPostRating = async ({ accessToken, content, reviewImage, product
 
 
 // để đưa qua usermanagement
-export const apiGetRoles = async ({accessToken}) => {
+export const apiGetRoles = async ({ accessToken }) => {
   try {
     const { data } = await http.get("/roles", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    return data; 
+    return data;
   } catch (error) {
     console.error("Lỗi getRoles:", error);
     throw error;
@@ -207,7 +205,7 @@ export const apiChangeUserRole = async ({ userId, roleId, accessToken }) => {
   try {
     const payload = {
       userId,
-      roleIds: [roleId], 
+      roleIds: [roleId],
     };
     const config = {
       headers: {
@@ -257,3 +255,4 @@ export const apiDeleteUser = async ({ userId, accessToken }) => {
     };
   }
 };
+

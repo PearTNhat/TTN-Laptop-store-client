@@ -13,7 +13,6 @@ import Register from "./pages/public/auth/Register/Register";
 import ResetPassword from "./pages/public/auth/ResetPassword";
 import ChangeEmail from "./pages/user/components/ChangeEmail";
 import ChangePassword from "./pages/user/components/ChangePassword";
-import Voucher from "~/components/Voucher";
 import ProfileInfo from "./pages/user/components/ProfileInfo";
 import UserProfileLayout from "./pages/user/UserProfileLayout";
 import {
@@ -69,7 +68,7 @@ function App() {
         {/* router user */}
         <Route path="/user" element={<UserProfileLayout />}>
           <Route path="profile" element={<ProfileInfo />} />
-          <Route path="voucher" element={<VoucherList/>} />
+          <Route path="voucher" element={<VoucherList />} />
           <Route path="orders" element={<MyOrders />} />
           <Route path="change-password" element={<ChangePassword />} />
           <Route path="change_email" element={<ChangeEmail />} />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
 import { apiGetMyPromotion } from "~/apis/promotionApi";
 // Component hiển thị một voucher
 const VoucherCard = ({ voucher, isActive, onApply, onCopy, copiedCode }) => {

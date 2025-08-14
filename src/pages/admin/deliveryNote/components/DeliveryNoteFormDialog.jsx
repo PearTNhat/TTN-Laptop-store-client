@@ -64,8 +64,6 @@ const DeliveryNoteFormDialog = ({
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      console.log("Submitting delivery note:", formData);
-
       const response = await apiCreateDeliveryNote({
         accessToken,
         body: formData,

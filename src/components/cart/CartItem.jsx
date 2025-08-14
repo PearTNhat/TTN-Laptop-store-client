@@ -11,12 +11,9 @@ const CartItem = ({
   onUpdateQuantity,
   onRemoveItem,
 }) => {
-  console.log("item:", item);
   const handleIncreaseQuantity = () => {
-    // Kiểm tra trước khi tăng
     if (item?.appliedPromotion && item?.appliedPromotion.usageLimit) {
       const remainingUses = item.appliedPromotion.usageLimit;
-      // Nếu số lượng hiện tại đã bằng số lượt còn lại, lần tăng tiếp theo sẽ vi phạm
       if (item.quantity >= remainingUses) {
         showToastWarning(
           `Vượt quá giới hạn khuyến mãi! KM sẽ không áp dụng nếu tăng số lượng.`
@@ -53,7 +50,7 @@ const CartItem = ({
         <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
           {item.thumbnail ? (
             <Link
-              to={`/products/${item.productDetailId}`}
+              to={`/products/${item.productId}?pId=${item.productDetailId}`}
               className="block w-full h-full"
             >
               <img

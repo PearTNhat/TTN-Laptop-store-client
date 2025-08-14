@@ -51,7 +51,6 @@ const RankFormDialog = ({ isOpen, setIsOpen, editingRank, onSuccess }) => {
         params: {
           page: 1,
           size: 100,
-          code: "",
           promotionType: "GIFT",
           status: "ACTIVE",
         },
@@ -66,7 +65,7 @@ const RankFormDialog = ({ isOpen, setIsOpen, editingRank, onSuccess }) => {
       setLoadingPromotions(false);
     }
   };
-
+  console.log(promotions);
   // Effect để load promotions khi dialog mở
   useEffect(() => {
     if (isOpen) {

@@ -167,14 +167,10 @@ function DetailProduct() {
     }
   }, [colorProduct, selectedPromotion]);
   useEffect(() => {
-    if (!currentParams.pId) {
-      showToastError("Chi tiết sản phẩm không tồn tại");
-
-      return;
-    }
     if (colorProduct && currentParams.pId == colorProduct?.id) return;
     let found = false;
     for (const detail of productDetails) {
+      console.log("_________________", detail.id, currentParams.pId);
       if (detail.id == currentParams.pId) {
         setColorProduct(detail);
         found = true;
@@ -182,9 +178,8 @@ function DetailProduct() {
     }
     if (!found) {
       setColorProduct({});
-      showToastError("Chi tiết sản phẩm không tồn tại");
     }
-  }, [currentParams]);
+  }, [currentParams, colorProduct]);
   useEffect(() => {
     const element = descRef.current;
     if (element) {

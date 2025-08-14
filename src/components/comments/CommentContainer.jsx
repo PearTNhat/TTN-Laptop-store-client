@@ -129,7 +129,7 @@ function CommentContainer({
         <div className="space-y-6">
           {comments?.map((comment) => (
             <div
-              key={comment._id}
+              key={comment.id}
               className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0"
             >
               <Comment

@@ -146,7 +146,6 @@ const Cart = ({
       })),
       totalAmount: totalAmount,
     };
-    console.log(formattedOrder);
     // Navigate to checkout với data
     navigate("/checkout", {
       state: {

@@ -43,7 +43,7 @@ const OrderSelector = ({ onOrderSelect, preselectedOrder }) => {
           params: {
             page: 1,
             size: 30,
-            status: "PROCESSING",
+            // status: "PROCESSING",
             code: keyword,
           },
         });
