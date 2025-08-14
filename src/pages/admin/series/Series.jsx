@@ -29,31 +29,31 @@ function Series() {
 
   const seriesPerPage = 5;
 
+  const fetchSeries = async () => {
+    setIsLoading(true);
+    try {
+      const res = await apiGetSeries();
+
+      // 📌 LOG DỮ LIỆU NHẬN ĐƯỢC
+      console.log("📦 Kết quả từ API getSeries:", res);
+
+      // Kiểm tra nếu res là { code: 200, data: [...] }
+      const list = Array.isArray(res?.data) ? res.data : [];
+
+      const formatted = list.map((item) => ({
+        ...item,
+        brandName: item.brandName || "Unknown",
+      }));
+
+      setSeries(formatted);
+    } catch (error) {
+      console.error("❌ Lỗi khi gọi getSeries:", error);
+      toast.error("Không thể tải danh sách series");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchSeries = async () => {
-      setIsLoading(true);
-      try {
-        const res = await apiGetSeries();
-
-        // 📌 LOG DỮ LIỆU NHẬN ĐƯỢC
-        console.log("📦 Kết quả từ API getSeries:", res);
-
-        // Kiểm tra nếu res là { code: 200, data: [...] }
-        const list = Array.isArray(res?.data) ? res.data : [];
-
-        const formatted = list.map((item) => ({
-          ...item,
-          brandName: item.brandName || "Unknown",
-        }));
-
-        setSeries(formatted);
-      } catch (error) {
-        console.error("❌ Lỗi khi gọi getSeries:", error);
-        toast.error("Không thể tải danh sách series");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     const fetchBrands = async () => {
       try {
         const res = await apiGetBrands();
@@ -76,14 +76,10 @@ function Series() {
       const res = await apiCreateSeries({ brandId: newSeries.brandId, body: newSeries, accessToken });
       if (res.success) {
         const brand = brands.find(b => String(b.id) === String(newSeries.brandId));
-        const seriesWithBrand = {
-          ...res.data,
-          name: res.data.name || newSeries.name,
-          description: res.data.description || newSeries.description,
-          brandName: brand ? brand.name : "Unknown"
-        };
+        
 
-        setSeries([seriesWithBrand, ...series]);
+        // setSeries([seriesWithBrand, ...series]);
+            fetchSeries();
         toast.success("Thêm dòng sản phẩm thành công!");
         setShowDialog(false);
       } else {

@@ -40,6 +40,7 @@ import DeliveryNoteManagement from "./pages/admin/deliveryNote";
 import GoodsReceiptManagement from "./pages/admin/goodsReceipt";
 import RankLevelMangement from "./pages/admin/rankLevel/RankLevelMangement";
 import MyOrders from "./pages/user/components/myOrder/MyOrders";
+import VoucherList from "./pages/user/components/VoucherList";
 
 function App() {
   const { childrenModal, isShowModal } = useSelector((state) => state.modal);
@@ -68,7 +69,7 @@ function App() {
         {/* router user */}
         <Route path="/user" element={<UserProfileLayout />}>
           <Route path="profile" element={<ProfileInfo />} />
-          <Route path="voucher" element={<Voucher />} />
+          <Route path="voucher" element={<VoucherList/>} />
           <Route path="orders" element={<MyOrders />} />
           <Route path="change-password" element={<ChangePassword />} />
           <Route path="change_email" element={<ChangeEmail />} />
