@@ -255,4 +255,28 @@ export const apiDeleteUser = async ({ userId, accessToken }) => {
     };
   }
 };
+export const apiCheckRating = async ({ orderId, accessToken }) => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    };
+
+    const { data } = await http.get(
+      `reviews/rating/${orderId}`,
+      config
+    );
+
+    console.log("API Check Rating:", data);
+    return data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      console.error("Lỗi check rating:", error.response.data);
+      return error.response.data;
+    }
+    throw new Error(error.message);
+  }
+};
+
 

@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FiShoppingCart,
-  FiInfo,
-  FiTruck,
-  FiCheckCircle,
-  FiX,
-  FiCalendar,
+import { 
+  FiShoppingCart, 
+  FiInfo, 
+  FiTruck, 
+  FiCheckCircle, 
+  FiX, 
+  FiCalendar
 } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import { apiGetOrders } from "~/apis/orderApi";
-import OrderItem from "./OrderItem";
+import { formatPrice, formatDate } from "~/utils/helper"; 
+import OrderItem from './OrderItem';
 import OrderDetails from "./OrderDetail";
 
 import { mapApiOrderToState } from "./OrderStatus";
+
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -24,12 +26,13 @@ const MyOrders = () => {
   const [size, setSize] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
         const res = await apiGetOrders({ accessToken, page, size });
+        console.log("res orders: ", res)
         if (res.code === 200) {
           const mappedOrders = res.data.content.map(mapApiOrderToState);
           setOrders(mappedOrders);
@@ -46,16 +49,7 @@ const MyOrders = () => {
     setSelectedOrder(order);
     setIsOpen(true);
   };
-
-  const handleBuyAgain = (order) => {
-    const cartItems = order.items.map((item) => ({
-      name: item.name,
-      quantity: item.quantity,
-    }));
-    console.log("Thêm vào giỏ hàng:", cartItems);
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -71,9 +65,7 @@ const MyOrders = () => {
           <div className="w-24 h-24 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiShoppingCart className="text-4xl text-blue-500" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-3">
-            Bạn chưa có đơn hàng nào
-          </h3>
+          <h3 className="text-2xl font-bold text-gray-800 mb-3">Bạn chưa có đơn hàng nào</h3>
           <p className="text-gray-600 mb-8 text-lg">
             Hãy bắt đầu mua sắm để xem các đơn hàng tại đây
           </p>
@@ -94,12 +86,8 @@ const MyOrders = () => {
             <FiShoppingCart className="text-2xl" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              Đơn hàng của tôi
-            </h2>
-            <p className="text-gray-600 mt-1">
-              Quản lý và theo dõi đơn hàng của bạn
-            </p>
+            <h2 className="text-2xl font-bold text-gray-800">Đơn hàng của tôi</h2>
+            <p className="text-gray-600 mt-1">Quản lý và theo dõi đơn hàng của bạn</p>
           </div>
         </div>
       </div>
@@ -115,10 +103,9 @@ const MyOrders = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              <OrderItem
-                order={order}
+              <OrderItem 
+                order={order} 
                 onDetail={handleDetail}
-                onBuyAgain={handleBuyAgain}
               />
             </motion.div>
           ))}
@@ -134,9 +121,9 @@ const MyOrders = () => {
                 key={i}
                 onClick={() => setPage(i)}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                  page === i
-                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  page === i 
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {i + 1}
@@ -146,10 +133,10 @@ const MyOrders = () => {
         </div>
       )}
 
-      <OrderDetails
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        order={selectedOrder}
+      <OrderDetails 
+        isOpen={isOpen} 
+        onClose={() => setIsOpen(false)} 
+        order={selectedOrder} 
       />
     </div>
   );
