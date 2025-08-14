@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { apiPostRating } from "~/apis/userApi";
+import { apiPostRating, apiCheckRating } from "~/apis/userApi";
 import { apiGetImgString } from "~/apis/fileApi";
 
-const RatingBox = ({ orderId, productDetailId }) => {
+const RatingBox = ({ orderId, productId, productDetailId, orderStatus }) => {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -11,24 +11,39 @@ const RatingBox = ({ orderId, productDetailId }) => {
   const [previewImages, setPreviewImages] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isReviewed, setIsReviewed] = useState(false);
+  const [canRate, setCanRate] = useState(true);
   const { accessToken } = useSelector((state) => state.user);
 
-  // Placeholder: Kiểm tra trạng thái đánh giá
+  // ✅ Kiểm tra trạng thái đánh giá + trạng thái đơn hàng
   useEffect(() => {
     const checkReviewStatus = async () => {
+      console.log("sss: ", orderId, orderStatus, productDetailId)
       try {
-        // TODO: Tích hợp API kiểm tra trạng thái đánh giá nếu có
-        console.log("Checking review status for:", { orderId, productDetailId });
+        if (orderStatus !== "Hoàn thành") {
+          setCanRate(false);
+          return;
+        }
+        const res = await apiCheckRating({ orderId, accessToken });
+        if (res.code === 200 && res.data) {
+          setIsReviewed(true);
+          setCanRate(false);
+        } else {
+          setIsReviewed(false);
+          setCanRate(true);
+        }
       } catch (error) {
-        console.error("Lỗi khi kiểm tra trạng thái đánh giá:", error.message);
+        console.error("❌ Lỗi khi kiểm tra trạng thái đánh giá:", error.message);
       }
     };
-    checkReviewStatus();
-  }, [accessToken, orderId, productDetailId]);
+    if (orderId && accessToken) {
+      checkReviewStatus();
+    }
+  }, [accessToken, orderId, orderStatus]);
 
   // Xử lý chọn ảnh và hiển thị preview
   const handleImageChange = async (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     console.log("Selected files:", files.length);
     const newPreviewImages = files.map((file) => URL.createObjectURL(file));
     setPreviewImages((prev) => [...prev, ...newPreviewImages]);
@@ -44,25 +59,16 @@ const RatingBox = ({ orderId, productDetailId }) => {
         const formData = new FormData();
         formData.append("file", file);
         const response = await apiGetImgString({ accessToken, formData });
-        console.log("Uploaded image URL:", response);
-        const imageUrl = response?.data; // Lấy URL từ response.data
+        const imageUrl = response?.data;
         if (imageUrl && typeof imageUrl === "string") {
           uploadedImageUrls.push(imageUrl);
         } else {
           console.error("Invalid image URL in response:", response);
         }
       }
-      console.log("Valid uploaded URLs:", uploadedImageUrls);
-      setReviewImage((prev) => {
-        const newImages = [...prev, ...uploadedImageUrls];
-        console.log("Updated reviewImage:", newImages);
-        return newImages;
-      });
-      if (uploadedImageUrls.length === 0 && files.length > 0) {
-        alert("Không thể lấy URL ảnh. Vui lòng thử lại.");
-      }
+      setReviewImage((prev) => [...prev, ...uploadedImageUrls]);
     } catch (error) {
-      console.error("Lỗi khi upload ảnh:", error.message);
+      console.error("❌ Lỗi khi upload ảnh:", error.message);
       alert("Không thể upload ảnh. Vui lòng thử lại.");
     } finally {
       setIsUploading(false);
@@ -71,31 +77,17 @@ const RatingBox = ({ orderId, productDetailId }) => {
 
   // Gửi đánh giá
   const handleSubmit = async () => {
-    console.log("RatingBox props:", { orderId, productDetailId });
-    console.log("Current reviewImage:", reviewImage);
-    console.log("Payload trước khi gửi:", {
-      accessToken: accessToken ? "Có token" : "Không có token",
-      content: comment,
-      reviewImage,
-      productDetailId,
-      orderId,
-      rating: selectedRating,
-    });
     if (!selectedRating) {
       alert("Vui lòng chọn số sao!");
       return;
     }
     if (!productDetailId) {
-      alert("Lỗi: productDetailId không hợp lệ! Vui lòng liên hệ hỗ trợ.");
+      alert("Lỗi: productDetailId không hợp lệ!");
       return;
     }
     if (previewImages.length > 0 && reviewImage.length === 0 && isUploading) {
       alert("Vui lòng chờ ảnh upload hoàn tất!");
       return;
-    }
-    if (previewImages.length > 0 && reviewImage.length === 0) {
-      alert("Upload ảnh thất bại. Bạn có muốn gửi đánh giá mà không có ảnh?");
-      // Có thể cho phép tiếp tục hoặc dừng
     }
     try {
       const response = await apiPostRating({
@@ -106,30 +98,30 @@ const RatingBox = ({ orderId, productDetailId }) => {
         orderId,
         rating: selectedRating,
       });
-      console.log("API response:", response);
       if (response.code === 200) {
-        alert("Đánh giá đã được gửi thành công!");
+        alert("Đánh giá thành công!");
         setComment("");
         setSelectedRating(0);
         setReviewImage([]);
         setPreviewImages([]);
         setIsReviewed(true);
-      } else if (response.code === 500 && response.message.includes("duplicate key value violates unique constraint")) {
-        alert("Bạn đã gửi đánh giá cho sản phẩm này rồi. Mỗi sản phẩm chỉ được đánh giá một lần.");
-        setIsReviewed(true);
+        setCanRate(false);
       } else {
-        alert("Gửi đánh giá thất bại. Vui lòng thử lại.");
+        alert(response.message || "Gửi đánh giá thất bại.");
       }
     } catch (error) {
-      console.error("Lỗi khi gửi đánh giá:", error.message);
-      alert(`Có lỗi xảy ra khi gửi đánh giá: ${error.message}`);
+      console.error("❌ Lỗi khi gửi đánh giá:", error.message);
+      alert(`Có lỗi xảy ra: ${error.message}`);
     }
   };
 
-  if (isReviewed) {
+  // ⛔ Không cho đánh giá nếu đã review hoặc chưa hoàn thành
+  if (!canRate) {
     return (
       <div className="mt-3 bg-gray-50 p-3 rounded-md text-gray-600 text-sm">
-        Bạn đã gửi đánh giá cho sản phẩm này.
+        {isReviewed
+          ? "Bạn đã gửi đánh giá cho sản phẩm này."
+          : "Chỉ có thể đánh giá khi đơn hàng ở trạng thái Hoàn thành."}
       </div>
     );
   }
@@ -170,7 +162,6 @@ const RatingBox = ({ orderId, productDetailId }) => {
           accept="image/*"
           multiple
           onChange={handleImageChange}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           disabled={isUploading}
         />
       </div>
@@ -182,7 +173,7 @@ const RatingBox = ({ orderId, productDetailId }) => {
               key={index}
               src={src}
               alt={`Preview ${index + 1}`}
-              className="w-20 h-20 object-cover rounded-md border border-gray-200"
+              className="w-20 h-20 object-cover rounded-md border"
             />
           ))}
         </div>

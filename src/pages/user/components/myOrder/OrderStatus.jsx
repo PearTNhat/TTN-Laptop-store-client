@@ -63,7 +63,7 @@ export const mapApiOrderToState = (apiOrder) => {
   };
 
   return {
-    id: apiOrder.id,
+    idOrder: apiOrder.id,
     code: apiOrder.code,
     date: apiOrder.createdAt,
     status: statusInfo.display,
@@ -74,7 +74,8 @@ export const mapApiOrderToState = (apiOrder) => {
     address: apiOrder.address,
     phone: apiOrder.phone,
     items: apiOrder.orderDetails.map((detail) => ({
-      id: detail.id,
+      idproductDetail: detail.productDetailId,
+      idproduct: detail.productId,
       name: detail.title,
       price: detail.price,
       quantity: detail.quantity,

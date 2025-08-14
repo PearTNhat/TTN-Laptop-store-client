@@ -19,6 +19,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
   const [selectedOrder, setSelectedOrder] = useState(order);
   useEffect(() => {
     if (order) {
+      console.log("📦 selectedOrder:", selectedOrder);
       setSelectedOrder(order);
     }
   }, [order]);
@@ -201,7 +202,12 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                         </div>
                       </div>
                       <div className="mt-6 pt-4 border-t border-gray-100">
-                        <RatingBox />
+                        <RatingBox
+                          orderId={selectedOrder.idOrder}
+                          productId={item.idproduct}
+                          productDetailId={item.idproductDetail}
+                          orderStatus={selectedOrder.status}
+                        />
                       </div>
                     </motion.div>
                   ))}

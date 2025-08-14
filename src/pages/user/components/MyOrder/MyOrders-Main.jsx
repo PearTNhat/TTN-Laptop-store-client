@@ -16,6 +16,7 @@ import OrderItem from './OrderItem';
 import OrderDetails from "./OrderDetail";
 
 import { mapApiOrderToState } from "./OrderStatus";
+
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +32,7 @@ const MyOrders = () => {
       setIsLoading(true);
       try {
         const res = await apiGetOrders({ accessToken, page, size });
+        console.log("res orders: ", res)
         if (res.code === 200) {
           const mappedOrders = res.data.content.map(mapApiOrderToState);
           setOrders(mappedOrders);
@@ -47,16 +49,7 @@ const MyOrders = () => {
     setSelectedOrder(order);
     setIsOpen(true);
   };
-
-  const handleBuyAgain = (order) => {
-    const cartItems = order.items.map(item => ({
-      name: item.name,
-      quantity: item.quantity
-    }));
-    console.log("Thêm vào giỏ hàng:", cartItems);
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  };
-
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
