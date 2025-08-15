@@ -82,4 +82,13 @@ const formatDate = (dateStr) => {
         year: 'numeric'
     });
 };
-export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, formatDate, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };
+const formatDateSencond = (dateString) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
+export { formatNumber, convertNumberToStar, calculatePercent, formatPrice, formatDate, formatDateSencond, covertMoneyToNumber, capitalizeFirstCharacter, generateSlug };

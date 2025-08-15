@@ -12,11 +12,12 @@ import ColorSelector from "./components/ColorSelector";
 import QuantitySelector from "./components/QuantitySelector";
 import ActionButtons from "./components/ActionButtons";
 import CommentContainer from "~/components/comments/CommentContainer";
+import RatingContainer from "./components/RatingContainer";
 import { apiGetDetailProduct } from "~/apis/productApi";
 import { apiCreateCart } from "~/apis/cartApi";
 import { useDispatch, useSelector } from "react-redux";
 import DOMPurify from "dompurify";
-import { apiGetComments } from "~/apis/commentApi";
+import { apiGetComments, apiGetRatingProductDetailId } from "~/apis/commentApi";
 import { fetchCart } from "~/stores/action/cart";
 import { calculateFinalPrice } from "~/utils/promotion";
 import PromotionSection from "./components/PromotionSection";
@@ -36,6 +37,7 @@ function DetailProduct() {
   const [isReadMore, setIsReadMore] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [comments, setComments] = useState([]);
+  const [ratings, setRatings] = useState([]);
   const [fetchCommentAgain, setFetchCommentAgain] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [finalPriceInfo, setFinalPriceInfo] = useState({
@@ -84,7 +86,23 @@ function DetailProduct() {
       console.error("Error fetching products:", error);
     }
   };
-
+  const getRatings = async ({ productDetailId }) => {
+    try {
+      const params = {
+        productDetailId: productDetailId,
+        page: 1,
+        size: 10,
+      };
+      const response = await apiGetRatingProductDetailId({ ...params });
+      if (response.code !== 200) {
+        showToastError(response.message);
+      } else {
+        setRatings(response.data.content);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
   // ✨ Hàm xử lý khi người dùng chọn/bỏ chọn voucher
   const handleApplyPromotion = (promotion) => {
     setSelectedPromotion(promotion);
@@ -154,6 +172,7 @@ function DetailProduct() {
   useEffect(() => {
     if (!colorProduct.id) return;
     getComments(colorProduct.id);
+    getRatings({ productDetailId: colorProduct.id });
   }, [colorProduct.id, fetchCommentAgain, accessToken]);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -170,7 +189,6 @@ function DetailProduct() {
     if (colorProduct && currentParams.pId == colorProduct?.id) return;
     let found = false;
     for (const detail of productDetails) {
-      console.log("_________________", detail.id, currentParams.pId);
       if (detail.id == currentParams.pId) {
         setColorProduct(detail);
         found = true;
@@ -194,6 +212,8 @@ function DetailProduct() {
       setSelectedPromotion(null);
     }
   }, [quantity]);
+  console.log("color____", colorProduct);
+  console.log("rating", ratings);
   return (
     <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Breadcrumb Section */}
@@ -308,6 +328,18 @@ function DetailProduct() {
           </div>
         </div>
         <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-2">
+            <h2 className="font-bold text-2xl flex items-center gap-3">
+              <span className="text-2xl">⭐</span>
+              Đánh giá sản phẩm
+            </h2>
+          </div>
+
+          <div className="p-6">
+            <RatingContainer ratings={ratings} />
+          </div>
+        </div>
+        <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2">
             <h2 className="font-bold text-2xl flex items-center gap-3">
               <span className="text-2xl">💬</span>
@@ -320,7 +352,6 @@ function DetailProduct() {
               productDetailId={colorProduct.id}
               setFetchCommentAgain={setFetchCommentAgain}
               comments={comments}
-              totalRating={productDetails?.totalRating}
             />
           </div>
         </div>

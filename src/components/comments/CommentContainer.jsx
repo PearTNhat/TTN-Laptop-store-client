@@ -8,12 +8,7 @@ import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiComment, apiReplyComment } from "~/apis/commentApi";
 import { useSelector } from "react-redux";
 
-function CommentContainer({
-  productDetailId,
-  comments,
-  totalRating,
-  setFetchCommentAgain,
-}) {
+function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
   const [affectedComment, setAffectedComment] = useState(null);
   const { accessToken } = useSelector((state) => state.user);
   // Mock handlers
@@ -79,15 +74,8 @@ function CommentContainer({
     console.log("Delete comment:", { commentId });
   };
 
-  const handleShowModalUpdateRating = () => {
-    console.log("Show update rating modal");
-  };
   const currentUserAvatar = "https://randomuser.me/api/portraits/men/1.jpg";
   // Tìm comment của user hiện tại
-  const rated = comments?.find(
-    (comment) => comment._id === comments._id && comment?.rating > 0
-  );
-
   return (
     <div
       className="space-y-8 max-h-[1000px] 
@@ -99,9 +87,6 @@ function CommentContainer({
         "
     >
       {/* Vote Bar */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
-        <VoteBar totalRating={totalRating} comments={comments} />
-      </div>
       <div className="bg-white p-6 rounded-2xl border">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Bình luận</h3>
         <CommentForm
@@ -110,15 +95,6 @@ function CommentContainer({
           onSubmit={handleSubmitComment}
         />
       </div>
-      {rated && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6">
-          <YourRating
-            comment={rated}
-            handleShowModalUpdateRating={handleShowModalUpdateRating}
-            handleDeleteComment={handleDeleteComment}
-          />
-        </div>
-      )}
 
       {/* Comments List */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">

@@ -13,14 +13,16 @@ const apiGetComments = async ({ pId }) => {
 };
 const apiGetRatingProductDetailId = async ({ productDetailId, page, size }) => {
     try {
+        let params = {
+            productDetailId,
+            page: page <= 1 ? 0 : page - 1,
+            size,
+        }
+
         const config = {
-            params: {
-                productDetailId,
-                page,
-                size,
-            },
+            params
         };
-        const { data } = await http.get("/reviews/comments", config);
+        const { data } = await http.get("/reviews/ratings", config);
         return data;
     } catch (error) {
         if (error.response && error.response.data) {

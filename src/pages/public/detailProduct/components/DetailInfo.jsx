@@ -18,7 +18,6 @@ function DetailInfo({ configs }) {
   const shortInfo = configsArr.slice(0, 6);
 
   const handleClickViewDetail = () => {
-    console.log("Clicked view detail with configs:", configsArr);
     dispatch(
       modalActions.toggleModal({
         isShowModal: true,
