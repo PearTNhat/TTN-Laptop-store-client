@@ -96,7 +96,6 @@ function Header() {
     //   navigate("/admin");
     // }
   }, [userData]);
-
   const handleLogout = () => {
     dispatch(userActions.logout());
     showToastSuccess("Đăng xuất thành công!");
@@ -105,7 +104,12 @@ function Header() {
 
   // Lọc dropdown profile dựa trên role
   const filteredDropDownProfile = dropDownProfile.filter(
-    (item) => !(item.name === "Admin" && userData?.role?.roleId === "112")
+    (item) =>
+      !(
+        item.name === "Quản lý" &&
+        userData?.roles?.length > 0 &&
+        userData?.roles[0]?.id !== "ADMIN"
+      )
   );
 
   // Các hàm xử lý giỏ hàng (giữ nguyên)

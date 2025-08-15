@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { capitalizeFirstCharacter, convertNumberToStar } from "~/utils/helper";
 
-function ProductInfo({ product, colorProduct, totalRating }) {
+function ProductInfo({ product, colorProduct, totalRating, countRating }) {
   const stars = useCallback(() => {
     return convertNumberToStar(totalRating);
   }, [totalRating]);
@@ -35,7 +35,7 @@ function ProductInfo({ product, colorProduct, totalRating }) {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-gray-600 text-sm font-medium">
-            ({totalRating} đánh giá)
+            ({countRating} đánh giá)
           </span>
           <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-lg text-xs font-semibold">
             Đánh giá tốt

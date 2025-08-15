@@ -83,7 +83,9 @@ const formatDate = (dateStr) => {
     });
 };
 const formatDateSencond = (dateString) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+    const date = new Date(dateString);
+    date.setHours(date.getHours() + 7); // cộng thêm 7 giờ
+    return date.toLocaleDateString("vi-VN", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",

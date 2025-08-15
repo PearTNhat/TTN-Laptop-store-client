@@ -212,8 +212,6 @@ function DetailProduct() {
       setSelectedPromotion(null);
     }
   }, [quantity]);
-  console.log("color____", colorProduct);
-  console.log("rating", ratings);
   return (
     <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Breadcrumb Section */}
@@ -248,6 +246,7 @@ function DetailProduct() {
                 product={product}
                 colorProduct={colorProduct}
                 totalRating={colorProduct.totalRating || 0}
+                countRating={ratings.length}
               />
               {/* Product Price Component */}
               <ProductPrice
@@ -336,7 +335,10 @@ function DetailProduct() {
           </div>
 
           <div className="p-6">
-            <RatingContainer ratings={ratings} />
+            <RatingContainer
+              ratings={ratings}
+              totalRating={colorProduct.totalRating}
+            />
           </div>
         </div>
         <div className="mt-8 bg-white rounded-2xl shadow-xl overflow-hidden">

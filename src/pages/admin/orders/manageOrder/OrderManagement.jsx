@@ -10,7 +10,7 @@ import {
   FaStickyNote,
 } from "react-icons/fa";
 import { getPaymentMethodStyle } from "../utils/orderHelper";
-import { formatPrice } from "~/utils/helper";
+import { formatDateSencond, formatPrice } from "~/utils/helper";
 import {
   apiGetOrderList,
   apiGetOrderDetail,
@@ -324,19 +324,8 @@ const OrderManagement = () => {
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-900">
                             {order?.createdDate
-                              ? formatDate(
-                                  new Date(order.createdDate),
-                                  "dd/MM/yyyy"
-                                )
+                              ? formatDateSencond(order.createdDate)
                               : "N/A"}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {order?.createdDate
-                              ? formatDate(
-                                  new Date(order.createdDate),
-                                  "HH:mm:ss"
-                                )
-                              : ""}
                           </div>
                         </td>
                         <td className="px-6 py-4">
