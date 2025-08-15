@@ -217,7 +217,7 @@ function DetailProduct() {
       {/* Breadcrumb Section */}
       <div className="py-6 bg-white shadow-sm border-b border-gray-200">
         <div className="main-container">
-          <Breadcrumbs title={product.title?.split("-")[0]} />
+          <Breadcrumbs title={colorProduct?.title} />
         </div>
       </div>
 

@@ -63,4 +63,20 @@ const apiComment = async ({ accessToken, body }) => {
         throw new Error(error.message);
     }
 }
-export { apiGetComments, apiReplyComment, apiComment, apiGetRatingProductDetailId };
+const apiDeleteComment = async ({ accessToken, commentId }) => {
+    try {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        };
+        const { data } = await http.delete(`/reviews/${commentId}`, config);
+        return data;
+    } catch (error) {
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        throw new Error(error.message);
+    }
+};
+export { apiGetComments, apiReplyComment, apiComment, apiGetRatingProductDetailId, apiDeleteComment };

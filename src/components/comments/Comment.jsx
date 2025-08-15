@@ -40,7 +40,6 @@ function Comment({
   replies,
   currentUserId,
   onDelete,
-  onUpdate,
   handleSubmitComment,
   affectedComment,
   setAffectedComment,
@@ -93,7 +92,7 @@ function Comment({
           </button>
           {isUserComment && (
             <button
-              className="hover:underline text-red-500"
+              className="hover:underline"
               onClick={() => onDelete({ commentId: comment.id })}
             >
               Xóa
@@ -123,7 +122,6 @@ function Comment({
               replies={[]} // A reply doesn't have further nested replies in this model
               currentUserId={currentUserId}
               onDelete={onDelete}
-              onUpdate={onUpdate}
               handleSubmitComment={handleSubmitComment}
               affectedComment={affectedComment}
               setAffectedComment={setAffectedComment}

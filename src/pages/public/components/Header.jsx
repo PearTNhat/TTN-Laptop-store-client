@@ -1,13 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  ShoppingCart,
-  Menu,
-  X,
-  Home,
-  Laptop,
-  Search,
-  LogOut,
-} from "lucide-react";
+import { ShoppingCart, Menu, X, Home, LogOut, Laptop } from "lucide-react";
 import { useNavigate, NavLink, Link } from "react-router-dom";
 import { dropDownProfile } from "~/constants/dropdown";
 import { showToastError, showToastSuccess } from "~/utils/alert";
@@ -21,7 +13,7 @@ import { fetchCart } from "~/stores/action/cart";
 import { cartActions } from "~/stores/slice/cartSlice";
 import { apiDeleteCart, apiUpdateCart } from "~/apis/cartApi";
 import { fetchMyAddress } from "~/stores/action/address";
-import { DefaultUser } from "~/assets/images";
+import { DefaultUser, LaptopLogo } from "~/assets/images";
 import { SearchBar } from "./SearchBar";
 import { fetchBrands } from "~/stores/action/brand";
 
@@ -149,13 +141,8 @@ function Header() {
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                <Laptop className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:inline">
-                Laptop Store
-              </span>
+            <Link to="/" className="mr-4">
+              <img src={LaptopLogo} alt="" width={120} height={40} />
             </Link>
 
             {/* Desktop Navigation */}

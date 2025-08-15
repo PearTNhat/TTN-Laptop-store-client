@@ -104,6 +104,18 @@ const ProductRow = ({ index, remove, orderProducts }) => {
     setValue(`details.${index}.serialProductItemId`, newSerials);
   };
 
+  // Lọc serial khả dụng cho từng vị trí
+  // selectedSerials tạo arr = quantity, chọn 1 ô và kiểm tra trong  selectedSerials có tồn tại chưa và bỏ qua nếu tồn tại
+  const getAvailableSerials = (currentSerialIndex) => {
+    return serialOptions.filter((serial) => {
+      // Loại bỏ serial đã được chọn ở các vị trí khác
+      return !selectedSerials.some(
+        (selectedSerial, selectedIndex) =>
+          selectedSerial === serial && selectedIndex !== currentSerialIndex
+      );
+    });
+  };
+
   return (
     <TableRow className="hover:bg-gray-50">
       {/* Chọn sản phẩm từ order */}
@@ -196,19 +208,26 @@ const ProductRow = ({ index, remove, orderProducts }) => {
                   >
                     <SelectTrigger className="flex-1">
                       <SelectValue
-                        placeholder={`Chọn serial ${serialIndex + 1}...`}
+                        placeholder={`Chọn serial ${serialIndex + 1}... (${
+                          getAvailableSerials(serialIndex).length
+                        } khả dụng)`}
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {serialOptions.map((serial) => {
-                        return (
-                          <SelectItem key={serial} value={serial}>
-                            <div className="flex flex-col">
-                              <span className="font-mono">{serial}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
+                      {getAvailableSerials(serialIndex).map((serial) => (
+                        <SelectItem key={serial} value={serial}>
+                          <div className="flex flex-col">
+                            <span className="font-mono">{serial}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                      {getAvailableSerials(serialIndex).length === 0 && (
+                        <SelectItem value="" disabled>
+                          <div className="text-gray-500 italic">
+                            Không còn serial khả dụng
+                          </div>
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <span className="text-xs text-gray-500">

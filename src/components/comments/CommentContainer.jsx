@@ -1,16 +1,19 @@
 import { useCallback, useState } from "react";
-import VoteBar from "./VoteBar";
 import Comment from "./Comment";
-import YourRating from "./YourRating";
 import CommentForm from "./CommentForm";
 import { DefaultUser } from "~/assets/images";
 import { showToastError, showToastSuccess } from "~/utils/alert";
-import { apiComment, apiReplyComment } from "~/apis/commentApi";
+import {
+  apiComment,
+  apiReplyComment,
+  apiDeleteComment,
+} from "~/apis/commentApi";
 import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
   const [affectedComment, setAffectedComment] = useState(null);
-  const { accessToken } = useSelector((state) => state.user);
+  const { accessToken, userData } = useSelector((state) => state.user);
   // Mock handlers
   const handleSubmitComment = useCallback(
     async ({ rating, content, parentId, replyOnUser, images }) => {
@@ -62,17 +65,40 @@ function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
         setAffectedComment(null);
       }
     },
-    [productDetailId, accessToken]
+    [productDetailId, accessToken, setFetchCommentAgain]
   );
 
-  const handleUpdateComment = ({ commentId, content, rating }) => {
-    console.log("Update comment:", { commentId, content, rating });
-    setAffectedComment(null);
-  };
-
-  const handleDeleteComment = ({ commentId }) => {
-    console.log("Delete comment:", { commentId });
-  };
+  const handleDeleteComment = useCallback(
+    async ({ commentId }) => {
+      try {
+        // Hiển thị confirm dialog trước khi xóa
+        const r = await Swal.fire({
+          title: "Xóa bình luận",
+          text: "Bạn có chắc chắn muốn xóa bình luận này không?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Xóa",
+          cancelButtonText: "Hủy",
+        });
+        if (r.isConfirmed) {
+          const res = await apiDeleteComment({
+            accessToken,
+            commentId,
+          });
+          if (res.code === 200) {
+            setFetchCommentAgain((prev) => !prev);
+            showToastSuccess("Xóa bình luận thành công!");
+          } else {
+            showToastError(res.message || "Có lỗi xảy ra khi xóa bình luận");
+          }
+        }
+      } catch (error) {
+        const errorMessage = error.message || "Có lỗi xảy ra khi xóa bình luận";
+        showToastError(errorMessage);
+      }
+    },
+    [accessToken, setFetchCommentAgain]
+  );
 
   const currentUserAvatar = "https://randomuser.me/api/portraits/men/1.jpg";
   // Tìm comment của user hiện tại
@@ -109,14 +135,13 @@ function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
               className="border-b border-gray-100 pb-6 last:border-b-0 last:pb-0"
             >
               <Comment
-                userId={comment.userId}
                 comment={comment}
+                currentUserId={userData?.id}
                 isAdmin={false}
                 affectedComment={affectedComment}
                 setAffectedComment={setAffectedComment}
                 handleSubmitComment={handleSubmitComment}
-                handleUpdateComment={handleUpdateComment}
-                handleDeleteComment={handleDeleteComment}
+                onDelete={handleDeleteComment}
                 replies={comment.childReviewResponses || []}
               />
             </div>
