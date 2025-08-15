@@ -32,7 +32,8 @@ export const statusBadges = {
   PENDING: "bg-yellow-500/10 text-yellow-800 border border-yellow-300",
   AWAITING: "bg-orange-500/10 text-orange-800 border border-orange-300",
   PROCESSING: "bg-blue-500/10 text-blue-800 border border-blue-300",
-  PARTIALLY_DELIVERED: "bg-indigo-500/10 text-indigo-800 border border-indigo-300",
+  PARTIALLY_DELIVERED:
+    "bg-indigo-500/10 text-indigo-800 border border-indigo-300",
   DELIVERED: "bg-green-500/10 text-green-800 border border-green-300",
   COMPLETED: "bg-green-600/10 text-green-900 border border-green-400",
   CANCELED: "bg-red-500/10 text-red-800 border border-red-300",
@@ -49,18 +50,20 @@ export const statusDisplayMap = {
 };
 
 export const mapApiOrderToState = (apiOrder) => {
-  console.log("Raw order from API:", JSON.stringify(apiOrder, null, 2)); // Debug dữ liệu API thô
   const statusKey = apiOrder.status;
 
   const statusInfo = {
     display: statusDisplayMap[statusKey] || statusKey,
-    color: statusColors[statusKey] || "bg-gray-100 text-gray-800 border-gray-200",
-    badge: statusBadges[statusKey] || "bg-gray-100 text-gray-800 border border-gray-300",
+    color:
+      statusColors[statusKey] || "bg-gray-100 text-gray-800 border-gray-200",
+    badge:
+      statusBadges[statusKey] ||
+      "bg-gray-100 text-gray-800 border border-gray-300",
     icon: statusIcons[statusKey] || <FiInfo />,
   };
 
-  const mappedOrder = {
-    id: apiOrder.id,
+  return {
+    idOrder: apiOrder.id,
     code: apiOrder.code,
     date: apiOrder.createdAt,
     status: statusInfo.display,
@@ -70,9 +73,10 @@ export const mapApiOrderToState = (apiOrder) => {
     recipient: apiOrder.recipient,
     address: apiOrder.address,
     phone: apiOrder.phone,
-    items: (apiOrder.orderDetails || apiOrder.items || []).map(detail => ({
-      id: detail.id,
-      title: detail.title || detail.name,
+    items: apiOrder.orderDetails.map((detail) => ({
+      idproductDetail: detail.productDetailId,
+      idproduct: detail.productId,
+      name: detail.title,
       price: detail.price,
       quantity: detail.quantity,
       ramValue: detail.ramValue,
@@ -80,11 +84,7 @@ export const mapApiOrderToState = (apiOrder) => {
       colorName: detail.colorName,
       thumbnail: detail.thumbnail,
       description: detail.description,
-      productDetailId: detail.productDetailId,
-      serialNumber: detail.serialNumber,
     })),
     total: apiOrder.totalPrice,
   };
-  console.log("Mapped order:", JSON.stringify(mappedOrder, null, 2)); // Debug order đã ánh xạ
-  return mappedOrder;
 };
