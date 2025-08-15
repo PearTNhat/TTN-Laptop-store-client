@@ -16,6 +16,7 @@ import {
   getPromotionTypeText,
 } from "../utils/helper";
 import PromotionDetailList from "./PromotionDetailList";
+import { formatDateSencond } from "~/utils/helper";
 
 const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
   if (!isOpen || !promotion) return null;
@@ -27,21 +28,10 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
     }).format(price);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const getUsagePercentage = () => {
     if (promotion.usageLimit === 0) return 0;
     return Math.round((promotion.usageCount / promotion.usageLimit) * 100);
   };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -161,8 +151,8 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-1">Giới hạn sử dụng</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {promotion.usageLimit === 0
+                  <p className="text-2xl font-bold  text-blue-600">
+                    {promotion.usageLimit == undefined
                       ? "Không giới hạn"
                       : promotion.usageLimit}
                   </p>
@@ -176,7 +166,7 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
                 <div className="text-center">
                   <p className="text-sm text-gray-600 mb-1">Còn lại</p>
                   <p className="text-2xl font-bold text-blue-600">
-                    {promotion.usageLimit === 0
+                    {promotion.usageLimit == undefined
                       ? "Không giới hạn"
                       : promotion.usageLimit - promotion.usageCount}
                   </p>
@@ -216,7 +206,7 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
                   <p className="font-medium text-blue-900">Ngày bắt đầu</p>
                 </div>
                 <p className="text-blue-800 font-semibold">
-                  {formatDate(promotion.startDate)}
+                  {formatDateSencond(promotion.startDate)}
                 </p>
               </div>
 
@@ -226,7 +216,7 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
                   <p className="font-medium text-red-900">Ngày kết thúc</p>
                 </div>
                 <p className="text-red-800 font-semibold">
-                  {formatDate(promotion.endDate)}
+                  {formatDateSencond(promotion.endDate)}
                 </p>
               </div>
 
@@ -236,7 +226,7 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
                   <p className="font-medium text-gray-900">Ngày tạo</p>
                 </div>
                 <p className="text-gray-800 font-semibold">
-                  {formatDate(promotion.createdAt)}
+                  {formatDateSencond(promotion.createdAt)}
                 </p>
               </div>
             </div>
