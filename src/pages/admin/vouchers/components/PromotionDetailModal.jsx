@@ -252,7 +252,9 @@ const PromotionDetailModal = ({ promotion, isOpen, onClose }) => {
             )}
 
           {/* Detail Data Section */}
-          {promotion.detailData && promotion.detailData.length > 0 ? (
+          {promotion.detailData &&
+          promotion.detailData.length > 0 &&
+          !promotion.detailData[0]?.notice ? (
             <div className="mb-6">
               <PromotionDetailList
                 detailData={promotion.detailData}

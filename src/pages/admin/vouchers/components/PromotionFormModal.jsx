@@ -60,7 +60,7 @@ const PromotionFormModal = ({
       discountUnit: "PERCENT",
       promotionType: "USER_PROMOTION",
       minOrderValue: 0,
-      maxDiscountValue: 0,
+      maxDiscountValue: null,
       usageLimit: null,
       startDate: "",
       endDate: "",

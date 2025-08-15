@@ -51,8 +51,6 @@ function Vouchers() {
     [searchParams]
   );
 
-  const [totalElements, setTotalElements] = useState(0);
-
   // Modal states
   const [detailModal, setDetailModal] = useState({
     isOpen: false,
@@ -84,7 +82,6 @@ function Vouchers() {
           currentPage: response.data.pageNumber + 1,
           totalPages: response.data.totalPages,
         });
-        setTotalElements(response.data.totalElements || 0);
       } else {
         setPromotions([]);
         showToastError(response.message || "Không thể tải khuyến mãi");

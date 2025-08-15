@@ -70,7 +70,7 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
           {/* Giảm tối đa */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Giảm tối đa (VNĐ) *
+              Giảm tối đa (VNĐ)
             </label>
             <Controller
               name="maxDiscountValue"
@@ -80,10 +80,16 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
                   {...field}
                   type="number"
                   min="0"
-                  step="1000"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  placeholder="0"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  placeholder="Để trống = Không giới hạn"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Nếu input trống hoặc bằng 0 thì set null, ngược lại set Number
+                    field.onChange(
+                      value === "" || Number(value) === 0 ? null : Number(value)
+                    );
+                  }}
+                  value={field.value === null ? "" : field.value}
                 />
               )}
             />
@@ -92,6 +98,9 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
                 {errors.maxDiscountValue.message}
               </p>
             )}
+            <p className="text-xs text-gray-500 mt-1">
+              Để trống hoặc nhập 0 để không giới hạn giảm tối đa
+            </p>
           </div>
         </div>
       </div>
