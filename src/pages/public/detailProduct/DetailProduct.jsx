@@ -175,9 +175,6 @@ function DetailProduct() {
     getRatings({ productDetailId: colorProduct.id });
   }, [colorProduct.id, fetchCommentAgain, accessToken]);
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [product]);
-  useEffect(() => {
     if (colorProduct) {
       const priceInfo = calculateFinalPrice(colorProduct.originalPrice, [
         selectedPromotion || {},
@@ -230,7 +227,6 @@ function DetailProduct() {
               <ProductImageGallery images={colorProduct?.images || []} />
               <div className="mt-10">
                 <PromotionSection
-                  accessToken={accessToken}
                   productDetailId={colorProduct.id}
                   originalPrice={colorProduct.originalPrice}
                   onApplyPromotion={handleApplyPromotion}

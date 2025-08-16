@@ -4,7 +4,6 @@ import VoucherCard from "~/components/voucher/VoucherCard";
 import { calculateFinalPrice } from "~/utils/promotion";
 
 const PromotionSection = ({
-  accessToken,
   productDetailId,
   originalPrice,
   onApplyPromotion,
@@ -21,7 +20,6 @@ const PromotionSection = ({
       try {
         // Giả sử API này lấy tất cả promotion hợp lệ cho một product detail id
         const response = await apiGetProductPromotionById({
-          accessToken,
           pId: productDetailId,
           type: "ACTIVE", // Hoặc "expired" nếu bạn muốn lấy các khuyến mãi đã hết hạn
         });

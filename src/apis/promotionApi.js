@@ -16,12 +16,9 @@ const apiGetMyPromotion = async ({ accessToken }) => {
         throw new Error(error.message);
     }
 };
-const apiGetProductPromotionById = async ({ accessToken, pId, type }) => {
+const apiGetProductPromotionById = async ({ pId, type }) => {
     try {
         const config = {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
             params: {
                 promotionStatus: type,
             },
