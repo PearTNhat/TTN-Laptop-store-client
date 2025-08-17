@@ -17,6 +17,21 @@ function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
   // Mock handlers
   const handleSubmitComment = useCallback(
     async ({ rating, content, parentId, replyOnUser, images }) => {
+      if (!accessToken) {
+        Swal.fire({
+          title: "Bạn cần đăng nhập để bình luận",
+          icon: "warning",
+          confirmButtonText: "Đăng nhập",
+          showCancelButton: true,
+          cancelButtonText: "Hủy",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Redirect to login page
+            window.location.href = "/login";
+          }
+        });
+        return;
+      }
       if (!parentId) {
         // Kiểm tra nội dung bình luận
         try {

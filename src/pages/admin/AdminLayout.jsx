@@ -9,7 +9,9 @@ const AdminLayout = () => {
     (state) => state.sideBar
   );
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen xl:flex">
       <div>
