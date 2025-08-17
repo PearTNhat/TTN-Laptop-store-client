@@ -64,7 +64,7 @@ const FilterProductPage = () => {
   };
   useEffect(() => {
     window.scrollTo(0, 0); // Cuộn lên đầu trang mỗi khi filter thay đổi
-  }, []);
+  }, [currentParams.page]);
 
   return (
     <main className="bg-gray-50">

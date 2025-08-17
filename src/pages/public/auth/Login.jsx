@@ -79,7 +79,9 @@ const Login = () => {
       localStorage.setItem("rememberedUsers", JSON.stringify(remembered));
     }
   };
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">

@@ -209,6 +209,9 @@ function DetailProduct() {
       setSelectedPromotion(null);
     }
   }, [quantity]);
+  useEffect(() => {
+    window.scrollTo(0, 0); // Cuộn lên đầu trang mỗi khi filter thay đổi
+  }, []);
   return (
     <div className=" mx-auto p-2 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Breadcrumb Section */}
