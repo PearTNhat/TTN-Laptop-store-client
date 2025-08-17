@@ -16,6 +16,23 @@ export default {
 		"./src/**/*.{js,ts,jsx,tsx}",
 	],
 	theme: {
+		container: {
+			center: true,
+			padding: {
+				// DEFAULT: '1rem',
+				// sm: '1rem',
+				// lg: '2rem',
+				// xl: '3rem',
+				// '2xl': '4rem',
+			},
+			screens: {
+				sm: '640px',
+				md: '768px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1400px',
+			},
+		},
 		extend: {
 			colors: {
 				...COLORS,
@@ -82,7 +99,17 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			},
 			maxWidth: {
-				main: '1200px'
+				main: '1200px',
+				'screen-sm': '640px',
+				'screen-md': '768px',
+				'screen-lg': '1024px',
+				'screen-xl': '1280px',
+				'screen-2xl': '1536px',
+				'container-sm': '576px',
+				'container-md': '720px',
+				'container-lg': '960px',
+				'container-xl': '1140px',
+				'container-2xl': '1320px',
 			},
 			keyframes: {
 				modalEnter: {

@@ -6,8 +6,13 @@ import Swal from "sweetalert2";
 import { createRoot } from "react-dom/client";
 
 // --- Các component và API của bạn ---
-import { apiDeleteProduct, apiGetListProducts } from "~/apis/productApi";
+import {
+  apiDeleteProduct,
+  apiDeleteProductDetail,
+  apiGetListProducts,
+} from "~/apis/productApi";
 import ProductDetailModal from "./components/ProductDetailModal";
+import ProductDetailDeleteModal from "./components/ProductDetailDeleteModal";
 import ProductTable from "./components/ProductTable"; // Import component bảng mới
 import LoadingSpinner from "~/components/loading/LoadingSpinner";
 import Pagination from "~/components/pagination/Pagination";
@@ -33,6 +38,8 @@ const ProductManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [editingProduct, setEditingProduct] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),
     [searchParams]
@@ -44,6 +51,28 @@ const ProductManagement = () => {
   const handleOpenEditModal = (product) => {
     setEditingProduct(product); // Đặt dữ liệu sản phẩm cần sửa
     setIsModalOpen(true);
+  };
+  const handleDeleteDetail = async (productDetailId) => {
+    try {
+      const response = await apiDeleteProductDetail({
+        accessToken,
+        id: productDetailId,
+      });
+      if (response && response.code === 200) {
+        showToastSuccess("Xóa biến thể sản phẩm thành công!");
+        // Refresh danh sách sản phẩm
+        fetchProducts();
+      } else {
+        throw new Error(response?.message || "Xóa không thành công từ API");
+      }
+    } catch (error) {
+      showToastError(error.message || "Có lỗi xảy ra khi xóa biến thể.");
+    }
+  };
+
+  const handleOpenDeleteModal = (product) => {
+    setProductToDelete(product);
+    setDeleteModalOpen(true);
   };
   useEffect(() => {
     const fetchBrands = async () => {
@@ -202,6 +231,7 @@ const ProductManagement = () => {
           onShowDetails={handleShowDetails}
           onDelete={handleDeleteProduct}
           onEdit={handleOpenEditModal}
+          onDeleteDetail={handleOpenDeleteModal}
         />
         <Pagination
           currentPage={pagination.currentPage}
@@ -267,6 +297,16 @@ const ProductManagement = () => {
         categories={categories}
         accessToken={accessToken}
         editingProduct={editingProduct}
+      />
+
+      <ProductDetailDeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setProductToDelete(null);
+        }}
+        product={productToDelete}
+        onDeleteDetail={handleDeleteDetail}
       />
     </>
   );

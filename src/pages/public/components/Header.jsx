@@ -37,7 +37,7 @@ function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userData, accessToken } = useSelector((state) => state.user);
-  const { carts: myCart } = useSelector((state) => state.cart);
+  let { carts: myCart } = useSelector((state) => state.cart);
   const isLoggedIn = !!accessToken;
 
   // TÁCH STATE: Quản lý riêng state cho từng menu
@@ -91,7 +91,7 @@ function Header() {
   const handleLogout = () => {
     dispatch(userActions.logout());
     showToastSuccess("Đăng xuất thành công!");
-    navigate("/login");
+    dispatch(cartActions.clearCart());
   };
 
   // Lọc dropdown profile dựa trên role
@@ -138,13 +138,11 @@ function Header() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <Link to="/" className="mr-4">
               <img src={LaptopLogo} alt="" width={120} height={40} />
             </Link>
-
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-2">
               {navigationLinks.map((link) => (

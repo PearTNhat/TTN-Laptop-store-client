@@ -1,5 +1,5 @@
 import React from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Layers } from "lucide-react";
 
 // --- Các hàm tiện ích đã được chuyển vào đây để component tự quản lý việc hiển thị ---
 const formatPrice = (price) =>
@@ -15,7 +15,13 @@ const getStockStatus = (quantity) => {
   return { text: "Còn hàng", className: "bg-green-100 text-green-700" };
 };
 
-const ProductTable = ({ products, onShowDetails, onDelete, onEdit }) => {
+const ProductTable = ({
+  products,
+  onShowDetails,
+  onDelete,
+  onEdit,
+  onDeleteDetail,
+}) => {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left text-gray-700">
@@ -96,10 +102,20 @@ const ProductTable = ({ products, onShowDetails, onDelete, onEdit }) => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        onDeleteDetail(product); // Mở modal xóa biến thể
+                      }}
+                      className="p-2 text-gray-500 hover:text-orange-600 rounded-full hover:bg-gray-100"
+                      title="Xóa biến thể"
+                    >
+                      <Layers size={18} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onDelete(product.id, displayDetail.title); // Gọi hàm onDelete từ props
                       }}
                       className="p-2 text-gray-500 hover:text-red-600 rounded-full hover:bg-gray-100"
-                      title="Xóa"
+                      title="Xóa sản phẩm"
                     >
                       <Trash2 size={18} />
                     </button>

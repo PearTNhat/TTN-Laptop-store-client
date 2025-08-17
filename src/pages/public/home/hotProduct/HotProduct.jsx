@@ -11,7 +11,6 @@ function HotProduct() {
         size: 10,
         sortBy: "SOLD",
       });
-      console.log("data", response);
       setProducts(response.data.content);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -21,7 +20,7 @@ function HotProduct() {
     fetchProducts();
   }, []);
   return (
-    <div className="bg-white py-4">
+    <div className=" bg-white">
       <ProductCarousel title="🔥 Sản phẩm bán chạy" products={products} />
     </div>
   );

@@ -115,11 +115,11 @@ const BrandCarousel = () => {
       },
     ],
   };
-  const { brands, isLoading: loading } = useSelector((state) => state.brand);
+  const { brands } = useSelector((state) => state.brand);
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" container">
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">

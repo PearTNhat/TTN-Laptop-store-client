@@ -2,7 +2,7 @@ import React from "react";
 
 function PromotionBanner() {
   return (
-    <div className="my-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="my-16 container">
       <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0">

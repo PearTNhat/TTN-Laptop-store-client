@@ -2,12 +2,10 @@
 import moment from "moment";
 import "moment/locale/vi"; // Cho hiển thị "vài giây trước"
 import CommentForm from "./CommentForm";
-
+moment.locale("vi");
 // Ảnh đại diện mặc định, bạn cần thay thế bằng đường dẫn đúng
 import { DefaultUser } from "~/assets/images";
-import StarRating from "./StarRating";
 
-moment.locale("vi");
 const ImageGallery = ({ images }) => {
   if (!images || images.length === 0) return null;
   return (
@@ -51,7 +49,7 @@ function Comment({
   return (
     <div className="flex items-start space-x-3 mt-4">
       <img
-        src={comment.user?.avatar?.url || DefaultUser}
+        src={comment.avatarUrl || DefaultUser}
         alt={comment.username}
         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
       />
@@ -61,13 +59,6 @@ function Comment({
             <span className="font-semibold text-sm text-gray-800">
               {comment.username}
             </span>
-            {comment.rating > 0 && (
-              <StarRating
-                rating={comment.rating}
-                onRatingChange={() => {}}
-                size="text-sm"
-              />
-            )}
           </div>
           <div className="text-sm text-gray-700 mt-1">
             {comment.replyOnUser &&
@@ -81,7 +72,7 @@ function Comment({
           </div>
         </div>
         <div className="flex items-center mt-1 space-x-4 text-xs text-gray-500 font-medium">
-          <span>{moment(comment.reviewDate).fromNow()}</span>
+          <span>{moment(comment.reviewDate).add(7, "hours").fromNow()}</span>
           <button
             className="hover:underline"
             onClick={() =>

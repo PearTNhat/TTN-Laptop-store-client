@@ -15,4 +15,7 @@ export default defineConfig({
       '~': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    global: {}, // Bạn có thể dùng global: 'window' hoặc global: 'globalThis'
+  },
 })

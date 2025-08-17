@@ -103,7 +103,7 @@ const CategoryCarousel = () => {
   };
   return (
     <div className="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 py-10">
-      <div className="mx-auto px-4">
+      <div className="container">
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">

@@ -53,7 +53,6 @@ const ProductDetailFormStep2 = ({ colorsOptions }) => {
     });
   };
   const handleDelete = async (index, productDetailId) => {
-    console.log("Deleting product detail with ID:", productDetailId);
     // Nếu ID âm (phiên bản mới chưa lưu), chỉ xóa khỏi form
     if (productDetailId < 0) {
       remove(index);

@@ -114,8 +114,6 @@ function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
     },
     [accessToken, setFetchCommentAgain]
   );
-
-  const currentUserAvatar = "https://randomuser.me/api/portraits/men/1.jpg";
   // Tìm comment của user hiện tại
   return (
     <div
@@ -132,7 +130,7 @@ function CommentContainer({ productDetailId, comments, setFetchCommentAgain }) {
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Bình luận</h3>
         <CommentForm
           submitLabel="Gửi đánh giá"
-          userAvatar={currentUserAvatar || DefaultUser}
+          userAvatar={userData.avatar || DefaultUser}
           onSubmit={handleSubmitComment}
         />
       </div>

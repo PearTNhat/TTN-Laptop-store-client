@@ -27,9 +27,6 @@ const userSlice = createSlice({
             state.accessToken = null;
             state.isLoggedIn = false;
             state.userData = {};
-
-            // localStorage.removeItem("token");
-            // localStorage.removeItem("persist:shop/user");
         },
     },
     extraReducers: (builder) => {

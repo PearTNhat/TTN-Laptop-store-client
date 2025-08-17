@@ -23,6 +23,12 @@ const ProductCard = ({ product }) => {
       showToastError("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
       return;
     }
+
+    if (product.quantity === 0) {
+      showToastError("Sản phẩm đã hết hàng, vui lòng chờ hàng về!");
+      return;
+    }
+
     const res = await apiCreateCart({
       accessToken,
       productDetailId,
@@ -36,7 +42,6 @@ const ProductCard = ({ product }) => {
       dispatch(fetchCart({ accessToken }));
     }
   };
-  console.log("Product:", product);
   return (
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-blue-200 transform hover:-translate-y-2 relative">
       {/* Badge giảm giá */}
@@ -84,8 +89,8 @@ const ProductCard = ({ product }) => {
               )}
           </div>
         </div>
-        {/* Rating */}
-        <div className="flex items-center justify-between mb-3 p-2 ">
+        {/* Rating và tình trạng kho */}
+        <div className="flex items-center justify-between mb-3 p-2">
           {/* Rating */}
           <div className="flex items-center gap-1 text-yellow-400">
             {convertNumberToStar(product.totalRating).map((star, index) => (
@@ -102,19 +107,48 @@ const ProductCard = ({ product }) => {
             </span>
           </p>
         </div>
+
+        {/* Tình trạng kho */}
+        <div className="mb-3">
+          {product.quantity === 0 ? (
+            <div className="flex items-center justify-center py-2 px-3 bg-red-50 border border-red-200 rounded-lg">
+              <span className="text-red-600 text-sm font-medium">
+                ⚠️ Hết hàng - Sắp có hàng mới
+              </span>
+            </div>
+          ) : product.quantity <= 5 ? (
+            <div className="flex items-center justify-center py-2 px-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <span className="text-orange-600 text-sm font-medium">
+                🔥 Chỉ còn {product.quantity} sản phẩm
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-2 px-3 bg-green-50 border border-green-200 rounded-lg">
+              <span className="text-green-600 text-sm font-medium">
+                ✅ Còn hàng ({product.quantity} sản phẩm)
+              </span>
+            </div>
+          )}
+        </div>
         {/* Nút thêm vào giỏ hàng */}
-        <button
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group/btn transform hover:scale-105 shadow-lg hover:shadow-xl"
-          onClick={() =>
-            handleAddToCart({
-              productDetailId: product.productId,
-              productPromotionId: product.productPromotionId,
-            })
-          }
-        >
-          <FaShoppingCart className="w-4 h-4 group-hover/btn:animate-bounce" />
-          <span>Thêm vào giỏ</span>
-        </button>
+        {product.quantity === 0 ? (
+          <div className="w-full bg-gray-200 text-gray-500 font-semibold py-3 px-4 rounded-xl flex items-center justify-center space-x-2 cursor-not-allowed">
+            <span className="text-sm">📦 Hàng sắp về</span>
+          </div>
+        ) : (
+          <button
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group/btn transform hover:scale-105 shadow-lg hover:shadow-xl"
+            onClick={() =>
+              handleAddToCart({
+                productDetailId: product.productDetailId,
+                productPromotionId: product.promotionIdMaxDiscount,
+              })
+            }
+          >
+            <FaShoppingCart className="w-4 h-4 group-hover/btn:animate-bounce" />
+            <span>Thêm vào giỏ</span>
+          </button>
+        )}
 
         {/* Thông tin thêm */}
         <div className="mt-3 flex items-center justify-between text-xs text-gray-500">

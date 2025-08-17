@@ -13,7 +13,7 @@ const defaultSettings = {
 // Component có thể nhận type để hiển thị các loại sản phẩm khác nhau
 const ProductCarousel = ({ title, products }) => {
   return (
-    <div className="mx-auto py-8">
+    <div className="container py-8">
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-4xl font-bold text-gray-800 mb-4">{title}</h2>

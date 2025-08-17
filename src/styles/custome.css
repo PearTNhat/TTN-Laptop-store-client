@@ -28,7 +28,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -54,7 +54,7 @@
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -64,5 +64,64 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Custom Container Classes - Responsive với padding tự động */
+  .main-container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
+    max-width: 1400px;
+  }
+
+  .main-container-sm {
+    @apply mx-auto px-4 sm:px-6;
+    max-width: 1200px;
+  }
+
+  .main-container-lg {
+    @apply mx-auto px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20;
+    max-width: 1600px;
+  }
+
+  /* Container với breakpoints cụ thể */
+  .container-responsive {
+    @apply mx-auto px-4;
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .container-responsive {
+      max-width: 576px;
+      @apply px-6;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-responsive {
+      max-width: 720px;
+      @apply px-8;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-responsive {
+      max-width: 960px;
+      @apply px-10;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-responsive {
+      max-width: 1140px;
+      @apply px-12;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container-responsive {
+      max-width: 1320px;
+      @apply px-16;
+    }
   }
 }
