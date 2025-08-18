@@ -243,116 +243,43 @@ function DetailProduct() {
     window.scrollTo(0, 0); // Cuộn lên đầu trang mỗi khi filter thay đổi
   }, []);
 
-  useEffect(() => {
-    if (!colorProduct.id) {
-      return;
-    }
-
-    // Ngắt kết nối cũ nếu có trước khi tạo kết nối mới
-    if (stompClientRef.current) {
-      stompClientRef.current.deactivate();
-    }
-
-    console.log("Attempting to connect to WebSocket...");
-
-    // Tạo client mới với cấu hình chi tiết hơn
-    const client = new Client({
-      // Dùng URL đầy đủ để chắc chắn
-      brokerURL: "wss://dev.api.mylaptopshop.me/ws", // <-- QUAN TRỌNG: Stomp v6/v7 khuyến khích dùng brokerURL thay vì webSocketFactory nếu không có nhu cầu đặc biệt
-      // https://dev.api.mylaptopshop.me
-      reconnectDelay: 5000,
-      heartbeatIncoming: 0, // 0 = client không yêu cầu heartbeat từ server
-      heartbeatOutgoing: 0, // 0 = client không gửi heartbeat
-
-      // Bật log debug của thư viện stomp
-      debug: (str) => {
-        console.log(new Date(), str);
-      },
-    });
-
-    client.onConnect = (frame) => {
-      client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
-        try {
-          const newComment = JSON.parse(message.body);
-          console.log("Received new comment: ", newComment);
-          setComments((prevComments) => [newComment, ...prevComments]);
-        } catch (error) {
-          console.error("Could not parse new comment", error);
-        }
-      });
-      client.subscribe(
-        `/topic/delete-comments/${colorProduct.id}`,
-        (message) => {
-          console.log(
-            "Received delete instruction, reloading comments:",
-            message.body
-          );
-          // CHỈ CẦN GỌI LẠI HÀM getComments ĐÃ CÓ
-          getComments(colorProduct.id);
-
-          showToastSuccess("Danh sách bình luận đã được cập nhật.");
-        }
-      );
-    };
-    client.onStompError = (frame) => {
-      console.error("Broker reported error: " + frame.headers["message"]);
-      console.error("Additional details: " + frame.body);
-    };
-
-    client.onWebSocketError = (event) => {
-      console.error("WebSocket error observed:", event);
-    };
-
-    client.onWebSocketClose = (event) => {
-      console.log("WebSocket connection closed.", event);
-    };
-
-    // Kích hoạt kết nối
-    client.activate();
-
-    // Lưu lại client để có thể ngắt kết nối
-    stompClientRef.current = client;
-
-    return () => {
-      if (stompClientRef.current) {
-        console.log("Deactivating WebSocket client...");
-        stompClientRef.current.deactivate();
-      }
-    };
-  }, [colorProduct.id]);
-
   // useEffect(() => {
-  //   if (!colorProduct.id) return;
+  //   if (!colorProduct.id) {
+  //     return;
+  //   }
 
+  //   // Ngắt kết nối cũ nếu có trước khi tạo kết nối mới
+  //   if (stompClientRef.current) {
+  //     stompClientRef.current.deactivate();
+  //   }
+
+  //   console.log("Attempting to connect to WebSocket...");
+
+  //   // Tạo client mới với cấu hình chi tiết hơn
   //   const client = new Client({
-  //     // Sử dụng webSocketFactory để tích hợp với SockJS
-  //     webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"),
-
-  //     // Các tùy chọn để tăng độ ổn định và debug
+  //     // Dùng URL đầy đủ để chắc chắn
+  //     brokerURL: "wss://dev.api.mylaptopshop.me/ws", // <-- QUAN TRỌNG: Stomp v6/v7 khuyến khích dùng brokerURL thay vì webSocketFactory nếu không có nhu cầu đặc biệt
+  //     // https://dev.api.mylaptopshop.me
   //     reconnectDelay: 5000,
-  //     heartbeatIncoming: 4000,
-  //     heartbeatOutgoing: 4000,
-  //     // Bật log để dễ dàng debug
+  //     heartbeatIncoming: 0, // 0 = client không yêu cầu heartbeat từ server
+  //     heartbeatOutgoing: 0, // 0 = client không gửi heartbeat
+
+  //     // Bật log debug của thư viện stomp
   //     debug: (str) => {
-  //       console.log("STOMP DEBUG:", str);
+  //       console.log(new Date(), str);
   //     },
   //   });
 
-  //   // Xử lý khi kết nối thành công
   //   client.onConnect = (frame) => {
-  //     console.log("WebSocket Connected: " + frame);
-  //     // Đăng ký vào topic của sản phẩm cụ thể
   //     client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
   //       try {
   //         const newComment = JSON.parse(message.body);
   //         console.log("Received new comment: ", newComment);
-  //         // Thêm bình luận mới vào đầu danh sách
   //         setComments((prevComments) => [newComment, ...prevComments]);
   //       } catch (error) {
   //         console.error("Could not parse new comment", error);
   //       }
   //     });
-  //     // ---- SUBSCRIPTION 2: ĐỂ XÓA BÌNH LUẬN (Sửa lại) ----
   //     client.subscribe(
   //       `/topic/delete-comments/${colorProduct.id}`,
   //       (message) => {
@@ -367,29 +294,90 @@ function DetailProduct() {
   //       }
   //     );
   //   };
-
-  //   // Xử lý các loại lỗi
   //   client.onStompError = (frame) => {
   //     console.error("Broker reported error: " + frame.headers["message"]);
   //     console.error("Additional details: " + frame.body);
   //   };
+
   //   client.onWebSocketError = (event) => {
   //     console.error("WebSocket error observed:", event);
+  //   };
+
+  //   client.onWebSocketClose = (event) => {
+  //     console.log("WebSocket connection closed.", event);
   //   };
 
   //   // Kích hoạt kết nối
   //   client.activate();
 
-  //   // Lưu lại instance của client
+  //   // Lưu lại client để có thể ngắt kết nối
   //   stompClientRef.current = client;
 
-  //   // Hàm dọn dẹp: ngắt kết nối khi component unmount hoặc đổi sản phẩm
   //   return () => {
   //     if (stompClientRef.current) {
+  //       console.log("Deactivating WebSocket client...");
   //       stompClientRef.current.deactivate();
   //     }
   //   };
   // }, [colorProduct.id]);
+  useEffect(() => {
+    if (!colorProduct.id) return;
+
+    // ✅ ISSUE 2 FIXED: Thêm logic dọn dẹp kết nối cũ trước khi tạo kết nối mới
+    if (stompClientRef.current) {
+      stompClientRef.current.deactivate();
+    }
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"),
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      debug: (str) => {
+        console.log("STOMP DEBUG:", str);
+      },
+    });
+
+    client.onConnect = (frame) => {
+      console.log("WebSocket Connected: " + frame);
+      client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
+        try {
+          const newComment = JSON.parse(message.body);
+          setComments((prevComments) => [newComment, ...prevComments]);
+        } catch (error) {
+          console.error("Could not parse new comment", error);
+        }
+      });
+      client.subscribe(
+        `/topic/delete-comments/${colorProduct.id}`,
+        (message) => {
+          console.log(
+            "Received delete instruction, reloading comments:",
+            message.body
+          );
+          getComments(colorProduct.id);
+          showToastSuccess("Danh sách bình luận đã được cập nhật.");
+        }
+      );
+    };
+
+    client.onStompError = (frame) => {
+      console.error("Broker reported error: " + frame.headers["message"]);
+      console.error("Additional details: " + frame.body);
+    };
+    client.onWebSocketError = (event) => {
+      console.error("WebSocket error observed:", event);
+    };
+
+    client.activate();
+    stompClientRef.current = client;
+
+    return () => {
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate();
+      }
+    };
+  }, [colorProduct.id]);
 
   return (
     <div className=" min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
