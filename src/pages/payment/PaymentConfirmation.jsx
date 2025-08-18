@@ -39,7 +39,6 @@ export default function PaymentConfirmation() {
     try {
       const response = await apiDeleteCart({ accessToken, pId: itemId });
       if (response.code !== 200) throw new Error(response.message);
-      showToastSuccess("Xóa sản phẩm thành công");
       dispatch(cartActions.removeFromCart(itemId));
     } catch (error) {
       showToastError(error.message || "Lỗi xóa sản phẩm");

@@ -35,7 +35,7 @@ function RatingContainer({ ratings = [], totalRating = 0 }) {
                 {/* Avatar */}
                 <div className="flex-shrink-0">
                   <img
-                    src={rating.userAvatar || DefaultUser}
+                    src={rating.avatarUrl || DefaultUser}
                     alt="User Avatar"
                     className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                   />

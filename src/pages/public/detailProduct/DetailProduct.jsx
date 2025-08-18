@@ -47,8 +47,7 @@ function DetailProduct() {
     discountAmount: 0,
     appliedPromotion: {},
   });
-  // const [stompClient, setStompClient] = useState(null);
-  // const [connected, setConnected] = useState(false);
+  const stompClientRef = useRef(null); // ADD THIS: Dùng ref để lưu trữ client
   const isOutOfStock = !colorProduct?.quantity || colorProduct?.quantity === 0;
   const currentParams = useMemo(
     () => Object.fromEntries([...searchParams]),
@@ -189,7 +188,7 @@ function DetailProduct() {
     if (!colorProduct.id) return;
     getComments(colorProduct.id);
     getRatings({ productDetailId: colorProduct.id });
-  }, [colorProduct.id, fetchCommentAgain, accessToken]);
+  }, [colorProduct.id, accessToken]);
   useEffect(() => {
     if (colorProduct) {
       const priceInfo = calculateFinalPrice(colorProduct.originalPrice, [
@@ -240,61 +239,145 @@ function DetailProduct() {
       }, 300);
     }
   }, [product, isReadMore]);
-  // useEffect(() => {
-  //   if (selectedPromotion?.usageLimit == null) return;
-  //   if (selectedPromotion && quantity > selectedPromotion.usageLimit) {
-  //     setSelectedPromotion(null);
-  //   }
-  // }, [quantity, selectedPromotion]);
   useEffect(() => {
     window.scrollTo(0, 0); // Cuộn lên đầu trang mỗi khi filter thay đổi
   }, []);
 
+  // useEffect(() => {
+  //   if (!colorProduct.id) {
+  //     return;
+  //   }
+
+  //   // Ngắt kết nối cũ nếu có trước khi tạo kết nối mới
+  //   if (stompClientRef.current) {
+  //     stompClientRef.current.deactivate();
+  //   }
+
+  //   console.log("Attempting to connect to WebSocket...");
+
+  //   // Tạo client mới với cấu hình chi tiết hơn
+  //   const client = new Client({
+  //     // Dùng URL đầy đủ để chắc chắn
+  //     brokerURL: "ws://localhost:8080/ws", // <-- QUAN TRỌNG: Stomp v6/v7 khuyến khích dùng brokerURL thay vì webSocketFactory nếu không có nhu cầu đặc biệt
+  //     // https://dev.api.mylaptopshop.me
+  //     reconnectDelay: 5000,
+  //     heartbeatIncoming: 0, // 0 = client không yêu cầu heartbeat từ server
+  //     heartbeatOutgoing: 0, // 0 = client không gửi heartbeat
+
+  //     // Bật log debug của thư viện stomp
+  //     debug: (str) => {
+  //       console.log(new Date(), str);
+  //     },
+  //   });
+
+  //   client.onConnect = (frame) => {
+  //     client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
+  //       try {
+  //         const newComment = JSON.parse(message.body);
+  //         console.log("Received new comment: ", newComment);
+  //         setComments((prevComments) => [newComment, ...prevComments]);
+  //       } catch (error) {
+  //         console.error("Could not parse new comment", error);
+  //       }
+  //     });
+  //   };
+  //   client.onStompError = (frame) => {
+  //     console.error("Broker reported error: " + frame.headers["message"]);
+  //     console.error("Additional details: " + frame.body);
+  //   };
+
+  //   client.onWebSocketError = (event) => {
+  //     console.error("WebSocket error observed:", event);
+  //   };
+
+  //   client.onWebSocketClose = (event) => {
+  //     console.log("WebSocket connection closed.", event);
+  //   };
+
+  //   // Kích hoạt kết nối
+  //   client.activate();
+
+  //   // Lưu lại client để có thể ngắt kết nối
+  //   stompClientRef.current = client;
+
+  //   return () => {
+  //     if (stompClientRef.current) {
+  //       console.log("Deactivating WebSocket client...");
+  //       stompClientRef.current.deactivate();
+  //     }
+  //   };
+  // }, [colorProduct.id]);
+
   useEffect(() => {
-    // Tạo một client STOMP mới
+    if (!colorProduct.id) return;
+
     const client = new Client({
-      // Dùng SockJS làm lớp transport
-      webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"), // URL đến endpoint WebSocket của Spring Boot
-      // Bật debug để xem log trong consol
-      debug: (str) => {
-        console.log(str);
-      },
-      // Kết nối lại sau 5 giây nếu bị mất kết nối
+      // Sử dụng webSocketFactory để tích hợp với SockJS
+      webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"),
+
+      // Các tùy chọn để tăng độ ổn định và debug
       reconnectDelay: 5000,
-      connectHeaders: {
-        // login: 'user',
-        // passcode: 'password',
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      // Bật log để dễ dàng debug
+      debug: (str) => {
+        console.log("STOMP DEBUG:", str);
       },
     });
+
     // Xử lý khi kết nối thành công
     client.onConnect = (frame) => {
-      console.log("Connected: " + frame);
-      // setConnected(true);
-      // Đăng ký (subscribe) vào một topic để nhận message từ server
-      // Ví dụ: server gửi message đến topic '/topic/public'
-      // client.subscribe("/topic/public", (message) => {
-      //   const receivedMessage = JSON.parse(message.body);
-      //   setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-      // });
+      console.log("WebSocket Connected: " + frame);
+      // Đăng ký vào topic của sản phẩm cụ thể
+      client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
+        try {
+          const newComment = JSON.parse(message.body);
+          console.log("Received new comment: ", newComment);
+          // Thêm bình luận mới vào đầu danh sách
+          setComments((prevComments) => [newComment, ...prevComments]);
+        } catch (error) {
+          console.error("Could not parse new comment", error);
+        }
+      });
+      // ---- SUBSCRIPTION 2: ĐỂ XÓA BÌNH LUẬN (Sửa lại) ----
+      client.subscribe(
+        `/topic/delete-comments/${colorProduct.id}`,
+        (message) => {
+          console.log(
+            "Received delete instruction, reloading comments:",
+            message.body
+          );
+          // CHỈ CẦN GỌI LẠI HÀM getComments ĐÃ CÓ
+          getComments(colorProduct.id);
+
+          showToastSuccess("Danh sách bình luận đã được cập nhật.");
+        }
+      );
     };
 
-    // Xử lý lỗi
+    // Xử lý các loại lỗi
     client.onStompError = (frame) => {
       console.error("Broker reported error: " + frame.headers["message"]);
       console.error("Additional details: " + frame.body);
     };
+    client.onWebSocketError = (event) => {
+      console.error("WebSocket error observed:", event);
+    };
+
     // Kích hoạt kết nối
     client.activate();
-    // Lưu client vào state
-    // setStompClient(client);
-    // Hàm dọn dẹp: ngắt kết nối khi component bị unmount
+
+    // Lưu lại instance của client
+    stompClientRef.current = client;
+
+    // Hàm dọn dẹp: ngắt kết nối khi component unmount hoặc đổi sản phẩm
     return () => {
-      if (client) {
-        client.deactivate();
-        console.log("WebSocket Disconnected");
+      if (stompClientRef.current) {
+        stompClientRef.current.deactivate();
       }
     };
-  }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy 1 lần khi component mount
+  }, [colorProduct.id]);
+
   return (
     <div className=" min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
       {/* Loading State */}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WebSocket Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+
+<body>
+  <h2>Test Push Comments</h2>
+  <button onclick="sendComment()">Send Comment</button>
+  <ul id="messages"></ul>
+
+  <script>
+    const socket = new SockJS('https://dev.api.mylaptopshop.me/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+      console.log('Connected: ' + frame);
+
+      // Sub đến topic
+      stompClient.subscribe('/topic/comments/2', function (message) {
+        console.log('Received:', message.body);
+        const li = document.createElement('li');
+        li.textContent = message.body;
+        document.getElementById('messages').appendChild(li);
+      });
+    });
+
+    function sendComment() {
+      stompClient.send('/send', {}, JSON.stringify({
+        content: 'Hello from test client!',
+        productDetailId: 2
+      }));
+    }
+  </script>
+</body>
+
+</html>
