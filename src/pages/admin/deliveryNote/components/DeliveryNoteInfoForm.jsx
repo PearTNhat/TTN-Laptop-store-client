@@ -60,7 +60,7 @@ const DeliveryNoteInfoForm = ({ onOrderSelect, preselectedOrder }) => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="DRAFT">Bản nháp</SelectItem>
+                    {/* <SelectItem value="DRAFT">Bản nháp</SelectItem> */}
                     <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
                   </SelectContent>
                 </Select>

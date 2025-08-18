@@ -9,7 +9,7 @@ import PaymentMethod from "./components/PaymentMethod";
 import { useSelector } from "react-redux";
 // Import dữ liệu giả
 import { fakeUserData } from "~/data/fakeOrder";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { showToastError, showToastSuccess } from "~/utils/alert";
 import { apiCreateOrder } from "~/apis/orderApi";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ import { apiDeleteCart } from "~/apis/cartApi";
 export default function PaymentConfirmation() {
   const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { accessToken, userData } = useSelector((state) => state.user);
   // State quản lý toàn bộ trang
   const [selectedPayment, setSelectedPayment] = useState("COD");
@@ -38,6 +39,7 @@ export default function PaymentConfirmation() {
     try {
       const response = await apiDeleteCart({ accessToken, pId: itemId });
       if (response.code !== 200) throw new Error(response.message);
+      showToastSuccess("Xóa sản phẩm thành công");
       dispatch(cartActions.removeFromCart(itemId));
     } catch (error) {
       showToastError(error.message || "Lỗi xóa sản phẩm");
@@ -74,11 +76,11 @@ export default function PaymentConfirmation() {
       const res = await createOrder({ accessToken, body });
       if (res?.code === 200) {
         showToastSuccess("Đặt hàng thành công!");
+        navigate("https://www.mylaptopshop.me/user/orders");
       } else {
         showToastError(res?.message || "Đặt hàng thất bại");
         return;
       }
-      console.log(res);
     } else {
       body.paymentMethod = "MOMO";
       const res = await createOrder({ accessToken, body });

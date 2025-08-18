@@ -61,9 +61,9 @@ const DeliveryNoteList = ({
                 className="border-0 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
               >
                 {/* Header */}
-                <div className="flex items-center w-full px-6 py-5 rounded-xl">
+                <div className="flex items-center w-full px-2 py-5 rounded-xl">
                   <AccordionTrigger className="flex-1 p-0 hover:no-underline bg-transparent text-left">
-                    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-center">
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-center">
                       {/* Mã Phiếu xuất */}
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
@@ -75,6 +75,21 @@ const DeliveryNoteList = ({
                           </p>
                           <p className="font-semibold text-gray-900 text-sm">
                             {note.code}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Mã Đơn Hàng */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-indigo-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">
+                            Mã Đơn Hàng
+                          </p>
+                          <p className="font-semibold text-gray-900 text-sm">
+                            {note.orderCode || "N/A"}
                           </p>
                         </div>
                       </div>

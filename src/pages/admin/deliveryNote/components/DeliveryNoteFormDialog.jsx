@@ -27,7 +27,7 @@ const DeliveryNoteFormDialog = ({
     resolver: zodResolver(deliveryNoteSchema),
     defaultValues: {
       orderCode: "",
-      status: "DRAFT",
+      status: "COMPLETED",
       note: "",
       details: [],
     },
@@ -37,7 +37,7 @@ const DeliveryNoteFormDialog = ({
     if (!isOpen) {
       methods.reset({
         orderCode: "",
-        status: "DRAFT",
+        status: "COMPLETED",
         note: "",
         details: [],
       });

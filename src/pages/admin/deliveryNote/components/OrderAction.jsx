@@ -28,7 +28,7 @@ const OrderActions = ({ order, onDelete, onConfirm }) => {
         </Button>
       )}
 
-      <Button
+      {/* <Button
         variant="ghost"
         size="icon"
         onClick={handleDeleteClick}
@@ -36,7 +36,7 @@ const OrderActions = ({ order, onDelete, onConfirm }) => {
         title="Xóa"
       >
         <Trash2 className="h-4 w-4" />
-      </Button>
+      </Button> */}
     </div>
   );
 };

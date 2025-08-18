@@ -11,7 +11,6 @@ const DeliveryNoteDetail = ({ details }) => {
       </div>
     );
   }
-  console.log("details:", details);
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -52,7 +51,8 @@ const DeliveryNoteDetail = ({ details }) => {
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {item.productTitle}
+                        <div className="">{item.productTitle}</div>
+                        {/* <div className="">ID: {item.productDetailId}</div> */}
                       </div>
                     </div>
                   </div>
