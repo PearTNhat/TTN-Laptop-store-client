@@ -16,14 +16,6 @@ import RatingBox from "../RatingBox";
 import { formatPrice, formatDate } from "~/utils/helper";
 
 const OrderDetails = ({ isOpen, onClose, order }) => {
-  const [selectedOrder, setSelectedOrder] = useState(order);
-  useEffect(() => {
-    if (order) {
-      console.log("📦 selectedOrder:", selectedOrder);
-      setSelectedOrder(order);
-    }
-  }, [order]);
-
   if (!order) return null;
 
   return (
@@ -43,7 +35,7 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
               <span className="bg-indigo-500 text-white p-3 rounded-xl mr-3 shadow-md">
                 <FiShoppingCart className="text-2xl" />
               </span>
-              <span>Chi tiết đơn hàng #{order.id}</span>
+              <span>Chi tiết đơn hàng #{order.idOrder}</span>
             </Dialog.Title>
             <button
               onClick={onClose}
@@ -93,7 +85,9 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                       <FiCreditCard className="mr-2" />
                       <span>Phương thức thanh toán:</span>
                     </div>
-                    <span className="font-medium text-gray-800">COD</span>
+                    <span className="font-medium text-gray-800">
+                      {order.paymentMethod}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -149,8 +143,8 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                 🛒 Sản phẩm đã đặt
               </h3>
               <div className="space-y-6">
-                {Array.isArray(selectedOrder?.items) &&
-                  selectedOrder.items.map((item, idx) => (
+                {Array.isArray(order.items) &&
+                  order.items.map((item, idx) => (
                     <motion.div
                       key={idx}
                       initial={{ opacity: 0, y: 10 }}
@@ -189,24 +183,24 @@ const OrderDetails = ({ isOpen, onClose, order }) => {
                             </div>
                           </div>
                           <div className="flex justify-between items-center">
-                            <p className="text-gray-600 text-sm">
+                            {/* <p className="text-gray-600 text-sm">
                               Đơn giá:{" "}
                               <span className="font-medium">
                                 {formatPrice(item.price)}
                               </span>
-                            </p>
-                            <p className="font-bold text-indigo-600 text-xl">
+                            </p> */}
+                            {/* <p className="font-bold text-indigo-600 text-xl">
                               {formatPrice(item.price * item.quantity)}
-                            </p>
+                            </p> */}
                           </div>
                         </div>
                       </div>
                       <div className="mt-6 pt-4 border-t border-gray-100">
                         <RatingBox
-                          orderId={selectedOrder.idOrder}
+                          orderId={order.idOrder}
                           productId={item.idproduct}
                           productDetailId={item.idproductDetail}
-                          orderStatus={selectedOrder.status}
+                          orderStatus={order.status}
                         />
                       </div>
                     </motion.div>

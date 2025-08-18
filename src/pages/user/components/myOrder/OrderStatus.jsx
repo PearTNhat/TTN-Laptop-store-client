@@ -44,7 +44,7 @@ export const statusDisplayMap = {
   AWAITING: "Đang chờ xử lý",
   PROCESSING: "Đang xử lý",
   PARTIALLY_DELIVERED: "Giao một phần",
-  DELIVERED: "Đã giao",
+  DELIVERED: "Đang giao",
   COMPLETED: "Hoàn thành",
   CANCELED: "Đã hủy",
 };
@@ -59,32 +59,43 @@ export const mapApiOrderToState = (apiOrder) => {
     badge:
       statusBadges[statusKey] ||
       "bg-gray-100 text-gray-800 border border-gray-300",
-    icon: statusIcons[statusKey] || <FiInfo />,
-  };
+      icon: statusIcons[statusKey] || <FiInfo />,
+    };
 
-  return {
-    idOrder: apiOrder.id,
-    code: apiOrder.code,
-    date: apiOrder.createdAt,
-    status: statusInfo.display,
-    statusColor: statusInfo.color,
-    statusBadge: statusInfo.badge,
-    statusIcon: statusInfo.icon,
-    recipient: apiOrder.recipient,
-    address: apiOrder.address,
-    phone: apiOrder.phone,
-    items: apiOrder.orderDetails.map((detail) => ({
-      idproductDetail: detail.productDetailId,
-      idproduct: detail.productId,
-      name: detail.title,
-      price: detail.price,
-      quantity: detail.quantity,
-      ramValue: detail.ramValue,
-      hardDriveValue: detail.hardDriveValue,
-      colorName: detail.colorName,
-      thumbnail: detail.thumbnail,
-      description: detail.description,
-    })),
-    total: apiOrder.totalPrice,
+    return {
+      idOrder: apiOrder.id,
+      code: apiOrder.code,
+      date: apiOrder.createdAt,
+      status: statusInfo.display, // dùng cho UI
+      statusfilter: statusKey, // dùng cho lọc
+      statusColor: statusInfo.color,
+      statusBadge: statusInfo.badge,
+      statusIcon: statusInfo.icon,
+      recipient: apiOrder.recipient,
+      address: apiOrder.address,
+      phone: apiOrder.phone,
+
+      paymentMethod: apiOrder.paymentMethod,
+      note: apiOrder.note,
+      payUrl: apiOrder.payUrl,
+
+      totalQuantity: apiOrder.totalQuantity,
+      total: apiOrder.totalPrice,
+      shopDiscount: apiOrder.shopDiscount,
+      userDiscount: apiOrder.userDiscount,
+
+      items: apiOrder.orderDetails.map((detail) => ({
+        idproductDetail: detail.productDetailId,
+        idproduct: detail.productId,
+        name: detail.title,
+        price: detail.price,
+        originalPrice: detail.originalPrice,
+        quantity: detail.quantity,
+        ramValue: detail.ramValue,
+        hardDriveValue: detail.hardDriveValue,
+        colorName: detail.colorName,
+        thumbnail: detail.thumbnail,
+        description: detail.description,
+      })),
+    };
   };
-};
