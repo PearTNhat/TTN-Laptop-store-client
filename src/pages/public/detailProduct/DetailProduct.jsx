@@ -255,7 +255,7 @@ function DetailProduct() {
     const client = new Client({
       // Dùng SockJS làm lớp transport
       webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"), // URL đến endpoint WebSocket của Spring Boot
-      // Bật debug để xem log trong console
+      // Bật debug để xem log trong consol
       debug: (str) => {
         console.log(str);
       },
