@@ -184,7 +184,7 @@ const Login = () => {
         <button
           className="mt-4 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-semibold py-3 rounded-lg flex items-center justify-center gap-2"
           onClick={() => {
-            const redirectUri = "http://localhost:5173/login/callback";
+            const redirectUri = "https://www.mylaptopshop.me/login/callback";
             const googleClientId =
               "917950957036-qujvo7u12pod1nemt3jv34l7qlj9dqop.apps.googleusercontent.com";
             const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&access_type=offline`;

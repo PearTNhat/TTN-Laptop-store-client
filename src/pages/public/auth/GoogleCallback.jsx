@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userActions } from "~/stores/slice/userSlice";
-import { apiLoginWithGoogle } from "~/apis/authApi"; 
-import { apiFetchMyInfo } from "~/apis/userApi"; 
+import { apiLoginWithGoogle } from "~/apis/authApi";
+import { apiFetchMyInfo } from "~/apis/userApi";
 import { showToastSuccess, showToastError } from "~/utils/alert";
 
 const GoogleCallback = () => {
@@ -22,7 +22,7 @@ const GoogleCallback = () => {
       }
 
       try {
-        const redirectUri = "http://localhost:5173/login/callback";
+        const redirectUri = "https://www.mylaptopshop.me/login/callback";
 
         const res = await apiLoginWithGoogle({ code, redirectUri });
         console.log("response: ", res);
@@ -40,7 +40,9 @@ const GoogleCallback = () => {
             showToastSuccess("Đăng nhập Google thành công!");
             navigate("/");
           } else {
-            throw new Error(fetchRes.message || "Không thể lấy thông tin người dùng.");
+            throw new Error(
+              fetchRes.message || "Không thể lấy thông tin người dùng."
+            );
           }
         } else {
           throw new Error(res.message || "Đăng nhập Google thất bại.");
