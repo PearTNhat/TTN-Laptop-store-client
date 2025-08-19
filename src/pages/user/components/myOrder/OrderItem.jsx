@@ -6,10 +6,14 @@ import {
   FiPackage,
   FiTruck,
   FiChevronRight,
-} from "react-icons/fi";
+  FiX,
+  FiClock,
+  FiSettings,
+} from "react-icons/fi"; // Thêm icon còn thiếu để switch đầy đủ
 import { formatPrice, formatDate } from "~/utils/helper";
 import { useSelector } from "react-redux";
 import { apiChangeStatusOrder } from "~/apis/orderApi";
+import { apiRepay } from "~/apis/usersmanagementApi";
 
 const OrderItem = ({ order, onDetail, onStatusChange }) => {
   const navigate = useNavigate();
@@ -20,36 +24,66 @@ const OrderItem = ({ order, onDetail, onStatusChange }) => {
     return Math.round(((originalPrice - price) / originalPrice) * 100);
   };
 
-
+  // Sửa: Dùng switch trên statusfilter (code API) thay vì status (display string), để chính xác và đầy đủ case
   const renderStatusInfo = () => {
-    if (order.status === "Hoàn thành") {
-      return {
-        icon: <FiPackage className="text-emerald-500" />,
-        bgColor: "bg-emerald-50",
-        textColor: "text-emerald-600",
-        ringColor: "ring-emerald-500/10",
-      };
+    switch (order.statusfilter) {
+      case "COMPLETED":
+        return {
+          icon: <FiPackage className="text-emerald-500" />,
+          bgColor: "bg-emerald-50",
+          textColor: "text-emerald-600",
+          ringColor: "ring-emerald-500/10",
+        };
+      case "DELIVERED":
+        return {
+          icon: <FiTruck className="text-sky-500" />,
+          bgColor: "bg-sky-50",
+          textColor: "text-sky-600",
+          ringColor: "ring-sky-500/10",
+        };
+      case "CANCELED":
+        return {
+          icon: <FiX className="text-red-500" />,
+          bgColor: "bg-red-50",
+          textColor: "text-red-600",
+          ringColor: "ring-red-500/10",
+        };
+      case "PENDING":
+        return {
+          icon: <FiInfo className="text-amber-500" />,
+          bgColor: "bg-amber-50",
+          textColor: "text-amber-600",
+          ringColor: "ring-amber-500/10",
+        };
+      case "AWAITING":
+        return {
+          icon: <FiClock className="text-orange-500" />,
+          bgColor: "bg-orange-50",
+          textColor: "text-orange-600",
+          ringColor: "ring-orange-500/10",
+        };
+      case "PROCESSING":
+        return {
+          icon: <FiSettings className="text-blue-500" />,
+          bgColor: "bg-blue-50",
+          textColor: "text-blue-600",
+          ringColor: "ring-blue-500/10",
+        };
+      default:
+        return {
+          icon: <FiInfo className="text-amber-500" />,
+          bgColor: "bg-amber-50",
+          textColor: "text-amber-600",
+          ringColor: "ring-amber-500/10",
+        };
     }
-    if (order.status === "Đang giao") {
-      return {
-        icon: <FiTruck className="text-sky-500" />,
-        bgColor: "bg-sky-50",
-        textColor: "text-sky-600",
-        ringColor: "ring-sky-500/10",
-      };
-    }
-    return {
-      icon: <FiInfo className="text-amber-500" />,
-      bgColor: "bg-amber-50",
-      textColor: "text-amber-600",
-      ringColor: "ring-amber-500/10",
-    };
   };
 
   const statusInfo = renderStatusInfo();
 
   const handleConfirmComplete = async () => {
     try {
+      console.log('Order ID (number):', order.idOrder, 'Type:', typeof order.idOrder);
       const res = await apiChangeStatusOrder({
         accessToken,
         id: order.idOrder,
@@ -57,12 +91,50 @@ const OrderItem = ({ order, onDetail, onStatusChange }) => {
       });
 
       if (res?.code === 200) {
-        // cập nhật UI ngay lập tức
         if (onStatusChange) {
-          onStatusChange({ ...order, status: "Hoàn thành" });
+          const updated = { ...order, newStatusKey: "COMPLETED" };
+          console.log('Before calling onStatusChange (COMPLETE):', updated); // Log trước khi gọi
+          onStatusChange(updated);
         }
       } else {
         alert(res.message || "Xác nhận đơn hàng thất bại");
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // Hủy đơn khi đang "Chờ thanh toán"
+  const handleCancelOrder = async () => {
+    try {
+      console.log('Order ID (number):', order.idOrder, 'Type:', typeof order.idOrder);
+      const res = await apiChangeStatusOrder({
+        accessToken,
+        id: order.idOrder,
+        status: "CANCELED",
+      });
+
+      if (res?.code === 200) {
+        if (onStatusChange) {
+          const updated = { ...order, newStatusKey: "CANCELED" };
+          console.log('Before calling onStatusChange (CANCEL):', updated); // Log trước khi gọi
+          onStatusChange(updated);
+        }
+      } else {
+        alert(res.message || "Hủy đơn thất bại");
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleRepay = async () => {
+    try {
+      const res = await apiRepay(order.idOrder, accessToken);
+      if (res?.payUrl) {
+        window.location.href = res.payUrl; // mở trực tiếp cổng thanh toán
+      } else {
+        alert("Không tạo được link thanh toán!");
       }
     } catch (err) {
       alert(err.message);
@@ -199,7 +271,6 @@ const OrderItem = ({ order, onDetail, onStatusChange }) => {
         </div>
       </div>
 
-
       {/* Footer - Summary and Actions */}
       <div className="bg-gradient-to-r from-gray-50 to-white p-6 border-t border-gray-100 rounded-b-2xl">
         <div className="w-full space-y-2 text-sm text-gray-600">
@@ -225,7 +296,24 @@ const OrderItem = ({ order, onDetail, onStatusChange }) => {
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        {/* Action buttons */}
+        <div className="flex justify-end mt-4 gap-3">
+          {order.status === "Chờ thanh toán" && (
+            <>
+              <button
+                onClick={handleCancelOrder}
+                className="px-5 py-2.5 rounded-lg text-sm font-medium bg-red-500 text-white shadow-md hover:bg-red-600 transition duration-200"
+              >
+                ❌ Hủy đơn
+              </button>
+              <button
+                onClick={handleRepay}
+                className="px-5 py-2.5 rounded-lg text-sm font-medium bg-pink-500 text-white shadow-md hover:bg-pink-600 transition duration-200"
+              >
+                💳 Thanh toán lại
+              </button>
+            </>
+          )}
           <button
             onClick={() => onDetail(order)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl shadow-md hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300"
