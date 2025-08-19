@@ -188,7 +188,7 @@ function DetailProduct() {
     if (!colorProduct.id) return;
     getComments(colorProduct.id);
     getRatings({ productDetailId: colorProduct.id });
-  }, [colorProduct.id, accessToken]);
+  }, [colorProduct.id, fetchCommentAgain, accessToken]);
   useEffect(() => {
     if (colorProduct) {
       const priceInfo = calculateFinalPrice(colorProduct.originalPrice, [
@@ -320,64 +320,64 @@ function DetailProduct() {
   //     }
   //   };
   // }, [colorProduct.id]);
-  useEffect(() => {
-    if (!colorProduct.id) return;
+  // useEffect(() => {
+  //   if (!colorProduct.id) return;
 
-    // ✅ ISSUE 2 FIXED: Thêm logic dọn dẹp kết nối cũ trước khi tạo kết nối mới
-    if (stompClientRef.current) {
-      stompClientRef.current.deactivate();
-    }
+  //   // ✅ ISSUE 2 FIXED: Thêm logic dọn dẹp kết nối cũ trước khi tạo kết nối mới
+  //   if (stompClientRef.current) {
+  //     stompClientRef.current.deactivate();
+  //   }
 
-    const client = new Client({
-      webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"),
-      reconnectDelay: 5000,
-      heartbeatIncoming: 4000,
-      heartbeatOutgoing: 4000,
-      debug: (str) => {
-        console.log("STOMP DEBUG:", str);
-      },
-    });
+  //   const client = new Client({
+  //     webSocketFactory: () => new SockJS("https://dev.api.mylaptopshop.me/ws"),
+  //     reconnectDelay: 5000,
+  //     heartbeatIncoming: 4000,
+  //     heartbeatOutgoing: 4000,
+  //     debug: (str) => {
+  //       console.log("STOMP DEBUG:", str);
+  //     },
+  //   });
 
-    client.onConnect = (frame) => {
-      console.log("WebSocket Connected: " + frame);
-      client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
-        try {
-          const newComment = JSON.parse(message.body);
-          setComments((prevComments) => [newComment, ...prevComments]);
-        } catch (error) {
-          console.error("Could not parse new comment", error);
-        }
-      });
-      client.subscribe(
-        `/topic/delete-comments/${colorProduct.id}`,
-        (message) => {
-          console.log(
-            "Received delete instruction, reloading comments:",
-            message.body
-          );
-          getComments(colorProduct.id);
-          showToastSuccess("Danh sách bình luận đã được cập nhật.");
-        }
-      );
-    };
+  //   client.onConnect = (frame) => {
+  //     console.log("WebSocket Connected: " + frame);
+  //     client.subscribe(`/topic/comments/${colorProduct.id}`, (message) => {
+  //       try {
+  //         const newComment = JSON.parse(message.body);
+  //         setComments((prevComments) => [newComment, ...prevComments]);
+  //       } catch (error) {
+  //         console.error("Could not parse new comment", error);
+  //       }
+  //     });
+  //     client.subscribe(
+  //       `/topic/delete-comments/${colorProduct.id}`,
+  //       (message) => {
+  //         console.log(
+  //           "Received delete instruction, reloading comments:",
+  //           message.body
+  //         );
+  //         getComments(colorProduct.id);
+  //         showToastSuccess("Danh sách bình luận đã được cập nhật.");
+  //       }
+  //     );
+  //   };
 
-    client.onStompError = (frame) => {
-      console.error("Broker reported error: " + frame.headers["message"]);
-      console.error("Additional details: " + frame.body);
-    };
-    client.onWebSocketError = (event) => {
-      console.error("WebSocket error observed:", event);
-    };
+  //   client.onStompError = (frame) => {
+  //     console.error("Broker reported error: " + frame.headers["message"]);
+  //     console.error("Additional details: " + frame.body);
+  //   };
+  //   client.onWebSocketError = (event) => {
+  //     console.error("WebSocket error observed:", event);
+  //   };
 
-    client.activate();
-    stompClientRef.current = client;
+  //   client.activate();
+  //   stompClientRef.current = client;
 
-    return () => {
-      if (stompClientRef.current) {
-        stompClientRef.current.deactivate();
-      }
-    };
-  }, [colorProduct.id]);
+  //   return () => {
+  //     if (stompClientRef.current) {
+  //       stompClientRef.current.deactivate();
+  //     }
+  //   };
+  // }, [colorProduct.id]);
 
   return (
     <div className=" min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 rounded-md">
