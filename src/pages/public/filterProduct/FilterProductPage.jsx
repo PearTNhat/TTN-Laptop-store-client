@@ -35,7 +35,7 @@ const FilterProductPage = () => {
         // Lấy các tham số từ URL, gán giá trị mặc định nếu cần
         const params = {
           page: currentParams.page || "0",
-          limit: currentParams.limit || "12",
+          size: currentParams.size || "12",
           ...currentParams,
         };
         const res = await apiGetProducts({

@@ -117,10 +117,6 @@ const ProfileInfo = () => {
           phoneNumber: updated.phoneNumber || "",
           dob: updated.dob || "",
           gender: updated.gender || "",
-          address:
-            Array.isArray(updated.address) && updated.address.length > 0
-              ? updated.address[0]
-              : { address: "" },
         }));
         showToastSuccess("Cập nhật thông tin thành công!");
         setIsOpen(false);
@@ -264,18 +260,6 @@ const ProfileInfo = () => {
                   <option value="Nữ">Nữ</option>
                   <option value="Khác">Khác</option>
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Địa chỉ
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={profile.address?.address || ""}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
-                />
               </div>
               <div className="mt-6 flex justify-end gap-3">
                 <button

@@ -1,6 +1,6 @@
 import { http } from "~/utils/http";
 
-const apiGetProducts = async ({ page = 1, size = 10, minPrice,
+const apiGetProducts = async ({ page = 1, size = 14, minPrice,
     maxPrice,
     categoryId,
     brandId,
