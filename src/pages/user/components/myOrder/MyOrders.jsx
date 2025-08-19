@@ -5,8 +5,9 @@ import { useSelector } from "react-redux";
 import { apiGetOrders } from "~/apis/orderApi";
 import OrderItem from "./OrderItem";
 import OrderDetails from "./OrderDetail";
-import { mapApiOrderToState, statusDisplayMap } from "./OrderStatus";
+import { mapApiOrderToState, getStatusInfo, statusDisplayMap } from "./OrderStatus";
 import Pagination from "~/components/pagination/Pagination";
+import StatusDropdown from "./StatusDropdown";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -81,21 +82,7 @@ const MyOrders = () => {
 
           {/* Dropdown lọc trạng thái */}
           <div>
-            <select
-              value={filterStatus}
-              onChange={(e) => {
-                setFilterStatus(e.target.value);
-                setCurrentPage(1); // reset về trang 1
-              }}
-              className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-            >
-              <option value="">Tất cả trạng thái</option>
-              {Object.entries(statusDisplayMap).map(([code, label]) => (
-                <option key={code} value={code}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <StatusDropdown filterStatus={filterStatus} setFilterStatus={setFilterStatus} />
           </div>
         </div>
       </div>
@@ -106,7 +93,7 @@ const MyOrders = () => {
           <AnimatePresence>
             {currentOrders.map((order) => (
               <motion.div
-                key={order.id}
+                key={order.idOrder}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -116,9 +103,43 @@ const MyOrders = () => {
                   order={order}
                   onDetail={handleDetail}
                   onStatusChange={(updatedOrder) => {
-                    setOrders((prev) =>
-                      prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
-                    );
+                    console.log('Received in onStatusChange:', updatedOrder);
+                    console.log('Type of updatedOrder.idOrder:', typeof updatedOrder.idOrder, 'Value:', updatedOrder.idOrder);
+                    
+                    const newStatusKey = updatedOrder.newStatusKey;
+                    if (!newStatusKey) {
+                      console.error('Missing newStatusKey!');
+                      return;
+                    }
+
+                    const statusInfo = getStatusInfo(newStatusKey);
+                    console.log('Calculated statusInfo:', statusInfo);
+
+                    setOrders((prev) => {
+                      console.log('Previous orders IDs:', prev.map(o => o.idOrder));
+                      
+                      const newOrders = prev.map((o) => {
+                        // So sánh số với số
+                        if (o.idOrder === Number(updatedOrder.idOrder)) {
+                          console.log('Match found, updating order:', o.idOrder);
+                          return {
+                            ...o,
+                            status: statusInfo.display,
+                            statusfilter: newStatusKey,
+                            statusColor: statusInfo.color,
+                            statusBadge: statusInfo.badge,
+                            statusIcon: statusInfo.icon,
+                          };
+                        }
+                        return o;
+                      });
+                      
+                      console.log('New orders after update:', newOrders.map(o => ({ id: o.idOrder, status: o.status })));
+                      return newOrders;
+                    });
+
+                    // Reset page để tránh list trống nếu order biến mất khỏi filter
+                    setCurrentPage(1);
                   }}
                 />
               </motion.div>
