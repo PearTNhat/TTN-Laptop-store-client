@@ -45,9 +45,12 @@ const DiscountSettingsForm = ({ control, errors, watchDiscountUnit }) => {
                     {...field}
                     type="number"
                     min="0"
-                    step={watchDiscountUnit === "PERCENT" ? "1" : "1000"}
+                    max={watchDiscountUnit === "PERCENT" ? "100" : undefined}
+                    step={watchDiscountUnit === "PERCENT" && "1"}
                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                    placeholder="0"
+                    placeholder={
+                      watchDiscountUnit === "PERCENT" ? "0-100" : "Nhập số tiền"
+                    }
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
                 )}

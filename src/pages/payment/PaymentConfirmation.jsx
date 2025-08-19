@@ -75,7 +75,7 @@ export default function PaymentConfirmation() {
       const res = await createOrder({ accessToken, body });
       if (res?.code === 200) {
         showToastSuccess("Đặt hàng thành công!");
-        navigate("https://www.mylaptopshop.me/user/orders");
+        navigate("/user/orders", { replace: true });
       } else {
         showToastError(res?.message || "Đặt hàng thất bại");
         return;
@@ -142,7 +142,9 @@ export default function PaymentConfirmation() {
       setOrderData(null);
     }
   }, [location.state]);
-
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-4xl mx-auto px-4">

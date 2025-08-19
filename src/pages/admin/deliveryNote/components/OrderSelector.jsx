@@ -43,10 +43,11 @@ const OrderSelector = ({ onOrderSelect, preselectedOrder }) => {
           params: {
             page: 1,
             size: 30,
-            // status: "PROCESSING",
-            code: keyword,
+            statuses: ["PENDING", "PARTIALLY_DELIVERED"],
+            code: keyword || null,
           },
         });
+        console.log("Orders fetched:", response);
         if (response.code === 200) {
           setOrders(response.data.content || []);
         } else {

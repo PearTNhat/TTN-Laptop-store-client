@@ -27,9 +27,26 @@ import PurchaseOrderDetailForm from "./PurchaseOrderDetailForm";
 
 // Dữ liệu mock (nên được truyền từ component cha trong thực tế)
 const mockSuppliers = [
-  { id: 1, name: "Apple Official Store" },
-  { id: 2, name: "Dell Vietnam Distributor" },
-  { id: 3, name: "Logitech Authorized Dealer" },
+  { id: 1, name: "FPT Trading" },
+  { id: 2, name: "Synnex FPT" },
+  { id: 3, name: "Digiworld Corporation" },
+  { id: 4, name: "ASUS Vietnam" },
+  { id: 5, name: "Dell Technologies VN" },
+  { id: 6, name: "HP Vietnam" },
+  { id: 7, name: "Lenovo Vietnam" },
+  { id: 8, name: "Acer Vietnam" },
+  { id: 9, name: "MSI Vietnam" },
+  { id: 10, name: "Gigabyte VN" },
+  { id: 11, name: "Intel Vietnam" },
+  { id: 12, name: "AMD Vietnam" },
+  { id: 13, name: "Samsung Vietnam" },
+  { id: 14, name: "LG Electronics" },
+  { id: 15, name: "Toshiba Vietnam" },
+  { id: 16, name: "Sony Vietnam" },
+  { id: 17, name: "Huawei Vietnam" },
+  { id: 18, name: "Apple Authorized VN" },
+  { id: 19, name: "Microsoft Vietnam" },
+  { id: 20, name: "Thakral One VN" },
 ];
 
 const defaultValues = {

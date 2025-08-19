@@ -47,8 +47,15 @@ const apiGetOrderList = async ({ accessToken, params }) => {
             },
             params,
         }
-        const { data } = await http.get("/orders/search", config);
-        return data;
+        let data;
+        if (params.statuses) {
+            const temp = params.statuses;
+            delete params.statuses;
+            data = await http.get(`/orders/search?statuses=${temp[0]}&statuses=${temp[1]}`, config);
+        } else {
+            data = await http.get("/orders/search", config);
+        }
+        return data.data;
     } catch (error) {
         if (error.response && error.response.data) {
             return error.response.data;

@@ -17,5 +17,5 @@ export default defineConfig({
   },
   define: {
     global: {}, // Bạn có thể dùng global: 'window' hoặc global: 'globalThis'
-  },
+  }
 })

@@ -143,6 +143,7 @@ const Cart = ({
         discountPrice: item.discountPrice,
         originalPrice: item.originalPrice,
         productDetailId: item.productDetailId,
+        productPromotionId: item.productPromotionId, // Nếu có khuyến mãi
       })),
       totalAmount: totalAmount,
     };

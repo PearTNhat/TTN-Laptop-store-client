@@ -5,7 +5,7 @@ export const promotionSchema = z.object({
     name: z.string().min(1, "Tên khuyến mãi không được để trống"),
     code: z.string().min(1, "Mã khuyến mãi không được để trống"),
     description: z.string().min(1, "Mô tả không được để trống"),
-    discountValue: z.number().min(0, "Giá trị giảm phải lớn hơn 0"),
+    discountValue: z.number().min(0.01, "Giá trị giảm phải lớn hơn 0"),
     discountUnit: z.enum(["PERCENT", "AMOUNT"]),
     promotionType: z.enum([
         "USER_PROMOTION",
@@ -31,13 +31,14 @@ export const promotionSchema = z.object({
 }).refine(
     (data) => {
         if (data.discountUnit === "PERCENT") {
-            return data.discountValue <= 100;
+            return data.discountValue <= 100 && data.discountValue > 0;
         }
-        return true; // Nếu không phải PERCENT thì không cần kiểm tra, luôn hợp lệ
+        // Đối với AMOUNT, không giới hạn trên, chỉ cần > 0
+        return data.discountValue > 0;
     },
     {
-        message: "Giá trị giảm không được vượt quá 100%",
-        path: ["discountValue"], // Gán lỗi này cho trường 'discountValue'
+        message: "Giá trị giảm giá không hợp lệ (phần trăm: 1-100%, số tiền: > 0)",
+        path: ["discountValue"],
     }
 );
 

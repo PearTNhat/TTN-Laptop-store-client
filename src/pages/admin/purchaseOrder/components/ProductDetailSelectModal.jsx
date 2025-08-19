@@ -97,7 +97,7 @@ const ProductDetailSelectModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[95vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <Package className="h-5 w-5 text-blue-600" />
@@ -199,7 +199,7 @@ const ProductDetailSelectModal = ({
         </div>
 
         {/* Pagination */}
-        <div className="border-t pt-4">
+        <div className="border-t">
           <Pagination
             currentPage={pagination.currentPage}
             totalPageCount={pagination.totalPages}

@@ -61,15 +61,16 @@ const navItems = [
     name: "Nhập hàng từ nhà cung cấp",
     path: "/admin/goods-receipt",
   },
-  {
-    icon: <Truck size={20} className="text-red-500" />,
-    name: "Xuất hàng cho đơn mua",
-    path: "/admin/delivery-notes",
-  },
+
   {
     icon: <Box size={20} className="text-teal-500" />,
     name: "Sản phẩm",
     path: "/admin/products",
+  },
+  {
+    icon: <Truck size={20} className="text-red-500" />,
+    name: "Xuất hàng cho đơn mua",
+    path: "/admin/delivery-notes",
   },
   {
     icon: <ShoppingCart size={20} className="text-blue-400" />,
