@@ -49,7 +49,6 @@ function UserManagement() {
       });
 
       if (response.code === 200) {
-        console.log(response.data);
         setUsers(response.data.content || []);
         setPagination({
           currentPage: response.data.pageNumber + 1,
@@ -77,7 +76,7 @@ function UserManagement() {
     (searchValue) => {
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
-        if (searchValue.trim()) {
+        if (searchValue)) {
           newParams.set("q", searchValue.trim());
           newParams.set("page", "1"); // Reset về trang 1 khi search
         } else {
