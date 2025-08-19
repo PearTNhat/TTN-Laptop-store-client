@@ -128,12 +128,13 @@ export const apiChangeEmail = async ({ newEmail, otpCode, accessToken }) => {
     };
   }
 };
-export const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, block = false }) => {
+export const apiGetAllUsers = async ({ accessToken, page = 1, size = 10, keyword = "", block = false }) => {
   try {
     page = page <= 1 ? 0 : page - 1;
     const params = {
       page,
       size,
+      keyword,
       block
     };
     const config = {

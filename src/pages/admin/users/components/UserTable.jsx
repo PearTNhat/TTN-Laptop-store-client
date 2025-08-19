@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import UserTableRow from "./UserTableRow";
 
-const UserTable = ({ users, onView, onEdit, onDelete }) => (
+const UserTable = ({ users, isLoading, onView, onEdit, onDelete }) => (
   <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -36,15 +36,35 @@ const UserTable = ({ users, onView, onEdit, onDelete }) => (
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
-            <UserTableRow
-              key={user.id}
-              user={user}
-              onView={onView}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
+          {isLoading ? (
+            <tr>
+              <td colSpan="3" className="px-6 py-8 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <span className="text-gray-500">Đang tải...</span>
+                </div>
+              </td>
+            </tr>
+          ) : users.length === 0 ? (
+            <tr>
+              <td colSpan="3" className="px-6 py-8 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <FaUsers className="text-gray-400 text-3xl" />
+                  <span className="text-gray-500">Không có người dùng nào</span>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            users.map((user) => (
+              <UserTableRow
+                key={user.id}
+                user={user}
+                onView={onView}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
+          )}
         </tbody>
       </table>
     </div>

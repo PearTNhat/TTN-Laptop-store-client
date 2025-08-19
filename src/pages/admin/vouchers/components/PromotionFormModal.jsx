@@ -110,9 +110,6 @@ const PromotionFormModal = ({
       if (watchPromotionType !== "USER_PROMOTION" || selectedRanks.length > 0) {
         return;
       }
-      console.log("_______", watchPromotionType, selectedRanks);
-
-      setUserLoading(true);
       try {
         const response = await apiGetAllUsers({
           accessToken,

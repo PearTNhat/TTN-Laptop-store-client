@@ -1,5 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { FaUsers, FaUsersCog } from "react-icons/fa";
+import { useSearchParams } from "react-router-dom";
 
 // Import các component con
 import UserActions from "./components/UserAction";
@@ -11,48 +12,91 @@ import ConfirmationModal from "./modal/ConfirmationModal";
 import Pagination from "~/components/pagination/Pagination";
 
 import { ToastContainer, toast } from "react-toastify";
-import { apiDeleteUser } from "~/apis/userApi";
-
+import { apiDeleteUser, apiGetAllUsers } from "~/apis/userApi";
 import { useSelector } from "react-redux";
-import { apiGetUsers } from "~/apis/usersmanagementApi";
+import { showToastError } from "~/utils/alert";
 
 function UserManagement() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
-
   const { accessToken } = useSelector((state) => state.user);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
+
+  const currentParams = useMemo(
+    () => Object.fromEntries([...searchParams]),
+    [searchParams]
+  );
+
+  const usersPerPage = 10;
 
   // State cho modals
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null); // 'view', 'edit', 'block'
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const fetchUsers = async () => {
-    setLoading(true);
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const res = await apiGetUsers({
-        page: 0,
-        size: 9999,
-        search: "",
-        accessToken
+      const response = await apiGetAllUsers({
+        accessToken,
+        page: parseInt(currentParams.page) || 1,
+        size: usersPerPage,
+        keyword: currentParams.q || undefined,
       });
-      console.log("API Users:", res.content);
-      setUsers(res.content);
-    } catch (err) {
-      setError(err.message);
+
+      if (response.code === 200) {
+        console.log(response.data);
+        setUsers(response.data.content || []);
+        setPagination({
+          currentPage: response.data.pageNumber + 1,
+          totalPages: response.data.totalPages || 1,
+        });
+      } else {
+        throw new Error(response.message || "Failed to load users");
+      }
+    } catch (error) {
+      showToastError(
+        error.message || "Không thể tải người dùng. Vui lòng thử lại."
+      );
+      setUsers([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [accessToken, currentParams.page, currentParams.q, usersPerPage]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
+  // Xử lý search với debounce
+  const handleSearchChange = useCallback(
+    (searchValue) => {
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (searchValue.trim()) {
+          newParams.set("q", searchValue.trim());
+          newParams.set("page", "1"); // Reset về trang 1 khi search
+        } else {
+          newParams.delete("q");
+        }
+        return newParams;
+      });
+    },
+    [setSearchParams]
+  );
+
+  // Xử lý pagination
+  const handlePageChange = (page) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("page", page.toString());
+      return newParams;
+    });
+  };
   const openModal = (type, user = null) => {
     setModalType(type);
     setSelectedUser(user);
@@ -76,9 +120,9 @@ function UserManagement() {
               roles: [
                 {
                   id: newRoleId,
-                  description: foundRole ? foundRole.label : newRoleId
-                }
-              ]
+                  description: foundRole ? foundRole.label : newRoleId,
+                },
+              ],
             }
           : u
       )
@@ -86,50 +130,17 @@ function UserManagement() {
   };
 
   const handleDeleteUser = async () => {
-  if (!selectedUser) return;
+    if (!selectedUser) return;
 
-  const res = await apiDeleteUser({ userId: selectedUser.id, accessToken });
-  if (res.success) {
-    toast.success(res.message);
-    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
-  } else {
-    toast.error(res.message);
-  }
-  closeModal();
-};
-  // Mở khóa / Khóa người dùng
-  // const handleToggleBlockUser = () => {
-  //   setUsers(
-  //     users.map((user) =>
-  //       user.id === selectedUser.id
-  //         ? { ...user, blocked: !user.blocked }
-  //         : user
-  //     )
-  //   );
-  //   closeModal();
-  // };
-
-  // Lọc danh sách
-  const filteredUsers = useMemo(
-    () =>
-      users.filter((user) => {
-        const fullName = `${user.lastName || ""} ${user.firstName || ""}`
-          .toLowerCase()
-          .trim();
-        const search = searchTerm.toLowerCase().trim();
-        return (
-          fullName.includes(search) ||
-          (user.email && user.email.toLowerCase().includes(search)) ||
-          (user.phoneNumber && user.phoneNumber.includes(search))
-        );
-      }),
-    [users, searchTerm]
-  );
-
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const res = await apiDeleteUser({ userId: selectedUser.id, accessToken });
+    if (res.success) {
+      toast.success(res.message);
+      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    } else {
+      toast.error(res.message);
+    }
+    closeModal();
+  };
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen font-sans">
@@ -155,17 +166,17 @@ function UserManagement() {
       </div>
 
       <UserActions
-        searchTerm={searchTerm}
+        searchTerm={currentParams.q || ""}
         onSearchChange={(e) => {
-          setSearchTerm(e.target.value);
-          setCurrentPage(1);
+          handleSearchChange(e.target.value);
         }}
         onAddClick={() => openModal("add")}
       />
 
       <div className="shadow-md rounded-xl">
         <UserTable
-          users={currentUsers}
+          users={users}
+          isLoading={isLoading}
           onView={(user) => openModal("view", user)}
           onEdit={(user) => openModal("edit", user)} // đổi role
           onBlock={(user) => openModal("block", user)}
@@ -173,9 +184,9 @@ function UserManagement() {
         />
         <div className="py-2">
           <Pagination
-            currentPage={currentPage}
-            totalPageCount={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
+            currentPage={pagination.currentPage}
+            totalPageCount={pagination.totalPages}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>
