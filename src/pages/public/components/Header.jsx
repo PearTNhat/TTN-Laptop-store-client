@@ -39,7 +39,7 @@ function Header() {
   const { userData, accessToken } = useSelector((state) => state.user);
   let { carts: myCart } = useSelector((state) => state.cart);
   const isLoggedIn = !!accessToken;
-
+  const [allowAdmin, setAllowAdmin] = useState(false);
   // TÁCH STATE: Quản lý riêng state cho từng menu
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -83,6 +83,7 @@ function Header() {
         isCustomer = true;
       }
     }
+    setAllowAdmin(isAdmin);
     // admin k phai customeer
     // if (isAdmin && !isCustomer) {
     //   navigate("/admin");
@@ -93,15 +94,9 @@ function Header() {
     showToastSuccess("Đăng xuất thành công!");
     dispatch(cartActions.clearCart());
   };
-
   // Lọc dropdown profile dựa trên role
   const filteredDropDownProfile = dropDownProfile.filter(
-    (item) =>
-      !(
-        item.name === "Quản lý" &&
-        userData?.roles?.length > 0 &&
-        userData?.roles[0]?.id !== "ADMIN"
-      )
+    (item) => item.name === "Quản lý" && allowAdmin
   );
 
   // Các hàm xử lý giỏ hàng (giữ nguyên)
