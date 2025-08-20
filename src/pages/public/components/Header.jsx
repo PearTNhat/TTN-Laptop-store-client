@@ -96,7 +96,7 @@ function Header() {
   };
   // Lọc dropdown profile dựa trên role
   const filteredDropDownProfile = dropDownProfile.filter(
-    (item) => item.name === "Quản lý" && allowAdmin
+    (item) => !(item.name === "Quản lý" && !allowAdmin)
   );
 
   // Các hàm xử lý giỏ hàng (giữ nguyên)
