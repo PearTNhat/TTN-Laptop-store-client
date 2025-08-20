@@ -76,7 +76,7 @@ function UserManagement() {
     (searchValue) => {
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev);
-        if (searchValue)) {
+        if (searchValue) {
           newParams.set("q", searchValue.trim());
           newParams.set("page", "1"); // Reset về trang 1 khi search
         } else {

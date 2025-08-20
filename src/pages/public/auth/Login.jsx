@@ -137,7 +137,7 @@ const Login = () => {
           </div>
 
           <div className="flex justify-between items-center">
-            <label className="flex items-center text-sm text-gray-600">
+            {/* <label className="flex items-center text-sm text-gray-600">
               <input
                 type="checkbox"
                 className="mr-2 rounded border-gray-300 text-[#1877F2]"
@@ -145,7 +145,7 @@ const Login = () => {
                 onChange={handleRememberChange}
               />
               Ghi nhớ đăng nhập
-            </label>
+            </label> */}
             <a
               href="/reset-password"
               className="text-sm text-[#1877F2] hover:underline font-medium"
